@@ -10,7 +10,7 @@ def __round_cost(cost):
         return round(cost, -3)
 
 
-def compose_sms(details):
+def compose_sms(details, locale):
     s = list()
 
     s.append('Маршрут: ')
@@ -25,7 +25,7 @@ def compose_sms(details):
     s.append('\n')
 
     # Тент 10
-    s.append(f"Транспорт: {details['vehicle'].name}")
+    s.append(f"Транспорт: {details['vehicle'].name_ua if locale == 'uk_UA' else details['vehicle'].name}")
     s.append('\n')
 
     # 10 700.68 грн
@@ -34,7 +34,7 @@ def compose_sms(details):
         # s.append(str(rounded_cost) + '0')
         # returns format '10 700.68' https://stackoverflow.com/questions/13082620/
         s.append('{:,.2f}'.format(__round_cost(cost_per_ton)).replace(',', ' '))
-        s.append(' грн за тонну')
+        s.append(' грн за тону' if locale == 'uk_UA' else ' грн за тонну')
     else:
         # s.append(str(__round_cost(details['cost'])) + '0')
         s.append('{:,.2f}'.format(__round_cost(details['cost'])).replace(',', ' '))
@@ -43,12 +43,13 @@ def compose_sms(details):
 
 
     # +380953459607
-    s.append('+380953459607\n\n')
+    s.append('+380687070075\n\n')
 
     # https://intersmartgroup.com
-    s.append('https://intersmartgroup.com/')
+    s.append('https://intersmartgroup.com/\n\n')
 
-    s.append('\n\nЦена в этом сообщении рассчитана автоматически и не является окончательной. Всегда перезванивайте!')
+    s.append('Ціна розрахована автоматично та не є кінцевою. Завжди телефонуйте!' if locale == 'uk_UA' else
+             'Цена рассчитана автоматически и не является окончательной. Всегда перезванивайте!')
 
     return str().join(s)
 
@@ -80,7 +81,7 @@ def __generate_place_chain(*args):
     return str().join(s)
 
 
-def compose_telegram(intent, details):
+def compose_telegram(intent, details, locale):
     s = list()
 
     # Просчет или Клиент нажал ПЕРЕЗВОНИТЬ
@@ -90,6 +91,8 @@ def compose_telegram(intent, details):
         s.append('Клиент нажал Перезвонить\n\n')
     else:
         raise RuntimeError('Internal Error 5')
+
+    s.append(f'Lang: {"ua" if locale == "uk_UA" else "ru"}\n\n')
 
     # Из: Репки, Черниговская область, Украина
     # В: Смела, Черкасская область, Украина

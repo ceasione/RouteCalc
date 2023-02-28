@@ -6,6 +6,7 @@ class Vehicle(object):
     def __init__(self,
                  a_id,
                  name,
+                 name_ua,
                  price,
                  order,
                  length,
@@ -14,11 +15,13 @@ class Vehicle(object):
                  weight_capacity,
                  space_capacity,
                  cargoes_possible,
+                 cargoes_possible_ua,
                  price_per_ton=False,
                  picture=None):
 
         self.id = a_id
         self.name = name
+        self.name_ua = name_ua
         self.price = price
         self.order = order
         self.length = length
@@ -27,7 +30,8 @@ class Vehicle(object):
         self.weight_capacity = weight_capacity
         self.space_capacity = space_capacity
         self.cargoes_possible = cargoes_possible
-        self.price_per_ton=price_per_ton
+        self.cargoes_possible_ua = cargoes_possible_ua
+        self.price_per_ton = price_per_ton
         self.picture = picture
 
 
@@ -42,6 +46,7 @@ VEHICLES = list()
 
 VEHICLES.append(Vehicle(a_id=0,
                 name='Тент 20',
+                name_ua='Тент 20',
                 price=40.0,
                 order=1,
                 length=13.6,
@@ -50,10 +55,12 @@ VEHICLES.append(Vehicle(a_id=0,
                 weight_capacity=22,
                 space_capacity=90,
                 cargoes_possible='Любые грузы на паллетах, в бегах и мешках',
+                cargoes_possible_ua='Будь-які вантажі на палетах, беги і мішки',
                 picture='https://api.intersmartgroup.com/static/icons/tent20.svg'))
 
 VEHICLES.append(Vehicle(a_id=1,
                 name='Тент 5',
+                name_ua='Тент 5',
                 price=23.0,
                 order=2,
                 length=7.0,
@@ -62,10 +69,12 @@ VEHICLES.append(Vehicle(a_id=1,
                 weight_capacity=5,
                 space_capacity=45,
                 cargoes_possible='Любые грузы на паллетах, в бегах и мешках',
+                cargoes_possible_ua='Будь-які вантажі на палетах, беги і мішки',
                 picture='https://api.intersmartgroup.com/static/icons/gaz.svg'))
 
 VEHICLES.append(Vehicle(a_id=2,
                 name='Зерновоз',
+                name_ua='Зерновоз',
                 price=75.0,
                 order=3,
                 length=10.0,
@@ -74,11 +83,13 @@ VEHICLES.append(Vehicle(a_id=2,
                 weight_capacity=25,
                 space_capacity=50,
                 cargoes_possible='Сыпучие грузы навалом',
+                cargoes_possible_ua='Насипні вантажі навалом',
                 price_per_ton=True,
                 picture='https://api.intersmartgroup.com/static/icons/grain_carrier.svg'))
 
 VEHICLES.append(Vehicle(a_id=3,
                 name='Автоцистерна',
+                name_ua='Автоцистерна',
                 price=75.0,
                 order=4,
                 length=0.0,
@@ -87,11 +98,13 @@ VEHICLES.append(Vehicle(a_id=3,
                 weight_capacity=25,
                 space_capacity=30,
                 cargoes_possible='Наливные грузы, химические либо пищевые',
+                cargoes_possible_ua='Рідкі вантажі, хімічні або харчові',
                 price_per_ton=True,
                 picture='https://api.intersmartgroup.com/static/icons/oil_carrier.svg'))
 
 VEHICLES.append(Vehicle(a_id=4,
                 name='Микроавтобус',
+                name_ua='Мікроавтобус',
                 price=14.0,
                 order=5,
                 length=3.0,
@@ -100,10 +113,12 @@ VEHICLES.append(Vehicle(a_id=4,
                 weight_capacity=1,
                 space_capacity=8,
                 cargoes_possible='Любые грузы, вещи, мебель',
+                cargoes_possible_ua='Будь-які вантажі, речі, меблі',
                 picture='https://api.intersmartgroup.com/static/icons/bus.svg'))
 
 VEHICLES.append(Vehicle(a_id=5,
                 name='Эвакуатор',
+                name_ua='Евакуатор',
                 price=24.0,
                 order=6,
                 length=3.0,
@@ -112,10 +127,12 @@ VEHICLES.append(Vehicle(a_id=5,
                 weight_capacity=2.8,
                 space_capacity=0,
                 cargoes_possible='Один легковой автомобиль',
+                cargoes_possible_ua='Одне легкове авто',
                 picture='https://api.intersmartgroup.com/static/icons/vehicle_carrier.svg'))
 
 VEHICLES.append(Vehicle(a_id=6,
                 name='Автовоз',
+                name_ua='Автовоз',
                 price=19.2,  # (Эвакуатор) - 20 %
                 order=7,
                 length=3.0,
@@ -124,4 +141,5 @@ VEHICLES.append(Vehicle(a_id=6,
                 weight_capacity=2.8,
                 space_capacity=0,
                 cargoes_possible='Восемь легковых авто',
+                cargoes_possible_ua='Вісім легкових авто',
                 picture='https://api.intersmartgroup.com/static/icons/multivehicle_carrier.svg'))
