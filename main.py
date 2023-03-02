@@ -104,7 +104,7 @@ def __validate_request(input_json):
                          'countrycode': str(obj['to']['countrycode'])},
             'transport_id': __validate_transport_id(int(obj['transport_id'])),
             'phone_number': num_validator.validate_phone_ukr(obj['phone_number']),
-            'locale': obj['locale'] if obj['locale'] is not None else 'ru_UA'}  # need to test this line !!!
+            'locale': obj['locale'] if obj.get('locale') is not None else 'ru_UA'}  # need to test this line !!!
 
 
 def __calculate_distance(a, b, c, d):
