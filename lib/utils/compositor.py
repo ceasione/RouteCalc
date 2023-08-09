@@ -10,7 +10,8 @@ def __round_cost(cost):
         return round(cost, -3)
 
 
-def compose_sms(details, locale):
+def compose_sms(details, a_locale):
+    locale = 'uk_UA' # locale lock
     s = list()
 
     s.append('Маршрут: ')
