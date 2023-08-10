@@ -31,11 +31,11 @@ def compose_sms(details, a_locale):
 
     # 10 700.68 грн
     if details['vehicle'].price_per_ton:
-        cost_per_ton = details['cost'] / 22.0
+        cost_per_ton = details['cost'] / 25.0
         # s.append(str(rounded_cost) + '0')
         # returns format '10 700.68' https://stackoverflow.com/questions/13082620/
         s.append('{:,.2f}'.format(__round_cost(cost_per_ton)).replace(',', ' '))
-        s.append(' грн за тону' if locale == 'uk_UA' else ' грн за тонну')
+        s.append(' грн за тонну' if locale == 'uk_UA' else ' грн за тонну')
     else:
         # s.append(str(__round_cost(details['cost'])) + '0')
         s.append('{:,.2f}'.format(__round_cost(details['cost'])).replace(',', ' '))
