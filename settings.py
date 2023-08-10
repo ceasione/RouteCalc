@@ -8,7 +8,7 @@ GOOGLE_APIKEY = str()
 
 GOOGLE_MAX_REQUEST_PLACES = 25
 
-DEPOT_DB_LOC = 'dbs/DepotPark_v2.3.sqlite'
+DEPOT_DB_LOC = 'dbs/DepotPark_v2.4.sqlite'
 CACHE_LOCATION = 'dbs/cache.sqlite'
 
 SMS_APIADR = 'https://im.smsclub.mobi/sms/send'
