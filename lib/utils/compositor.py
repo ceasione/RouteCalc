@@ -82,7 +82,7 @@ def __generate_place_chain(*args):
     return str().join(s)
 
 
-def compose_telegram(intent, details, locale):
+def compose_telegram(intent, details, locale, url):
     s = list()
 
     # Просчет или Клиент нажал ПЕРЕЗВОНИТЬ
@@ -93,7 +93,8 @@ def compose_telegram(intent, details, locale):
     else:
         raise RuntimeError('Internal Error 5')
 
-    s.append(f'Lang: {"ua" if locale == "uk_UA" else "ru"}\n\n')
+    s.append(f'Lang: {"ua" if locale == "uk_UA" else "ru"}\n')
+    s.append(f'Page URL: {url}\n\n')
 
     # Из: Репки, Черниговская область, Украина
     # В: Смела, Черкасская область, Украина

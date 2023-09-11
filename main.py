@@ -104,7 +104,8 @@ def __validate_request(input_json):
                          'countrycode': str(obj['to']['countrycode'])},
             'transport_id': __validate_transport_id(int(obj['transport_id'])),
             'phone_number': num_validator.validate_phone_ukr(obj['phone_number']),
-            'locale': obj['locale'] if obj.get('locale') is not None else 'ru_UA'}  # need to test this line !!!
+            'locale': obj['locale'] if obj.get('locale') is not None else 'uk_UA',
+            'url': obj['url'] if obj.get('url') is not None else 'url undefined'}
 
 
 def __calculate_distance(a, b, c, d):
@@ -228,10 +229,10 @@ def submit():
     # This was made for distinguish calc and callback. Callback should not increment today_requests
 
     if rqst['intent'] == 'calc' and today_requests <= MAX_REQUESTS:
-        telegramapi2.send_silent(compositor.compose_telegram(rqst['intent'], details, rqst['locale']))
+        telegramapi2.send_silent(compositor.compose_telegram(rqst['intent'], details, rqst['locale'], rqst['url']))
         LOGGER.put_request(phone_number=rqst["phone_number"],  # +380... or 380... for logging
                            query=s_request,
-                           response=json.dumps([compositor.compose_telegram(rqst['intent'], details, rqst['locale']),
+                           response=json.dumps([compositor.compose_telegram(rqst['intent'], details, rqst['locale'], rqst['url']),
                                                 compositor.compose_sms(details, rqst['locale'])], ensure_ascii=False))
         # if not from_is_ua or not to_is_ua:
         #     return __gen_response(501, 'REGION_NOT_IMPLEMENTED')
@@ -240,18 +241,18 @@ def submit():
         return __gen_response(200, 'SMS_SENT')
 
     elif rqst['intent'] == 'calc' and today_requests > MAX_REQUESTS:
-        telegramapi2.send_silent(compositor.compose_telegram(rqst['intent'], details, rqst['locale']))
+        telegramapi2.send_silent(compositor.compose_telegram(rqst['intent'], details, rqst['locale'], rqst['url']))
         LOGGER.put_request(phone_number=rqst["phone_number"],  # +380... or 380... for logging
                            query=s_request,
-                           response=json.dumps([compositor.compose_telegram(rqst['intent'], details, rqst['locale']),
+                           response=json.dumps([compositor.compose_telegram(rqst['intent'], details, rqst['locale'], rqst['url']),
                                                 compositor.compose_sms(details, rqst['locale'])], ensure_ascii=False))
         return __gen_response(403, 'MAX_DAILY_REQUESTS_EXCEEDED')
 
     elif rqst['intent'] == 'callback':
-        telegramapi2.send_loud(compositor.compose_telegram(rqst['intent'], details, rqst['locale']))
+        telegramapi2.send_loud(compositor.compose_telegram(rqst['intent'], details, rqst['locale'], rqst['url']))
         LOGGER.put_request(phone_number='+'+rqst['phone_number'],  # +380... or 380... for logging
                            query=s_request,
-                           response=json.dumps([compositor.compose_telegram(rqst['intent'], details, rqst['locale']),
+                           response=json.dumps([compositor.compose_telegram(rqst['intent'], details, rqst['locale'], rqst['url']),
                                                 compositor.compose_sms(details, rqst['locale'])], ensure_ascii=False))
         return __gen_response(200, 'CALLBACK_SCHEDULED')
 
