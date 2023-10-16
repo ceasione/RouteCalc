@@ -14,7 +14,7 @@ class SmsSendingError(RuntimeError):
 def send_sms(number, text):
 
     if number in settings.SMS_BLACKLIST:
-        return
+        return # rudimentary
 
     url = 'https://im.smsclub.mobi/sms/send'
     payload = {
