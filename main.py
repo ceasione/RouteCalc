@@ -109,7 +109,7 @@ def submit():
 
         requests_exceeded = LOGGER.get_today_requests_count(rqst['phone_number']) > MAX_REQUESTS
         if requests_exceeded:
-            telegramapi2.send_silent(f'MAX_DAILY_REQUESTS_EXCEEDED\n\n{tg_msg}')
+            telegramapi2.send_silent(f'DAILY REQUESTS EXCEEDED\n\n{tg_msg}')
             return __gen_response(403, 'MAX_DAILY_REQUESTS_EXCEEDED')
 
         telegramapi2.send_silent(tg_msg)
