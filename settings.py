@@ -29,3 +29,4 @@ MAX_REQUESTS = 3
 
 WORKING_DIR = '/home/olivercromwell/Python-Scrapy/RouteCalc/'
 
+SMS_TEXT_REDIAL_PHONE = '+380687070075'

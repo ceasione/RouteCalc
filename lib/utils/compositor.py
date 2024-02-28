@@ -1,4 +1,5 @@
 
+from settings import SMS_TEXT_REDIAL_PHONE
 
 def __round_cost(cost):
 
@@ -10,49 +11,30 @@ def __round_cost(cost):
         return round(cost, -3)
 
 
-def compose_sms(details, a_locale):
-    locale = 'uk_UA' # locale lock
+def make_sms_text(place_a_name: str,
+                  place_b_name: str,
+                  vehicle_name: str,
+                  cost_is_per_ton: bool,
+                  cost: float) -> str:
     s = list()
-
-    s.append('Маршрут: ')
-
-    # "Смела - Калуш"
-    s.append(f'{details["place_a"].name} - {details["place_b"].name}')
-
-    # ": 755,2 км"
-    # s.append(': ')
-    # s.append(str(round(details['total_distance']/1000, 1)))
-    # s.append(' км')
-    s.append('\n')
-
-    # Тент 10
-    s.append(f"Транспорт: {details['vehicle'].name_ua if locale == 'uk_UA' else details['vehicle'].name}")
-    s.append('\n')
-
-    # 10 700.68 грн
-    if details['vehicle'].price_per_ton:
-        cost_per_ton = details['cost'] / 25.0
-        # s.append(str(rounded_cost) + '0')
-        # returns format '10 700.68' https://stackoverflow.com/questions/13082620/
-        s.append('{:,.2f}'.format(__round_cost(cost_per_ton)).replace(',', ' '))
-        s.append(' грн за тонну' if locale == 'uk_UA' else ' грн за тонну')
+    s.append(f'{place_a_name} - {place_b_name}\n')
+    s.append(f"Транспорт: {vehicle_name}\n")
+    if cost_is_per_ton:
+        cost_per_ton = cost / 25.0
+        s.append('{:,.2f}'.format(__round_cost(cost_per_ton)).replace(',', ' '))  # returns format '10 700.68'
+        # https://stackoverflow.com/questions/13082620/
+        s.append(' грн за тонну\n')
     else:
-        # s.append(str(__round_cost(details['cost'])) + '0')
-        s.append('{:,.2f}'.format(__round_cost(details['cost'])).replace(',', ' '))
-        s.append(' грн')
-    s.append('\n')
-
-
-    # +380953459607
-    s.append('+380687070075\n\n')
-
-    # https://intersmartgroup.com
+        s.append('{:,.2f}'.format(__round_cost(cost)).replace(',', ' '))
+        s.append(' грн\n')
+    s.append(f'{SMS_TEXT_REDIAL_PHONE}\n\n')
     s.append('https://intersmartgroup.com/\n\n')
-
-    s.append('Ціна розрахована автоматично та не є кінцевою. Завжди телефонуйте!' if locale == 'uk_UA' else
-             'Цена рассчитана автоматически и не является окончательной. Всегда перезванивайте!')
-
+    s.append('Ціна розрахована автоматично та не є кінцевою. Завжди телефонуйте!')
     return str().join(s)
+
+
+def test_make_sms_text():
+    print(make_sms_text("Калуш", "Смела", "Автовоз", False, 14158.38))
 
 
 def __generate_map_url(*args):
@@ -134,3 +116,6 @@ def compose_telegram(intent, details, locale, url, ip):
     s.append(f'Телефон клиента: +{details["client_phone"]}')
 
     return str().join(s)
+
+if __name__ == '__main__':
+    test_make_sms_text()

@@ -90,14 +90,16 @@ def submit():
         rqst['locale'], 
         rqst['url'], 
         rqst['ip'])
-    
-    sms_msg = compositor.compose_sms(
-        route_calculations, 
-        rqst['locale'])
+
+    sms_msg: str = compositor.make_sms_text(route_calculations["place_a"].name,
+                                            route_calculations["place_b"].name,
+                                            route_calculations['vehicle'].name_ua,
+                                            route_calculations['vehicle'].price_per_ton,
+                                            route_calculations['cost'])
 
     LOGGER.put_request(phone_number=rqst["phone_number"],
-                           query=json.dumps(rqst, ensure_ascii=False),
-                           response=json.dumps([tg_msg, sms_msg], ensure_ascii=False))
+                       query=json.dumps(rqst, ensure_ascii=False),
+                       response=json.dumps([tg_msg, sms_msg], ensure_ascii=False))
 
     blacklisted = blacklist.check(rqst["phone_number"], rqst['ip'])
     if blacklisted:
