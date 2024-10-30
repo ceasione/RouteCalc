@@ -22,9 +22,11 @@ def send_sms(number, text):
         'message': text,
         'src_addr': ALPHANAME
     }
-    response = requests.post(url, json=payload, headers=HEADERS)
-    if response.status_code != 200:
-        raise SmsSendingError(f'status {response.status_code} {response.text}')
+
+    if not settings.isDeveloperPC:
+        response = requests.post(url, json=payload, headers=HEADERS)
+        if response.status_code != 200:
+            raise SmsSendingError(f'status {response.status_code} {response.text}')
 
 
 def get_sent_status(a_id):

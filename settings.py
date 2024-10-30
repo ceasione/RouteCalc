@@ -1,10 +1,16 @@
+import socket
 
 GOOGLE_APIADR = 'https://maps.googleapis.com/maps/api/distancematrix/json'
 
 GOOGLE_APIKEY_PROD = 'AIzaSyCQKtjuswR2c5fqEJng9k4hDKjWvgDnQLQ'
-GOOGLE_APIKEY_DEV = 'AIzaSyAL6RilQrR_oPPAV5nRTGXAf9uCkw4tOeQ'
-GOOGLE_APIKEY = str()
+GOOGLE_APIKEY_DEV = 'AIzaSyAzEn9je1TvxCJSVIU7UIbv_p7UI8O4rMc'
 
+if socket.gethostname() == 'ltone':
+    GOOGLE_APIKEY = GOOGLE_APIKEY_DEV
+    isDeveloperPC = True
+else:
+    GOOGLE_APIKEY = GOOGLE_APIKEY_PROD
+    isDeveloperPC = False
 
 GOOGLE_MAX_REQUEST_PLACES = 25
 
