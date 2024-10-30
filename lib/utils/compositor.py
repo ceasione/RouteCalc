@@ -72,6 +72,8 @@ def compose_telegram(intent, details, locale, url, ip):
         s.append('Просчет\n\n')
     elif intent == 'callback':
         s.append('Клиент нажал Перезвонить\n\n')
+    elif intent == 'acquire':
+        s.append('Просчет без номера\n\n')
     else:
         raise RuntimeError('Internal Error 5')
 
@@ -116,6 +118,21 @@ def compose_telegram(intent, details, locale, url, ip):
     s.append(f'Телефон клиента: +{details["client_phone"]}')
 
     return str().join(s)
+
+
+def compose_web(details, locale) -> dict:
+    cost = '{:,.2f}'.format(__round_cost(details['cost'] / 25)).replace(',', ' ') if details['vehicle'].price_per_ton \
+        else '{:,.2f}'.format(__round_cost(details['cost'])).replace(',', ' ')
+    return {
+        'place_a': details["place_a"].name_long,
+        'place_b': details["place_b"].name_long,
+        'map_url': __generate_map_url(details["place_a"], details["place_b"]),
+        'place_chain': __generate_place_chain(*details["route"]),
+        'chain_map_url': __generate_map_url(*details["route"]),
+        'distance': round(float(details["total_distance"])/1000, 0),
+        'price': cost
+    }
+
 
 if __name__ == '__main__':
     test_make_sms_text()

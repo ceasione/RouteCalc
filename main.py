@@ -32,7 +32,7 @@ app = Flask(__name__)
 CORS = CORS(app)
 
 
-def __gen_response(http_status: int, json_status: str, details: str = '') -> Response:
+def __gen_response(http_status: int, json_status: str, details: str = '', workload: dict = None) -> Response:
 
     if json_status not in ('SMS_SENT',
                            'SMS_ERROR',
@@ -40,11 +40,13 @@ def __gen_response(http_status: int, json_status: str, details: str = '') -> Res
                            'REGION_NOT_IMPLEMENTED',
                            'CALLBACK_SCHEDULED',
                            'ERROR',
-                           'BLACKLISTED'):
+                           'BLACKLISTED',
+                           'WORKLOAD'):
         raise RuntimeError('Internal error 8')
 
     resp = Response(response=json.dumps({'status': json_status,
-                                         'details': details},
+                                         'details': details,
+                                         'workload': workload},
                                         ensure_ascii=False),
                     status=http_status,
                     content_type='application/json; charset=utf-8')
@@ -129,6 +131,40 @@ def submit():
         return __gen_response(200, 'CALLBACK_SCHEDULED')
     else:
         raise RuntimeError('Internal error 9')
+
+
+@app.route('/calculate/', methods=['POST'])
+def calculate():
+    try:
+        rqst = request_processor.preprocess(request)
+    except (TypeError, ValueError, KeyError) as e:
+        return __gen_response(400, 'ERROR', details=str(e.args))
+
+    try:
+        route_calculations = calc_itself.calculate_route(rqst)
+    except RuntimeError as e:
+        telegramapi2.send_developer(
+            f'Calculator error!\n\nRequest = {json.dumps(rqst, ensure_ascii=False)}\n\nError = {e.args}')
+        return __gen_response(500, 'ERROR', details=str(e.args))
+
+    tg_msg = compositor.compose_telegram(
+        rqst['intent'],
+        route_calculations,
+        rqst['locale'],
+        rqst['url'],
+        rqst['ip'])
+
+    LOGGER.put_request(phone_number='smsless',
+                       query=json.dumps(rqst, ensure_ascii=False),
+                       response=json.dumps([tg_msg, 'smsless'], ensure_ascii=False))
+
+    blacklisted = blacklist.check_ip(rqst['ip'])
+    if blacklisted:
+        telegramapi2.send_silent(f'BLACKLISTED\n\n{tg_msg}')
+        return __gen_response(403, 'BLACKLISTED')
+    else:
+        telegramapi2.send_silent(tg_msg)
+        return __gen_response(200, 'WORKLOAD', workload=compositor.compose_web(route_calculations, rqst['locale']))
 
 
 @app.errorhandler(RuntimeError)

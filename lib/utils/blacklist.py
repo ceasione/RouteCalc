@@ -53,8 +53,14 @@ def spread(phone_number, client_ip):
 
     __renew()
 
+
 def check(phone_number, client_ip):
     __renew()
 
     return True if (__lookup(phone_number) or __lookup(client_ip)) else False
+
+
+def check_ip(client_ip):
+    __renew()
+    return True if __lookup(client_ip) else False
 

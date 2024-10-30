@@ -29,45 +29,77 @@ def __validate_transport_id(vehicle_id):
 
     raise ValueError('Unknown vehicle_id')
 
-def __validate_request(input_json, user_ip):
+
+def __validate_request(input_dict, user_ip):
 
     num_validator = number_tools.get_instance()
-    obj = json.loads(input_json)
 
-    if obj['intent'] != 'calc' and obj['intent'] != 'callback':
-        raise ValueError('Expected intent "calc" or "callback". Got ' + obj['intent'])
+    if input_dict['intent'] != 'calc' and input_dict['intent'] != 'callback' and input_dict['intent'] != 'acquire':
+        raise ValueError('Expected intent "calc", "callback" or "acquire". Got ' + input_dict['intent'])
 
-    if len(obj['from']['name_short']) < 1 or len(obj['to']['name_short']) < 1:
+    if len(input_dict['from']['name_short']) < 1 or len(input_dict['to']['name_short']) < 1:
         raise ValueError('Field name_short could not be empty')
 
-    if len(obj['from']['name_long']) < 1 or len(obj['to']['name_long']) < 1:
+    if len(input_dict['from']['name_long']) < 1 or len(input_dict['to']['name_long']) < 1:
         raise ValueError('Field name_long could not be empty')
 
-    return {'intent':   str(obj['intent']),
-            'from':     {'name_short': str(obj['from']['name_short']),
-                         'name_long': str(obj['from']['name_long']),
-                         'lat': float(obj['from']['lat']),
-                         'lng': float(obj['from']['lng']),
-                         'countrycode': str(obj['from']['countrycode'])},
-            'to':       {'name_short': str(obj['to']['name_short']),
-                         'name_long': str(obj['to']['name_long']),
-                         'lat': float(obj['to']['lat']),
-                         'lng': float(obj['to']['lng']),
-                         'countrycode': str(obj['to']['countrycode'])},
-            'transport_id': __validate_transport_id(int(obj['transport_id'])),
-            'phone_number': num_validator.validate_phone_ukr(obj['phone_number']),
-            'locale': obj['locale'] if obj.get('locale') is not None else 'uk_UA',
-            'url': obj['url'] if obj.get('url') is not None else 'url undefined',
+    return {'intent':   str(input_dict['intent']),
+            'from':     {'name_short': str(input_dict['from']['name_short']),
+                         'name_long': str(input_dict['from']['name_long']),
+                         'lat': float(input_dict['from']['lat']),
+                         'lng': float(input_dict['from']['lng']),
+                         'countrycode': str(input_dict['from']['countrycode'])},
+            'to':       {'name_short': str(input_dict['to']['name_short']),
+                         'name_long': str(input_dict['to']['name_long']),
+                         'lat': float(input_dict['to']['lat']),
+                         'lng': float(input_dict['to']['lng']),
+                         'countrycode': str(input_dict['to']['countrycode'])},
+            'transport_id': __validate_transport_id(int(input_dict['transport_id'])),
+            'phone_number': num_validator.validate_phone_ukr(input_dict['phone_number']),
+            'locale': input_dict['locale'] if input_dict.get('locale') is not None else 'uk_UA',
+            'url': input_dict['url'] if input_dict.get('url') is not None else 'url undefined',
             'ip': user_ip}
+
+
+def __validate_numless_request(input_dict, user_ip):
+
+    if input_dict['intent'] != 'acquire':
+        raise ValueError('Expected intent "acquire". Got ' + input_dict['intent'])
+
+    if len(input_dict['from']['name_short']) < 1 or len(input_dict['to']['name_short']) < 1:
+        raise ValueError('Field name_short could not be empty')
+
+    if len(input_dict['from']['name_long']) < 1 or len(input_dict['to']['name_long']) < 1:
+        raise ValueError('Field name_long could not be empty')
+
+    return {'intent':   str(input_dict['intent']),
+            'from':     {'name_short': str(input_dict['from']['name_short']),
+                         'name_long': str(input_dict['from']['name_long']),
+                         'lat': float(input_dict['from']['lat']),
+                         'lng': float(input_dict['from']['lng']),
+                         'countrycode': str(input_dict['from']['countrycode'])},
+            'to':       {'name_short': str(input_dict['to']['name_short']),
+                         'name_long': str(input_dict['to']['name_long']),
+                         'lat': float(input_dict['to']['lat']),
+                         'lng': float(input_dict['to']['lng']),
+                         'countrycode': str(input_dict['to']['countrycode'])},
+            'transport_id': __validate_transport_id(int(input_dict['transport_id'])),
+            'phone_number': None,
+            'locale': input_dict['locale'] if input_dict.get('locale') is not None else 'uk_UA',
+            'url': input_dict['url'] if input_dict.get('url') is not None else 'url undefined',
+            'ip': user_ip}
+
 
 def preprocess(request):
 
     if isinstance(request.json, str):
-        s_request = request.json
+        input_dict = json.loads(request.json)
     elif isinstance(request.json, dict):
-        s_request = json.dumps(request.json, ensure_ascii=False)
-        ip = request.remote_addr
+        input_dict = request.json
     else:
         raise TypeError('Expected input json be str or dict')
 
-    return __validate_request(s_request, request.remote_addr)
+    if input_dict['intent'] == 'acquire':
+        return __validate_numless_request(input_dict, request.remote_addr)
+    else:
+        return __validate_request(input_dict, request.remote_addr)
