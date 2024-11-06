@@ -14,6 +14,7 @@ import traceback
 import lib.utils.blacklist as blacklist
 import lib.utils.request_processor as request_processor
 import lib.calc.calc_itself as calc_itself
+from lib.utils.DTOs import CalculationDTO
 
 
 """
@@ -32,7 +33,7 @@ app = Flask(__name__)
 CORS = CORS(app)
 
 
-def __gen_response(http_status: int, json_status: str, details: str = '', workload: dict = None) -> Response:
+def __gen_response(http_status: int, json_status: str, details: str = '', workload: CalculationDTO = None) -> Response:
 
     if json_status not in ('SMS_SENT',
                            'SMS_ERROR',
@@ -86,18 +87,16 @@ def submit():
         telegramapi2.send_developer(f'Calculator error!\n\nRequest = {json.dumps(rqst, ensure_ascii=False)}\n\nError = {e.args}')
         return __gen_response(500, 'ERROR', details=str(e.args))
 
+    calculation_dto = compositor.make_calculation_dto(route_calculations, rqst['locale'])
+
     tg_msg = compositor.compose_telegram(
         rqst['intent'], 
-        route_calculations, 
-        rqst['locale'], 
+        calculation_dto,
         rqst['url'], 
-        rqst['ip'])
+        rqst['ip'],
+        rqst["phone_number"])
 
-    sms_msg: str = compositor.make_sms_text(route_calculations["place_a"].name,
-                                            route_calculations["place_b"].name,
-                                            route_calculations['vehicle'].name_ua,
-                                            route_calculations['vehicle'].price_per_ton,
-                                            route_calculations['cost'])
+    sms_msg: str = compositor.make_sms_text(calculation_dto)
 
     LOGGER.put_request(phone_number=rqst["phone_number"],
                        query=json.dumps(rqst, ensure_ascii=False),
@@ -121,13 +120,7 @@ def submit():
         return __gen_response(200, 'SMS_SENT')
     
     elif rqst['intent'] == 'callback':
-        telegramapi2.send_loud(
-            compositor.compose_telegram(
-                rqst['intent'], 
-                route_calculations, 
-                rqst['locale'], 
-                rqst['url'], 
-                rqst['ip']))
+        telegramapi2.send_loud(tg_msg)
         return __gen_response(200, 'CALLBACK_SCHEDULED')
     else:
         raise RuntimeError('Internal error 9')
@@ -147,12 +140,14 @@ def calculate():
             f'Calculator error!\n\nRequest = {json.dumps(rqst, ensure_ascii=False)}\n\nError = {e.args}')
         return __gen_response(500, 'ERROR', details=str(e.args))
 
+    calculation_dto = compositor.make_calculation_dto(route_calculations, rqst['locale'])
+
     tg_msg = compositor.compose_telegram(
         rqst['intent'],
-        route_calculations,
-        rqst['locale'],
+        calculation_dto,
         rqst['url'],
-        rqst['ip'])
+        rqst['ip'],
+        rqst["phone_number"])
 
     LOGGER.put_request(phone_number='smsless',
                        query=json.dumps(rqst, ensure_ascii=False),
@@ -164,7 +159,7 @@ def calculate():
         return __gen_response(403, 'BLACKLISTED')
     else:
         telegramapi2.send_silent(tg_msg)
-        return __gen_response(200, 'WORKLOAD', workload=compositor.compose_web(route_calculations, rqst['locale']))
+        return __gen_response(200, 'WORKLOAD', workload=calculation_dto.to_dict())
 
 
 @app.errorhandler(RuntimeError)
