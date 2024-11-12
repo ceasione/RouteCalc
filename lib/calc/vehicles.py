@@ -56,7 +56,7 @@ VEHICLES.append(Vehicle(a_id=0,
                 space_capacity=90,
                 cargoes_possible='Любые грузы на паллетах, в бегах и мешках',
                 cargoes_possible_ua='Будь-які вантажі на палетах, беги і мішки',
-                picture='https://api.intersmartgroup.com/static/icons/tent20.svg'))
+                picture='https://api.intersmartgroup.com/static/icons/tent20-v2.svg'))
 
 VEHICLES.append(Vehicle(a_id=6,
                 name='Тент 10',
