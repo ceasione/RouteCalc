@@ -19,16 +19,15 @@ def make_sms_text(calculation: CalculationDTO) -> str:
     s.append(f'{calculation.place_a_name} - {calculation.place_b_name}\n')
     s.append(f"Транспорт: {calculation.transport_name}\n")
     if calculation.is_price_per_ton:
-        cost_per_ton = calculation.price / 25.0
-        s.append('{:,.2f}'.format(__round_cost(cost_per_ton)).replace(',', ' '))  # returns format '10 700.68'
+        s.append(calculation.price_per_ton)
         # https://stackoverflow.com/questions/13082620/
         s.append(' грн за тонну\n')
     else:
-        s.append('{:,.2f}'.format(__round_cost(calculation.price)).replace(',', ' '))
+        s.append(calculation.price)
         s.append(' грн\n')
     s.append(f'{SMS_TEXT_REDIAL_PHONE}\n\n')
     s.append('https://intersmartgroup.com/\n\n')
-    s.append('Ціна розрахована автоматично та не є кінцевою. Завжди телефонуйте!')
+    s.append('Очікуйте на дзвінок. Inter Smart Group')
     return str().join(s)
 
 
@@ -79,8 +78,7 @@ def compose_telegram(intent, calculation, url, ip, phone_num='#'):
     # Из: Репки, Черниговская область, Украина
     # В: Смела, Черкасская область, Украина
     # Маршрут: https://www.google.com.ua/maps/dir/50.5465397,30.4010721/50.5380305,30.4443308/50.554393,30.469565/
-    s.append(f'{calculation.place_a_name_long}\n\n')
-    s.append(f'{calculation.place_b_name_long}\n\n')
+    s.append(f'{calculation.place_a_name} - {calculation.place_b_name}\n\n')
     s.append(f'[Google Maps]({calculation.map_link})\n\n')
 
     # Расчитанный маршрут: Чернигов - Репки - Смела - Черкассы
@@ -98,26 +96,32 @@ def compose_telegram(intent, calculation, url, ip, phone_num='#'):
 
     # 10 700.68
     if calculation.is_price_per_ton:
-        cost_per_ton = calculation.price / 25.0
         # s.append(str(rounded_cost) + '0')
         # returns format '10 700.68' https://stackoverflow.com/questions/13082620/
-        s.append('{:,.2f}'.format(__round_cost(cost_per_ton)).replace(',', ' '))
+        s.append(calculation.price_per_ton)
         s.append(' грн за тонну')
     else:
         # s.append(str(__round_cost(details['cost'])) + '0')
-        s.append('{:,.2f}'.format(__round_cost(calculation.price)).replace(',', ' '))
+        s.append(calculation.price)
         s.append(' грн')
 
-
-    s.append(f', ({round(calculation.price_per_km, 2)} грн/км)\n')
-    s.append(f'Телефон клиента: +{phone_num}')
+    s.append(f', ({calculation.price_per_km} грн/км):\n')
+    s.append(f'  Vehicle: {calculation.pfactor_vehicle}\n')
+    s.append(f'  Departure: {calculation.pfactor_departure}\n')
+    s.append(f'  Arrival: {calculation.pfactor_arrival}\n')
+    s.append(f'  Distance: {calculation.pfactor_distance}')
+    if phone_num is not None:
+        s.append(f'\n\nТелефон клиента: +{phone_num}')
 
     return str().join(s)
 
 
 def make_calculation_dto(details, locale) -> CalculationDTO:
-    cost = '{:,.2f}'.format(__round_cost(details['cost'] / 25)).replace(',', ' ') if details['vehicle'].price_per_ton \
-        else '{:,.2f}'.format(__round_cost(details['cost'])).replace(',', ' ')
+    raw_price = details['cost']
+    transport_capacity = details['vehicle'].weight_capacity
+    price_per_ton = '{:,.2f}'.format(__round_cost(raw_price/float(transport_capacity))).replace(',', ' ')
+    price = '{:,.2f}'.format(__round_cost(raw_price)).replace(',', ' ')
+
     return CalculationDTO(place_a_name=details["place_a"].name,
                           place_a_name_long=details["place_a"].name_long,
                           place_b_name=details["place_b"].name,
@@ -125,11 +129,16 @@ def make_calculation_dto(details, locale) -> CalculationDTO:
                           map_link=__generate_map_url(details["place_a"], details["place_b"]),
                           place_chain=__generate_place_chain(*details["route"]),
                           chain_map_link=__generate_map_url(*details["route"]),
-                          distance=round(float(details["total_distance"])/1000, 0),
+                          distance=str(round(float(details["total_distance"])/1000, 1)),
                           transport_id=details['vehicle'].id,
                           transport_name=details['vehicle'].name if locale == 'ru_UA' else details['vehicle'].name_ua,
-                          transport_capacity=details['vehicle'].weight_capacity,
-                          price=details['cost'],
-                          price_per_km=details['price'],
+                          transport_capacity=transport_capacity,
+                          price=price,
+                          price_per_ton=price_per_ton,
+                          price_per_km=str(round(details['price'], 2)),
                           is_price_per_ton=details['vehicle'].price_per_ton,
+                          pfactor_vehicle= details['pfactor_vehicle'],
+                          pfactor_departure=details['pfactor_departure'],
+                          pfactor_arrival=details['pfactor_arrival'],
+                          pfactor_distance=details['pfactor_distance'],
                           locale=LocaleDTO(locale))

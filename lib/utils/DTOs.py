@@ -33,13 +33,18 @@ class CalculationDTO:
                  map_link: str,
                  place_chain: str,
                  chain_map_link: str,
-                 distance: float,
+                 distance: str,
                  transport_id: int,
                  transport_name: str,
                  transport_capacity: int,
-                 price: float,
-                 price_per_km: float,
+                 price: str,
+                 price_per_ton: str,
+                 price_per_km: str,
                  is_price_per_ton: bool,
+                 pfactor_vehicle: str,
+                 pfactor_departure: str,
+                 pfactor_arrival: str,
+                 pfactor_distance: str,
                  locale: LocaleDTO):
         self.place_a_name = place_a_name
         self.place_a_name_long = place_a_name_long
@@ -53,8 +58,13 @@ class CalculationDTO:
         self.transport_name = transport_name
         self.transport_capacity = transport_capacity
         self.price = price
+        self.price_per_ton = price_per_ton
         self.price_per_km=price_per_km
         self.is_price_per_ton = is_price_per_ton
+        self.pfactor_vehicle = pfactor_vehicle
+        self.pfactor_departure = pfactor_departure
+        self.pfactor_arrival = pfactor_arrival
+        self.pfactor_distance = pfactor_distance
         self.locale = locale
 
     def to_dict(self):
@@ -70,8 +80,13 @@ class CalculationDTO:
                 'transport_name': self.transport_name,
                 'transport_capacity': self.transport_capacity,
                 'price': self.price,
+                'price_per_ton': self.price_per_ton,
                 'price_per_km': self.price_per_km,
                 'is_price_per_ton': self.is_price_per_ton,
+                'pfactor_vehicle': self.pfactor_vehicle,
+                'pfactor_departure': self.pfactor_departure,
+                'pfactor_arrival': self.pfactor_arrival,
+                'pfactor_distance': self.pfactor_distance,
                 'locale': self.locale.value}
 
     @classmethod
@@ -88,7 +103,12 @@ class CalculationDTO:
                    transport_name=dct['transport_name'],
                    transport_capacity=dct['transport_capacity'],
                    price=dct['price'],
+                   price_per_ton=dct['price_per_ton'],
                    price_per_km=dct['price_per_km'],
                    is_price_per_ton=dct['is_price_per_ton'],
+                   pfactor_vehicle = dct['pfactor_vehicle'],
+                   pfactor_departure = dct['pfactor_departure'],
+                   pfactor_arrival = dct['pfactor_arrival'],
+                   pfactor_distance = dct['pfactor_distance'],
                    locale=LocaleDTO(dct['locale']))
 

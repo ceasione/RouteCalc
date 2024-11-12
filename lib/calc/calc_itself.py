@@ -76,10 +76,13 @@ def calculate_route(rqst):
 
     cost = (distance / 1000) * price  # distance in kilometers
 
-
     return {'vehicle': selected_vehicle,
             'total_distance': distance,
             'price': price,
+            'pfactor_vehicle': selected_vehicle.price,
+            'pfactor_departure': starting_depot.departure_ratio,
+            'pfactor_arrival': ending_depot.arrival_ratio,
+            'pfactor_distance': __distance_ratio(distance),
             'cost': cost,
             'route': visible_route,
             'place_a': place_a,

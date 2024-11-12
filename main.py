@@ -15,6 +15,7 @@ import lib.utils.blacklist as blacklist
 import lib.utils.request_processor as request_processor
 import lib.calc.calc_itself as calc_itself
 from lib.utils.DTOs import CalculationDTO
+import lib.utils.number_tools as number_tools
 
 
 """
@@ -60,7 +61,6 @@ def __gen_response(http_status: int, json_status: str, details: str = '', worklo
 def blacklist_add(req: str):
     blacklist.append(req)
     return __gen_response(201, f'BLACKLISTED', req)
-
 
 
 @app.route('/get-available-vehicles/', methods=['GET'])
@@ -134,13 +134,11 @@ def calculate():
         return __gen_response(400, 'ERROR', details=str(e.args))
 
     try:
-        route_calculations = calc_itself.calculate_route(rqst)
+        calculation_dto = compositor.make_calculation_dto(calc_itself.calculate_route(rqst), rqst['locale'])
     except RuntimeError as e:
         telegramapi2.send_developer(
             f'Calculator error!\n\nRequest = {json.dumps(rqst, ensure_ascii=False)}\n\nError = {e.args}')
         return __gen_response(500, 'ERROR', details=str(e.args))
-
-    calculation_dto = compositor.make_calculation_dto(route_calculations, rqst['locale'])
 
     tg_msg = compositor.compose_telegram(
         rqst['intent'],
@@ -160,6 +158,35 @@ def calculate():
     else:
         telegramapi2.send_silent(tg_msg)
         return __gen_response(200, 'WORKLOAD', workload=calculation_dto.to_dict())
+
+
+@app.route('/submit/', methods=['POST'])
+def submit_new():
+    num_validator = number_tools.get_instance()
+    try:
+        dto = CalculationDTO.from_dict(request.json['dto'])
+        num = num_validator.validate_phone_ukr(request.json['num'])
+        url = request.json['url']
+        ip = request.remote_addr
+    except (TypeError, ValueError, KeyError) as e:
+        return __gen_response(400, 'ERROR', details=str(e.args))
+
+    tg_msg = compositor.compose_telegram(
+        intent='callback',
+        calculation=dto,
+        url=url,
+        ip=ip,
+        phone_num=num)
+
+    sms_msg = compositor.make_sms_text(dto)
+
+    LOGGER.put_request(phone_number=num,
+                       query='CalculationDTO object',
+                       response=json.dumps([tg_msg, sms_msg], ensure_ascii=False))
+
+    telegramapi2.send_loud(tg_msg)
+    smsapi.send_sms(num, sms_msg)
+    return __gen_response(200, 'CALLBACK_SCHEDULED')
 
 
 @app.errorhandler(RuntimeError)

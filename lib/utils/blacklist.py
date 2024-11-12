@@ -14,11 +14,13 @@ def __renew():
         for line in file:
             settings.SMS_BLACKLIST.append(line.rstrip())
             
-    print(f'Succesfully loaded BLACKLIST file')
+    print(f'Successfully loaded BLACKLIST file')
+
 
 def __lookup(req: str):
 
     return True if req in settings.SMS_BLACKLIST else False
+
 
 def append(req: str):
 

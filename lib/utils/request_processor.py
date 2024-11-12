@@ -19,6 +19,7 @@ request_example = {'intent': str('calc'+'callback'),
                    'locale': str('ru_UA'),
                    'url': str('https://inters...')}
 
+
 def __validate_transport_id(vehicle_id):
 
     for vehicle in vehicles.VEHICLES:
@@ -103,3 +104,8 @@ def preprocess(request):
         return __validate_numless_request(input_dict, request.remote_addr)
     else:
         return __validate_request(input_dict, request.remote_addr)
+
+
+def preprocess_calc_dto(dto):
+
+    pass
