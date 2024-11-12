@@ -154,10 +154,9 @@ def calculate():
     blacklisted = blacklist.check_ip(rqst['ip'])
     if blacklisted:
         telegramapi2.send_silent(f'BLACKLISTED\n\n{tg_msg}')
-        return __gen_response(403, 'BLACKLISTED')
     else:
         telegramapi2.send_silent(tg_msg)
-        return __gen_response(200, 'WORKLOAD', workload=calculation_dto.to_dict())
+    return __gen_response(200, 'WORKLOAD', workload=calculation_dto.to_dict())
 
 
 @app.route('/submit/', methods=['POST'])
