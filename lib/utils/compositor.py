@@ -73,7 +73,7 @@ def compose_telegram(intent, calculation, url, ip, phone_num='#'):
 
     s.append(f'Lang: {"ua" if calculation.locale.is_uk_ua() else "ru"}\n')
     s.append(f'Page URL: {url}\n')
-    s.append(f'IP: {ip}\n\n')
+    s.append(f'[IP: {ip}](http://ip-api.com/line/{ip})\n\n')
 
     # Из: Репки, Черниговская область, Украина
     # В: Смела, Черкасская область, Украина
