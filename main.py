@@ -10,7 +10,6 @@ from lib.apis import smsapi, telegramapi2
 from lib.utils.QueryLogger import query_logger_factory
 import settings
 from flask_cors import CORS
-import traceback
 import lib.utils.blacklist as blacklist
 import lib.utils.request_processor as request_processor
 import lib.calc.calc_itself as calc_itself
@@ -79,13 +78,15 @@ def submit():
     try:
         rqst = request_processor.preprocess(request)
     except (TypeError, ValueError, KeyError) as e:
-        return __gen_response(400, 'ERROR', details=str(e.args))
+        telegramapi2.send_developer('Request processing failed', e)
+        return __gen_response(400, 'ERROR', details="Request processing error")
 
     try:
         route_calculations = calc_itself.calculate_route(rqst)
-    except RuntimeError as e:
-        telegramapi2.send_developer(f'Calculator error!\n\nRequest = {json.dumps(rqst, ensure_ascii=False)}\n\nError = {e.args}')
-        return __gen_response(500, 'ERROR', details=str(e.args))
+    except Exception as e:
+        message = f'Calculator itself error\n\nRequest = {json.dumps(rqst, ensure_ascii=False)}\n\nException = {str(e)}'
+        telegramapi2.send_developer(message, e)
+        return __gen_response(500, 'ERROR', details="Calc itself error")
 
     calculation_dto = compositor.make_calculation_dto(route_calculations, rqst['locale'])
 
@@ -135,10 +136,12 @@ def calculate():
 
     try:
         calculation_dto = compositor.make_calculation_dto(calc_itself.calculate_route(rqst), rqst['locale'])
-    except RuntimeError as e:
-        telegramapi2.send_developer(
-            f'Calculator error!\n\nRequest = {json.dumps(rqst, ensure_ascii=False)}\n\nError = {e.args}')
-        return __gen_response(500, 'ERROR', details=str(e.args))
+    except Exception as e:
+        try:
+            telegramapi2.send_developer(
+                f'Unspecified calculation error\n\nRequest = {json.dumps(rqst, ensure_ascii=False)}\n\nException = {str(e)}', e)
+        finally:
+            return __gen_response(500, 'ERROR', details='Unspecified calculation error')
 
     tg_msg = compositor.compose_telegram(
         rqst['intent'],
@@ -147,15 +150,14 @@ def calculate():
         rqst['ip'],
         rqst["phone_number"])
 
-    LOGGER.put_request(phone_number='smsless',
+    LOGGER.put_request(phone_number='nosms',
                        query=json.dumps(rqst, ensure_ascii=False),
-                       response=json.dumps([tg_msg, 'smsless'], ensure_ascii=False))
+                       response=json.dumps([tg_msg, 'nosms'], ensure_ascii=False))
 
     blacklisted = blacklist.check_ip(rqst['ip'])
     if blacklisted:
-        telegramapi2.send_silent(f'BLACKLISTED\n\n{tg_msg}')
-    else:
-        telegramapi2.send_silent(tg_msg)
+        tg_msg = f'*BLACKLISTED*\n\n{tg_msg}'
+    telegramapi2.send_silent(tg_msg)
     return __gen_response(200, 'WORKLOAD', workload=calculation_dto.to_dict())
 
 
@@ -190,15 +192,14 @@ def submit_new():
 
 @app.errorhandler(RuntimeError)
 def handle_runtime_error(e: Exception) -> Response:
-    telegramapi2.send_developer(f'Error')
-    for stack_item in traceback.format_tb(e.__traceback__):
-        telegramapi2.send_developer(stack_item)
-    return __gen_response(500, 'ERROR', details=str(e.args))
+    telegramapi2.send_developer(f'Errorhandler error caught', e)
+    return __gen_response(500, 'ERROR', details='Errorhandler error caught')
 
 
 @app.errorhandler(smsapi.SmsSendingError)
 def handle_sms_error(e):
-    return __gen_response(503, 'SMS_ERROR', details=str(e.args))
+    telegramapi2.send_developer(f'SmsSendingError', e)
+    return __gen_response(503, 'SMS_ERROR', details='SmsSendingError')
 
 
 def create_app():
