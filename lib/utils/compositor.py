@@ -72,8 +72,8 @@ def compose_telegram(intent, calculation, url, ip, phone_num='#'):
         raise RuntimeError('Internal Error 5')
 
     s.append(f'Lang: {"ua" if calculation.locale.is_uk_ua() else "ru"}\n')
-    s.append(f'Page URL: {url}\n')
-    s.append(f'[IP: {ip}](http://ip-api.com/line/{ip})\n\n')
+    s.append(f'Page URL: {url}\n\n')
+    s.append(f'IP: [{ip}](http://ip-api.com/line/{ip})\n\n')
 
     # Из: Репки, Черниговская область, Украина
     # В: Смела, Черкасская область, Украина
@@ -137,7 +137,7 @@ def make_calculation_dto(details, locale) -> CalculationDTO:
                           price_per_ton=price_per_ton,
                           price_per_km=str(round(details['price'], 2)),
                           is_price_per_ton=details['vehicle'].price_per_ton,
-                          pfactor_vehicle= details['pfactor_vehicle'],
+                          pfactor_vehicle=details['pfactor_vehicle'],
                           pfactor_departure=details['pfactor_departure'],
                           pfactor_arrival=details['pfactor_arrival'],
                           pfactor_distance=details['pfactor_distance'],
