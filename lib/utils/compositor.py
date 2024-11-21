@@ -72,7 +72,7 @@ def compose_telegram(intent, calculation, url, ip, phone_num='#'):
         raise RuntimeError('Internal Error 5')
 
     s.append(f'Lang: {"ua" if calculation.locale.is_uk_ua() else "ru"}\n')
-    s.append(f'Page URL: {url}\n\n')
+    s.append(f'Page URL: `{url}`\n\n')
     s.append(f'IP: [{ip}](http://ip-api.com/line/{ip})\n\n')
 
     # Из: Репки, Черниговская область, Украина

@@ -3,6 +3,7 @@ import telegram
 from telegram.error import BadRequest
 import traceback
 from datetime import datetime
+import asyncio
 
 
 APIKEY = settings.TELEGRAM_BOT_APIKEY
@@ -14,12 +15,16 @@ DEVELOPER_CHAT_ID = settings.TELEGRAM_DEVELOPER_CHAT_ID
 bot = telegram.Bot(token=APIKEY)
 
 
+def _send_message(chat_id, text, parse_mode=None):
+    asyncio.run(bot.send_message(chat_id=chat_id, text=text, parse_mode=parse_mode))
+
+
 def send_message(chat_id: str, msg: str) -> None:
     try:
-        bot.send_message(chat_id=chat_id, text=msg, parse_mode='MARKDOWN')
+        _send_message(chat_id=chat_id, text=msg, parse_mode='MARKDOWN')
     except Exception as e:
         if isinstance(e, BadRequest) and "Can't parse entities" in str(e):
-            bot.send_message(chat_id=chat_id, text=msg)
+            _send_message(chat_id=chat_id, text=msg)
             error_message = f"{traceback.format_exc()}\n\n{msg}\n\nFailsafe msg has been sent"
             send_developer(error_message, e)
         else:
@@ -38,7 +43,7 @@ def send_loud(msg: str):
 
 def send_developer(msg: str, cause: Exception) -> None:
     try:
-        bot.send_message(chat_id=DEVELOPER_CHAT_ID, text=msg)
+        _send_message(chat_id=DEVELOPER_CHAT_ID, text=msg)
         timestamp = datetime.now().isoformat()
         tb = traceback.format_exception(type(cause), cause, cause.__traceback__)
         error_message = \
@@ -51,5 +56,6 @@ def send_developer(msg: str, cause: Exception) -> None:
 
 
 # Test
-failed_markdown = '*BOLD'
-send_message(chat_id=DEVELOPER_CHAT_ID, msg=failed_markdown)
+test_text = "Application start and initialization"
+send_developer(test_text, Exception('Test Exception'))
+# send_message(chat_id=DEVELOPER_CHAT_ID, msg=test_text)
