@@ -22,6 +22,7 @@ pip install flask
 pip install flask-cors
 pip install requests
 pip install python-telegram-bot --upgrade
+pip install asyncio
 """
 
 

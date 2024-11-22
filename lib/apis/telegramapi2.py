@@ -16,7 +16,8 @@ bot = telegram.Bot(token=APIKEY)
 
 
 def _send_message(chat_id, text, parse_mode=None):
-    asyncio.run(bot.send_message(chat_id=chat_id, text=text, parse_mode=parse_mode))
+    # asyncio.run(bot.send_message(chat_id=chat_id, text=text, parse_mode=parse_mode))
+    bot.send_message(chat_id=chat_id, text=text, parse_mode=parse_mode)
 
 
 def send_message(chat_id: str, msg: str) -> None:
