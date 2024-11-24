@@ -6,4 +6,3 @@ lib/apis/__pycache__/
 lib/calc/__pycache__/
 lib/utils/__pycache__/
 .vscode/
-release/
