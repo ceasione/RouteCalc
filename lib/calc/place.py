@@ -25,6 +25,25 @@ class Place:
         self.departure_ratio_reason = departure_ratio_reason
         self.cache = cache.cache_instance_factory()
 
+    def to_dict(self):
+        d = self.__dict__
+        del d['cache']
+        return d
+
+    @classmethod
+    def from_dict(cls, dict):
+        return cls(lat=dict['lat'],
+                   lng=dict['lng'],
+                   place_id=dict['id'],
+                   area=dict['area'],
+                   name=dict['name'],
+                   name_long=None,
+                   atr_super=dict['super'],
+                   arrival_ratio=dict['arrival_ratio'],
+                   arrival_ratio_reason=dict['arrival_ratio_reason'],
+                   departure_ratio=dict['departure_ratio'],
+                   departure_ratio_reason=dict['departure_ratio_reason'])
+
     def distance_to(self, place_to):
         return self.cache.fetch_cached_distance([self], [place_to])
 
