@@ -31,7 +31,7 @@ def __distance_ratio(dist: float) -> float:
     g = 0.050
     h = 0.450
 
-    return d / (math.log(e * kdist + f) + g) + h
+    return round(d / (math.log(e * kdist + f) + g) + h, 3)
 
 
 def __old_distance_ratio(dist: float) -> float:
