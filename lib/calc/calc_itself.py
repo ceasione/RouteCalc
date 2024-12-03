@@ -4,6 +4,7 @@ from copy import copy
 from lib.calc.depotpark import DepotPark
 from lib.calc import vehicles
 from lib.utils import utils
+import math
 
 
 DEPOT_PARK = DepotPark()
@@ -16,7 +17,25 @@ def __calculate_distance(a, b, c, d):
            b.distance_to(c)[0].distance + \
            c.distance_to(d)[0].distance
 
+
 def __distance_ratio(dist: float) -> float:
+    # dist valued in meters
+    # kdist valued in kilometers
+    if dist < 0.0:
+        raise RuntimeError('Calculated distance appeared to be negative')
+    kdist = dist / 1000.0
+    # Hardcoded weights
+    d = 0.900
+    e = 0.007
+    f = 1.100
+    g = 0.050
+    h = 0.450
+
+    return d / (math.log(e * kdist + f) + g) + h
+
+
+def __old_distance_ratio(dist: float) -> float:
+    """This method is deprecated and will be removed in the future."""
     # dist valued in meters
     # kdist valued in kilometers
     kdist = dist/1000.0
@@ -88,4 +107,3 @@ def calculate_route(rqst):
             'place_a': place_a,
             'place_b': place_b,
             'client_phone': rqst['phone_number']}
-
