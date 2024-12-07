@@ -5,10 +5,6 @@ from lib.utils import cache
 from lib.calc.distance import Distance
 
 
-class ZeroDistanceResultsError(RuntimeError):
-    pass
-
-
 class API:
 
     def __init__(self):
@@ -26,13 +22,10 @@ class API:
         _2 = _1[0]
         _3 = _2['elements']
         _4 = _3[0]
-        if _4['status'] == 'ZERO_RESULTS':
-            raise ZeroDistanceResultsError(_4['status'])
         _5 = _4['distance']
         _6 = _5['value']
         distance = int(_6)
         return distance
-
 
     def __parse_distances(self, json_obj):
 

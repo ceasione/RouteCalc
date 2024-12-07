@@ -15,7 +15,6 @@ import lib.utils.request_processor as request_processor
 import lib.calc.calc_itself as calc_itself
 from lib.utils.DTOs import CalculationDTO
 import lib.utils.number_tools as number_tools
-from lib.apis.googleapi import ZeroDistanceResultsError
 
 
 """
@@ -138,12 +137,6 @@ def calculate():
 
     try:
         calculation_dto = compositor.make_calculation_dto(calc_itself.calculate_route(rqst), rqst['locale'])
-    except ZeroDistanceResultsError as e:
-        try:
-            telegramapi2.send_developer(
-                f'ZeroDistanceResultsError\n\nRequest = {json.dumps(rqst, ensure_ascii=False)}\n\nException = {str(e)}', e)
-        finally:
-            return __gen_response(400, 'ZeroDistanceResultsError', details=str(e))
     except Exception as e:
         try:
             telegramapi2.send_developer(

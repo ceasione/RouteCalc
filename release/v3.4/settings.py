@@ -15,8 +15,7 @@ else:
 GOOGLE_MAX_REQUEST_PLACES = 25
 
 DEPOT_DB_LOC = 'dbs/DepotPark_v3.0.sqlite'
-DEPOTPARK_NOSQL_LOC = 'dbs/depotpark_nosql.json'
-STATEPARK_NOSQL_LOC = 'dbs/statepark_nosql.json'
+DEPOT_NOSQL_LOC = 'dbs/depotpark_nosql.json'
 CACHE_LOCATION = 'dbs/cache.sqlite'
 
 SMS_APIADR = 'https://im.smsclub.mobi/sms/send'

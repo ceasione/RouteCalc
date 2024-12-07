@@ -3,13 +3,12 @@ import settings
 from lib.utils.cache import Cache
 import sqlite3
 import json
-from lib.calc.depot import Depot
 
 
 APIADR = settings.GOOGLE_APIADR
 APIKEY = settings.GOOGLE_APIKEY
 DB_LOCATION = settings.DEPOT_DB_LOC
-
+NOSQL_LOCATION = settings.DEPOT_NOSQL_LOC
 
 # Database creation script to make a base from scratch
 """
@@ -38,18 +37,21 @@ class DepotPark:
 
     def __init__(self, already_park: [Place] = None):
         if already_park is not None and isinstance(already_park, list):
-            """This is used by the def from_file(cls, filename) method"""
             self.park = already_park
         else:
-            """This part will soon be deleted"""
+            # raise RuntimeError('Deprecated function')
             self.park = list()
             for db_row in self.__read_db():
-                self.park.append(Depot(lat=db_row['lat'],
+                self.park.append(Place(lat=db_row['lat'],
                                        lng=db_row['lng'],
+                                       place_id=db_row['id'],
+                                       area=db_row['area'],
                                        name=db_row['name'],
-                                       state_iso='UA',
+                                       atr_super=db_row['super'],
+                                       arrival_ratio=db_row['arrival_ratio'],
+                                       arrival_ratio_reason=db_row['arrival_ratio_reason'],
                                        departure_ratio=db_row['departure_ratio'],
-                                       arrival_ratio=db_row['arrival_ratio']))
+                                       departure_ratio_reason=db_row['departure_ratio_reason']))
 
     def __read_db(self):
         self.conn = sqlite3.connect(DB_LOCATION, check_same_thread=False)
@@ -81,14 +83,14 @@ class DepotPark:
             with open(file=filename, mode='r', encoding='utf8', ) as f:
                 contents = f.read()
             struct = json.loads(contents)
-            park = [Depot.from_dict(item) for item in struct['depotpark']]
+            park = [Place.from_dict(item) for item in struct['park']]
             return cls(park)
         except Exception as e:
             raise e
 
     def as_dict(self):
         d = dict()
-        d['depotpark'] = [place.to_dict() for place in self.park]
+        d['park'] = [place.to_dict() for place in self.park]
         return d
 
     def select_closest_depot_raw(self, place):
@@ -128,9 +130,9 @@ def test_depotpark_storage_restoring():
     dp = DepotPark()
     a_dict = dp.as_dict()
     a_str = json.dumps(a_dict, ensure_ascii=False)
-    with open(file=settings.DEPOTPARK_NOSQL_LOC, mode='w') as f:
+    with open(file='dbs/depotpark_nosql.json', mode='w') as f:
         f.write(a_str)
-    dp2 = DepotPark.from_file(filename=settings.DEPOTPARK_NOSQL_LOC)
+    dp2 = DepotPark.from_file(filename=NOSQL_LOCATION)
     if sum(1 for place in dp.park if isinstance(place, Place)) == \
             sum(1 for place in dp2.park if isinstance(place, Place)):
         print('test_depotpark_storage_restoring() COMPLETE')
@@ -139,6 +141,3 @@ def test_depotpark_storage_restoring():
 
 
 # test_depotpark_storage_restoring()
-
-
-depotpark = DepotPark.from_file(filename=settings.DEPOTPARK_NOSQL_LOC)

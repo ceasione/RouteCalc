@@ -3,7 +3,7 @@ import telegram
 from telegram.error import BadRequest
 import traceback
 from datetime import datetime
-# import asyncio
+import asyncio
 
 
 APIKEY = settings.TELEGRAM_BOT_APIKEY

@@ -13,7 +13,7 @@ def __sliding_window(iterable, n):
 
 def __remove_duplicates(places):
     # This removes duplicates in a row elements from list by 'name' field
-    # Logic assumes that first place is the farthest
+    # Logic assumes that first place is the most farthest
     # Not used in this project. Only for further use
     nodupes = list()
     nodupes.append(places[0])
@@ -41,7 +41,7 @@ def __merge_same(places):
     else:
         upd_places.append(places[0])
 
-    if places[2].name != places[3].name:
+    if places[2].name != places [3].name:
         upd_places.append(places[2])
         upd_places.append(places[3])
     else:
