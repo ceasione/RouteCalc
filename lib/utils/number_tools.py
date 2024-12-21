@@ -1,5 +1,9 @@
 
 
+class WrongNumberError (ValueError):
+    pass
+
+
 class NumValidator:
 
     def __init__(self):
@@ -49,7 +53,7 @@ class NumValidator:
         if not self.__is_all_digits(phone_number):
             raise ValueError('Phone number chars expected all numbers')
         if not self.__starts_with_special(phone_number):
-            raise ValueError('Phone number is expected to be ukrainian mobile number aka starts with 38067')
+            raise WrongNumberError(phone_number)
 
         return phone_number
 
