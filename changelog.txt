@@ -18,3 +18,7 @@ Introduced Currency class and currency overall support
 Improved __merge_same
 Added StateParkEurope
 Extended DepotPark
+
+2024-12-21: v3.61
+Weights modification
+Internal error 8 fix

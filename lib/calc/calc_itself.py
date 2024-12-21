@@ -26,10 +26,10 @@ def __distance_ratio(dist: float) -> float:
     kdist = dist / 1000.0
     # Hardcoded weights
     d = 0.900
-    e = 0.007
-    f = 1.100
-    g = 0.050
-    h = 0.450
+    e = 0.009
+    f = 0.870
+    g = 0.150
+    h = 0.700
 
     return round(d / (math.log(e * kdist + f) + g) + h, 3)
 

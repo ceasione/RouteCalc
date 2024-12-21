@@ -44,7 +44,8 @@ def __gen_response(http_status: int, json_status: str, details: str = '', worklo
                            'CALLBACK_SCHEDULED',
                            'ERROR',
                            'BLACKLISTED',
-                           'WORKLOAD'):
+                           'WORKLOAD',
+                           'ZeroDistanceResultsError'):
         raise RuntimeError('Internal error 8')
 
     resp = Response(response=json.dumps({'status': json_status,
