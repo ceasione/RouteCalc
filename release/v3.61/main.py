@@ -16,7 +16,6 @@ import lib.calc.calc_itself as calc_itself
 from lib.utils.DTOs import CalculationDTO
 import lib.utils.number_tools as number_tools
 from lib.apis.googleapi import ZeroDistanceResultsError
-from lib.utils.number_tools import WrongNumberError
 
 
 """
@@ -46,8 +45,7 @@ def __gen_response(http_status: int, json_status: str, details: str = '', worklo
                            'ERROR',
                            'BLACKLISTED',
                            'WORKLOAD',
-                           'ZeroDistanceResultsError',
-                           'WrongNumberError'):
+                           'ZeroDistanceResultsError'):
         raise RuntimeError('Internal error 8')
 
     resp = Response(response=json.dumps({'status': json_status,
@@ -146,7 +144,7 @@ def calculate():
             telegramapi2.send_developer(
                 f'ZeroDistanceResultsError\n\nRequest = {json.dumps(rqst, ensure_ascii=False)}\n\nException = {str(e)}', e)
         finally:
-            return __gen_response(404, 'ZeroDistanceResultsError', details=str(e))
+            return __gen_response(400, 'ZeroDistanceResultsError', details=str(e))
     except Exception as e:
         try:
             telegramapi2.send_developer(
@@ -161,16 +159,9 @@ def calculate():
         rqst['ip'],
         rqst["phone_number"])
 
-    try:
-        LOGGER.put_request(phone_number='nosms',
-                           query=json.dumps(rqst, ensure_ascii=False),
-                           response=json.dumps([tg_msg, 'nosms'], ensure_ascii=False))
-    except Exception as e:
-        try:
-            telegramapi2.send_developer(
-                f'LOGGER.put_request error\n\nException = {str(e)}', e)
-        finally:
-            pass
+    LOGGER.put_request(phone_number='nosms',
+                       query=json.dumps(rqst, ensure_ascii=False),
+                       response=json.dumps([tg_msg, 'nosms'], ensure_ascii=False))
 
     blacklisted = blacklist.check_ip(rqst['ip'])
     if blacklisted:
@@ -187,8 +178,6 @@ def submit_new():
         num = num_validator.validate_phone_ukr(request.json['num'])
         url = request.json['url']
         ip = request.remote_addr
-    except WrongNumberError as e:
-        return __gen_response(422, 'WrongNumberError', details=str(e.args))
     except (TypeError, ValueError, KeyError) as e:
         return __gen_response(400, 'ERROR', details=str(e.args))
 

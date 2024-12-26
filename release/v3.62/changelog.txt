@@ -25,6 +25,3 @@ Internal error 8 fix
 
 2024-12-21: v3.62
 REST errors numbers calibration, 422, 404, 400, 500
-
-2024-12-27 v3.65
-Low space error handling

@@ -161,16 +161,9 @@ def calculate():
         rqst['ip'],
         rqst["phone_number"])
 
-    try:
-        LOGGER.put_request(phone_number='nosms',
-                           query=json.dumps(rqst, ensure_ascii=False),
-                           response=json.dumps([tg_msg, 'nosms'], ensure_ascii=False))
-    except Exception as e:
-        try:
-            telegramapi2.send_developer(
-                f'LOGGER.put_request error\n\nException = {str(e)}', e)
-        finally:
-            pass
+    LOGGER.put_request(phone_number='nosms',
+                       query=json.dumps(rqst, ensure_ascii=False),
+                       response=json.dumps([tg_msg, 'nosms'], ensure_ascii=False))
 
     blacklisted = blacklist.check_ip(rqst['ip'])
     if blacklisted:
