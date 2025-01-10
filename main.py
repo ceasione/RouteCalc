@@ -23,7 +23,12 @@ from lib.utils.number_tools import WrongNumberError
 pip install flask
 pip install flask-cors
 pip install requests
-pip install python-telegram-bot --upgrade
+
+pip uninstall python-telegram-bot
+pip uninstall urllib3
+pip install urllib3==1.26.16
+pip install python-telegram-bot==13.15
+
 pip install asyncio
 """
 
