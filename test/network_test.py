@@ -27,6 +27,7 @@ def do_submit_calculation_test():
     r = requests.post(url, data.encode('utf-8'), headers=headers)
     return r.text
 
+
 def calculate_test():
     payload = {'intent': 'acquire',
                'from': {'name_short': 'Сміла',
