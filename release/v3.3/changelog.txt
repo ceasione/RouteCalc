@@ -1,5 +1,0 @@
-v3.1 Error handling, reports sending and logging
-
-v3.2 Finally fixed telegram API
-
-v3.3 Compatibility mode with Python 3.6
