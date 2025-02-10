@@ -15,20 +15,21 @@ def __round_cost(cost):
 
 
 def make_sms_text(calculation: CalculationDTO) -> str:
-    s = list()
-    s.append(f'{calculation.place_a_name} - {calculation.place_b_name}\n')
-    s.append(f"Транспорт: {calculation.transport_name}\n")
     if calculation.is_price_per_ton:
-        s.append(calculation.price_per_ton)
-        # https://stackoverflow.com/questions/13082620/
-        s.append(f' {calculation.currency} за тонну\n')
+        price = f'{calculation.price_per_ton} {calculation.currency} за тонну'
     else:
-        s.append(calculation.price)
-        s.append(f' {calculation.currency}\n')
-    s.append(f'{SMS_TEXT_REDIAL_PHONE}\n\n')
-    s.append('https://intersmartgroup.com/\n\n')
-    s.append('Очікуйте на дзвінок. Inter Smart Group')
-    return str().join(s)
+        price = f'{calculation.price} {calculation.currency}'
+
+    fstring = f'''{calculation.place_a_name} - {calculation.place_b_name}
+Транспорт: {calculation.transport_name}
+{price}
+{SMS_TEXT_REDIAL_PHONE}
+
+https://intersmartgroup.com/
+
+Ефективність – наш стандарт. Довіряйте Inter Smart.'''
+
+    return fstring
 
 
 def __generate_map_url(*args):
