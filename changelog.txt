@@ -42,3 +42,6 @@ Cache emergency mode
 Search min distance only from homeland
 Tests update
 Refactoring
+
+2025-02-11 v3.80
+Loads test stubs

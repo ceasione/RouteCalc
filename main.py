@@ -215,6 +215,130 @@ def submit_new():
     return __gen_response(200, 'CALLBACK_SCHEDULED')
 
 
+@app.route('/loads_test_8/', methods=['GET'])
+def get_loads8():
+    loads = [{
+        'id': 'df8f0e2f1c040353abfcafb2aef64394',
+        'type': 'internal',
+        'stage': 'start',
+        'stages': {
+            'start': 'Староконстантиновка',
+            'engage': None,
+            'drive': None,
+            'clear': None,
+            'finish': 'Николаев'
+        },
+        'last_update': '08:25'
+    }, {
+        'id': 'df8f0e2f1c040353abfcafb2aef64394',
+        'type': 'internal',
+        'stage': 'drive',
+        'stages': {
+            'start': 'Староконстантиновка',
+            'engage': None,
+            'drive': None,
+            'clear': None,
+            'finish': 'Николаев'
+        },
+        'last_update': '12:30'
+    }, {
+        'id': 'df8f0e2f1c040353abfcafb2aef64394',
+        'type': 'internal',
+        'stage': 'finish',
+        'stages': {
+            'start': 'Староконстантиновка',
+            'engage': None,
+            'drive': None,
+            'clear': None,
+            'finish': 'Николаев'
+        },
+        'last_update': '16:30'
+    }, {
+        'id': 'df8f0e2f1c040353abfcafb2aef64394',
+        'type': 'external',
+        'stage': 'start',
+        'stages': {
+            'start': 'Староконстантиновка',
+            'engage': 'Киев',
+            'drive': None,
+            'clear': 'Вроцлав',
+            'finish': 'Варшава'
+        },
+        'last_update': '08:00'
+    }, {
+        'id': 'df8f0e2f1c040353abfcafb2aef64394',
+        'type': 'external',
+        'stage': 'engage',
+        'stages': {
+            'start': 'Староконстантиновка',
+            'engage': 'Киев',
+            'drive': None,
+            'clear': 'Вроцлав',
+            'finish': 'Варшава'
+        },
+        'last_update': '12:00'
+    }, {
+        'id': 'df8f0e2f1c040353abfcafb2aef64394',
+        'type': 'external',
+        'stage': 'drive',
+        'stages': {
+            'start': 'Староконстантиновка',
+            'engage': 'Киев',
+            'drive': None,
+            'clear': 'Вроцлав',
+            'finish': 'Варшава'
+        },
+        'last_update': '15:00'
+    }, {
+        'id': 'df8f0e2f1c040353abfcafb2aef64394',
+        'type': 'external',
+        'stage': 'clear',
+        'stages': {
+            'start': 'Староконстантиновка',
+            'engage': 'Киев',
+            'drive': None,
+            'clear': 'Вроцлав',
+            'finish': 'Варшава'
+        },
+        'last_update': '20:00'
+    }, {
+        'id': 'df8f0e2f1c040353abfcafb2aef64394',
+        'type': 'external',
+        'stage': 'finish',
+        'stages': {
+            'start': 'Староконстантиновка',
+            'engage': 'Киев',
+            'drive': None,
+            'clear': 'Вроцлав',
+            'finish': 'Варшава'
+        },
+        'last_update': '23:00'
+    }]
+    resp = Response(response=json.dumps({'status': 'success',
+                                         'len': len(loads),
+                                         'loads': loads},
+                                        ensure_ascii=False),
+                    status=200,
+                    content_type='application/json; charset=utf-8')
+
+    resp.headers.add('Access-Control-Allow-Origin', '*')
+    return resp
+
+
+@app.route('/loads_test_0/', methods=['GET'])
+def get_loads0():
+    loads = []
+    resp = Response(response=json.dumps({'status': 'success',
+                                         'len': len(loads),
+                                         'loads': loads},
+                                        ensure_ascii=False),
+                    status=200,
+                    content_type='application/json; charset=utf-8')
+
+    resp.headers.add('Access-Control-Allow-Origin', '*')
+    return resp
+
+
 @app.errorhandler(RuntimeError)
 def handle_runtime_error(e: Exception) -> Response:
     telegramapi2.send_developer(f'Errorhandler error caught', e)
