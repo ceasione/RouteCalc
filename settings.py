@@ -19,6 +19,8 @@ DEPOTPARK_NOSQL_LOC = 'dbs/depotpark_nosql.json'
 STATEPARK_NOSQL_LOC = 'dbs/statepark_nosql.json'
 CACHE_LOCATION = 'dbs/cache.sqlite'
 
+LOADS_NOSQL_LOC = 'dbs/loads.json'
+
 SMS_APIADR = 'https://im.smsclub.mobi/sms/send'
 SMS_APIKEY = 'XXIxH1w1dLNEGmR'
 SMS_ALPHANAME = 'Inter Smart'

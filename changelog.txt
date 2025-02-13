@@ -45,3 +45,6 @@ Refactoring
 
 2025-02-11 v3.80
 Loads test stubs
+
+2025-02-13 v3.84
+Load class, Loads class, NOSQL storage, web now works but there is no mutable function yet

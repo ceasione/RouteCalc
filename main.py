@@ -1,4 +1,3 @@
-
 from lib.utils import cache
 from flask import Flask
 from flask import request
@@ -17,7 +16,7 @@ from lib.utils.DTOs import CalculationDTO
 import lib.utils.number_tools as number_tools
 from lib.apis.googleapi import ZeroDistanceResultsError
 from lib.utils.number_tools import WrongNumberError
-
+from lib.loads import loads
 
 """
 pip install flask
@@ -32,7 +31,6 @@ pip install python-telegram-bot==13.15
 pip install asyncio
 """
 
-
 CACHE = cache.cache_instance_factory()
 LOGGER = query_logger_factory()
 MAX_REQUESTS = settings.MAX_REQUESTS
@@ -42,7 +40,6 @@ CORS = CORS(app)
 
 
 def __gen_response(http_status: int, json_status: str, details: str = '', workload: CalculationDTO = None) -> Response:
-
     if json_status not in ('SMS_SENT',
                            'SMS_ERROR',
                            'MAX_DAILY_REQUESTS_EXCEEDED',
@@ -66,6 +63,18 @@ def __gen_response(http_status: int, json_status: str, details: str = '', worklo
     return resp
 
 
+def __gen_response2(http_status: int, json_status: str, message: str = None, workload=None) -> Response:
+    resp = Response(response=json.dumps({'status': json_status,
+                                         'message': message,
+                                         'workload': workload},
+                                        ensure_ascii=False),
+                    status=http_status,
+                    content_type='application/json; charset=utf-8')
+
+    resp.headers.add('Access-Control-Allow-Origin', '*')
+    return resp
+
+
 @app.route('/blacklist/<string:req>', methods=['GET'])
 def blacklist_add(req: str):
     blacklist.append(req)
@@ -74,7 +83,6 @@ def blacklist_add(req: str):
 
 @app.route('/get-available-vehicles/', methods=['GET'])
 def get_vehicles():
-
     resp = Response(response=json.dumps(vehicles.VEHICLES, cls=vehicles.VehicleEncoder, ensure_ascii=False),
                     content_type='application/json; charset=utf-8')
     resp.headers.add('Access-Control-Allow-Origin', '*')
@@ -84,7 +92,6 @@ def get_vehicles():
 
 @app.route('/do-submit-calculation/', methods=['POST'])
 def submit():
-
     try:
         rqst = request_processor.preprocess(request)
     except (TypeError, ValueError, KeyError) as e:
@@ -101,9 +108,9 @@ def submit():
     calculation_dto = compositor.make_calculation_dto(route_calculations, rqst['locale'])
 
     tg_msg = compositor.compose_telegram(
-        rqst['intent'], 
+        rqst['intent'],
         calculation_dto,
-        rqst['url'], 
+        rqst['url'],
         rqst['ip'],
         rqst["phone_number"])
 
@@ -118,7 +125,7 @@ def submit():
         blacklist.spread(rqst["phone_number"], rqst['ip'])
         telegramapi2.send_silent(f'BLACKLISTED\n\n{tg_msg}')
         return __gen_response(200, 'SMS_SENT')
-    
+
     if rqst['intent'] == 'calc':
 
         requests_exceeded = LOGGER.get_today_requests_count(rqst['phone_number']) > MAX_REQUESTS
@@ -129,7 +136,7 @@ def submit():
         telegramapi2.send_silent(tg_msg)
         smsapi.send_sms(rqst['phone_number'], sms_msg)
         return __gen_response(200, 'SMS_SENT')
-    
+
     elif rqst['intent'] == 'callback':
         telegramapi2.send_loud(tg_msg)
         return __gen_response(200, 'CALLBACK_SCHEDULED')
@@ -149,13 +156,15 @@ def calculate():
     except ZeroDistanceResultsError as e:
         try:
             telegramapi2.send_developer(
-                f'ZeroDistanceResultsError\n\nRequest = {json.dumps(rqst, ensure_ascii=False)}\n\nException = {str(e)}', e)
+                f'ZeroDistanceResultsError\n\nRequest = {json.dumps(rqst, ensure_ascii=False)}\n\nException = {str(e)}',
+                e)
         finally:
             return __gen_response(404, 'ZeroDistanceResultsError', details=str(e))
     except Exception as e:
         try:
             telegramapi2.send_developer(
-                f'Unspecified calculation error\n\nRequest = {json.dumps(rqst, ensure_ascii=False)}\n\nException = {str(e)}', e)
+                f'Unspecified calculation error\n\nRequest = {json.dumps(rqst, ensure_ascii=False)}\n\nException = {str(e)}',
+                e)
         finally:
             return __gen_response(500, 'ERROR', details='Unspecified calculation error')
 
@@ -217,126 +226,30 @@ def submit_new():
 
 @app.route('/loads_test_8/', methods=['GET'])
 def get_loads8():
-    loads = [{
-        'id': 'df8f0e2f1c040353abfcafb2aef64394',
-        'type': 'internal',
-        'stage': 'start',
-        'stages': {
-            'start': 'Староконстантиновка',
-            'engage': None,
-            'drive': None,
-            'clear': None,
-            'finish': 'Николаев'
-        },
-        'last_update': '08:25'
-    }, {
-        'id': 'df8f0e2f1c040353abfcafb2aef64394',
-        'type': 'internal',
-        'stage': 'drive',
-        'stages': {
-            'start': 'Староконстантиновка',
-            'engage': None,
-            'drive': None,
-            'clear': None,
-            'finish': 'Николаев'
-        },
-        'last_update': '12:30'
-    }, {
-        'id': 'df8f0e2f1c040353abfcafb2aef64394',
-        'type': 'internal',
-        'stage': 'finish',
-        'stages': {
-            'start': 'Староконстантиновка',
-            'engage': None,
-            'drive': None,
-            'clear': None,
-            'finish': 'Николаев'
-        },
-        'last_update': '16:30'
-    }, {
-        'id': 'df8f0e2f1c040353abfcafb2aef64394',
-        'type': 'external',
-        'stage': 'start',
-        'stages': {
-            'start': 'Староконстантиновка',
-            'engage': 'Киев',
-            'drive': None,
-            'clear': 'Вроцлав',
-            'finish': 'Варшава'
-        },
-        'last_update': '08:00'
-    }, {
-        'id': 'df8f0e2f1c040353abfcafb2aef64394',
-        'type': 'external',
-        'stage': 'engage',
-        'stages': {
-            'start': 'Староконстантиновка',
-            'engage': 'Киев',
-            'drive': None,
-            'clear': 'Вроцлав',
-            'finish': 'Варшава'
-        },
-        'last_update': '12:00'
-    }, {
-        'id': 'df8f0e2f1c040353abfcafb2aef64394',
-        'type': 'external',
-        'stage': 'drive',
-        'stages': {
-            'start': 'Староконстантиновка',
-            'engage': 'Киев',
-            'drive': None,
-            'clear': 'Вроцлав',
-            'finish': 'Варшава'
-        },
-        'last_update': '15:00'
-    }, {
-        'id': 'df8f0e2f1c040353abfcafb2aef64394',
-        'type': 'external',
-        'stage': 'clear',
-        'stages': {
-            'start': 'Староконстантиновка',
-            'engage': 'Киев',
-            'drive': None,
-            'clear': 'Вроцлав',
-            'finish': 'Варшава'
-        },
-        'last_update': '20:00'
-    }, {
-        'id': 'df8f0e2f1c040353abfcafb2aef64394',
-        'type': 'external',
-        'stage': 'finish',
-        'stages': {
-            'start': 'Староконстантиновка',
-            'engage': 'Киев',
-            'drive': None,
-            'clear': 'Вроцлав',
-            'finish': 'Варшава'
-        },
-        'last_update': '23:00'
-    }]
-    resp = Response(response=json.dumps({'status': 'success',
-                                         'len': len(loads),
-                                         'loads': loads},
-                                        ensure_ascii=False),
-                    status=200,
-                    content_type='application/json; charset=utf-8')
-
-    resp.headers.add('Access-Control-Allow-Origin', '*')
-    return resp
+    _loads = loads.loads_instance.get_active_loads()
+    return __gen_response2(http_status=200, json_status='success', workload={'len': len(_loads), 'loads': _loads})
 
 
 @app.route('/loads_test_0/', methods=['GET'])
 def get_loads0():
-    loads = []
-    resp = Response(response=json.dumps({'status': 'success',
-                                         'len': len(loads),
-                                         'loads': loads},
-                                        ensure_ascii=False),
-                    status=200,
-                    content_type='application/json; charset=utf-8')
+    _loads = []
+    return __gen_response2(http_status=200, json_status='success', workload={'len': len(_loads), 'loads': _loads})
 
-    resp.headers.add('Access-Control-Allow-Origin', '*')
-    return resp
+
+@app.route('/driver/', methods=['GET'])
+def get_driver():
+    # /driver?load_id=4214$auth_num=470129384701
+    load_id = request.args.get('load_id')
+    auth_num = request.args.get('auth_num')
+    if not load_id or auth_num:
+        __gen_response2(http_status=400, json_status='error', message='load_id and client_num are required')
+
+    from lib.loads.loads import NoSuchLoadID
+    try:
+        driver, js_status, http_status = loads.loads_instance.get_load_by_id(load_id).get_driver_details(auth_num)
+        return __gen_response2(http_status, js_status, workload=driver)
+    except NoSuchLoadID:
+        return __gen_response2(400, 'No such load ID')  #TODO Тут уязвимость т.к. можно явно сказать когда неверный телефон а когда лоад айди
 
 
 @app.errorhandler(RuntimeError)
@@ -358,5 +271,5 @@ def create_app():
 
 if __name__ == '__main__':
     settings.GOOGLE_APIKEY = settings.GOOGLE_APIKEY_DEV
-    settings.SMS_BLACKLIST = ('380953459607', )
+    settings.SMS_BLACKLIST = ('380953459607',)
     app.run(debug=True)
