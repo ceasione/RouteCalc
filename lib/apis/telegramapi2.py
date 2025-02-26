@@ -65,6 +65,6 @@ def send_developer(msg: str, cause: Exception = None) -> None:
 
 
 # Test
-send_developer('Application start and initialization')
-send_developer('Test Exception at startup', Exception('Test Exception'))
+# send_developer('Application start and initialization')
+# send_developer('Test Exception at startup', Exception('Test Exception'))
 # send_message(chat_id=DEVELOPER_CHAT_ID, msg=test_text)

@@ -48,3 +48,9 @@ Loads test stubs
 
 2025-02-13 v3.84
 Load class, Loads class, NOSQL storage, web now works but there is no mutable function yet
+
+2025-02-25 v3.88
+TelegramInterface, State, Keyboard, Buttons, Threading, Create-Update-Delete, App is already stable
+
+2025-02-26 v3.89
+Loads saves states between reboots

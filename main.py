@@ -16,7 +16,7 @@ from lib.utils.DTOs import CalculationDTO
 import lib.utils.number_tools as number_tools
 from lib.apis.googleapi import ZeroDistanceResultsError
 from lib.utils.number_tools import WrongNumberError
-from lib.loads import loads
+from lib.loads.loads import Loads, TelegramInterface
 
 """
 pip install flask
@@ -224,9 +224,9 @@ def submit_new():
     return __gen_response(200, 'CALLBACK_SCHEDULED')
 
 
-@app.route('/loads_test_8/', methods=['GET'])
+@app.route('/loads/', methods=['GET'])
 def get_loads8():
-    _loads = loads.loads_instance.get_active_loads()
+    _loads = Loads.instance.expose_active_loads()
     return __gen_response2(http_status=200, json_status='success', workload={'len': len(_loads), 'loads': _loads})
 
 
@@ -246,10 +246,21 @@ def get_driver():
 
     from lib.loads.loads import NoSuchLoadID
     try:
-        driver, js_status, http_status = loads.loads_instance.get_load_by_id(load_id).get_driver_details(auth_num)
+        driver, js_status, http_status = Loads.instance.get_load_by_id(load_id).get_driver_details(auth_num)
         return __gen_response2(http_status, js_status, workload=driver)
     except NoSuchLoadID:
-        return __gen_response2(400, 'No such load ID')  #TODO Тут уязвимость т.к. можно явно сказать когда неверный телефон а когда лоад айди
+        return __gen_response2(400, 'No such load ID')
+        # TODO Тут уязвимость т.к. можно явно сказать когда неверный телефон а когда лоад айди
+
+
+@app.route(f'/webhook-aibot/', methods=['POST'])
+def loads_webhook():
+    own_secret = TelegramInterface.instance.own_secret
+    got_secret = request.headers.get("X-Telegram-Bot-Api-Secret-Token")
+    if got_secret != own_secret:
+        return "Forbidden", 403
+    TelegramInterface.instance.catch_webhook(request.get_json())
+    return "OK", 200
 
 
 @app.errorhandler(RuntimeError)
@@ -272,4 +283,4 @@ def create_app():
 if __name__ == '__main__':
     settings.GOOGLE_APIKEY = settings.GOOGLE_APIKEY_DEV
     settings.SMS_BLACKLIST = ('380953459607',)
-    app.run(debug=True)
+    app.run(debug=True, use_reloader=False)
