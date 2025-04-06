@@ -57,3 +57,6 @@ Loads saves states between reboots
 
 2025-02-26 v3.90
 Code refactoring
+
+2025-04-06
+I don't remember why I haven't commited that earlier
