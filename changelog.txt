@@ -54,3 +54,6 @@ TelegramInterface, State, Keyboard, Buttons, Threading, Create-Update-Delete, Ap
 
 2025-02-26 v3.89
 Loads saves states between reboots
+
+2025-02-26 v3.90
+Code refactoring

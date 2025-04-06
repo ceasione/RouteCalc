@@ -16,7 +16,8 @@ from lib.utils.DTOs import CalculationDTO
 import lib.utils.number_tools as number_tools
 from lib.apis.googleapi import ZeroDistanceResultsError
 from lib.utils.number_tools import WrongNumberError
-from lib.loads.loads import Loads, TelegramInterface
+from lib.loads.loads import Loads
+from lib.loads.interface import TelegramInterface
 
 """
 pip install flask
@@ -37,6 +38,14 @@ MAX_REQUESTS = settings.MAX_REQUESTS
 
 app = Flask(__name__)
 CORS = CORS(app)
+
+
+loads = Loads.from_file_storage(settings.LOADS_NOSQL_LOC)
+interface = TelegramInterface(loads=loads)
+
+# interface = TelegramInterface(loads=loads,
+#                               webhook_url='https://0ef0-194-233-96-196.ngrok-free.app/webhook-aibot/',
+#                               chat_id=settings.TELEGRAM_DEVELOPER_CHAT_ID)
 
 
 def __gen_response(http_status: int, json_status: str, details: str = '', workload: CalculationDTO = None) -> Response:
@@ -225,8 +234,8 @@ def submit_new():
 
 
 @app.route('/loads/', methods=['GET'])
-def get_loads8():
-    _loads = Loads.instance.expose_active_loads()
+def get_loads():
+    _loads = loads.expose_active_loads()
     return __gen_response2(http_status=200, json_status='success', workload={'len': len(_loads), 'loads': _loads})
 
 
@@ -244,22 +253,22 @@ def get_driver():
     if not load_id or auth_num:
         __gen_response2(http_status=400, json_status='error', message='load_id and client_num are required')
 
-    from lib.loads.loads import NoSuchLoadID
+    from lib.loads.loads import Load
     try:
-        driver, js_status, http_status = Loads.instance.get_load_by_id(load_id).get_driver_details(auth_num)
+        driver, js_status, http_status = loads.get_load_by_id(load_id).get_driver_details(auth_num)
         return __gen_response2(http_status, js_status, workload=driver)
-    except NoSuchLoadID:
+    except Load.NoSuchLoadID:
         return __gen_response2(400, 'No such load ID')
         # TODO Тут уязвимость т.к. можно явно сказать когда неверный телефон а когда лоад айди
 
 
 @app.route(f'/webhook-aibot/', methods=['POST'])
 def loads_webhook():
-    own_secret = TelegramInterface.instance.own_secret
+    own_secret = interface.own_secret
     got_secret = request.headers.get("X-Telegram-Bot-Api-Secret-Token")
     if got_secret != own_secret:
         return "Forbidden", 403
-    TelegramInterface.instance.catch_webhook(request.get_json())
+    interface.catch_webhook(request.get_json())
     return "OK", 200
 
 
