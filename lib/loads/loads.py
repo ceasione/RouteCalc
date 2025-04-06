@@ -2,8 +2,9 @@ import datetime
 import _md5
 import random
 import time
-from settings import LOADS_NOSQL_LOC
+from impsettings import settings
 import json
+LOADS_NOSQL_LOC = settings.LOADS_NOSQL_LOC
 
 
 class Load:

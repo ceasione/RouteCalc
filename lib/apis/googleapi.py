@@ -1,4 +1,4 @@
-import settings
+from impsettings import settings
 import requests
 import json
 from lib.utils import cache

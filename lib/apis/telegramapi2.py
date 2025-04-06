@@ -1,10 +1,9 @@
-import settings
+from impsettings import settings
 import telegram
 from telegram.error import BadRequest
 import traceback
 from datetime import datetime
 import lib.utils.utils as utils
-# import asyncio
 
 
 APIKEY = settings.TELEGRAM_BOT_APIKEY

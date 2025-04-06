@@ -7,7 +7,6 @@ from lib.utils import compositor
 from lib.calc import vehicles
 from lib.apis import smsapi, telegramapi2
 from lib.utils.QueryLogger import query_logger_factory
-import settings
 from flask_cors import CORS
 import lib.utils.blacklist as blacklist
 import lib.utils.request_processor as request_processor
@@ -18,6 +17,7 @@ from lib.apis.googleapi import ZeroDistanceResultsError
 from lib.utils.number_tools import WrongNumberError
 from lib.loads.loads import Loads
 from lib.loads.interface import TelegramInterface
+from impsettings import settings
 
 """
 pip install flask

@@ -1,5 +1,5 @@
 from lib.calc.place import Place
-import settings
+from impsettings import settings
 from lib.utils import cache
 import sqlite3
 import json

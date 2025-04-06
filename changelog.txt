@@ -60,3 +60,6 @@ Code refactoring
 
 2025-04-06
 I don't remember why I haven't commited that earlier
+
+2025-04-06
+Data and settings have been moved to an external directory

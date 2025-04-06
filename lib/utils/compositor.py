@@ -1,7 +1,9 @@
 
-from settings import SMS_TEXT_REDIAL_PHONE
+from impsettings import settings
 from lib.utils.DTOs import CalculationDTO
 from lib.utils.DTOs import LocaleDTO
+
+SMS_TEXT_REDIAL_PHONE = settings.SMS_TEXT_REDIAL_PHONE
 
 
 def __round_cost(cost):

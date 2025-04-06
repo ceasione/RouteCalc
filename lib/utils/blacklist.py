@@ -1,5 +1,5 @@
 
-import settings
+from impsettings import settings
 from lib.utils import utils
 
 

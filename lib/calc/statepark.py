@@ -1,5 +1,5 @@
 import json
-import settings
+from impsettings import settings
 
 
 class Currency:
