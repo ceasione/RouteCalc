@@ -1,7 +1,8 @@
 
-from impsettings import settings
-from lib.utils.DTOs import CalculationDTO
-from lib.utils.DTOs import LocaleDTO
+from app.impsettings import settings
+from app.lib.utils.DTOs import CalculationDTO
+from app.lib.utils.DTOs import LocaleDTO
+from textwrap import dedent
 
 SMS_TEXT_REDIAL_PHONE = settings.SMS_TEXT_REDIAL_PHONE
 
@@ -22,16 +23,17 @@ def make_sms_text(calculation: CalculationDTO) -> str:
     else:
         price = f'{calculation.price} {calculation.currency}'
 
-    fstring = f'''{calculation.place_a_name} - {calculation.place_b_name}
-Транспорт: {calculation.transport_name}
-{price}
-{SMS_TEXT_REDIAL_PHONE}
+    fstring = f'''
+        {calculation.place_a_name} - {calculation.place_b_name}
+        Транспорт: {calculation.transport_name}
+        {price}
+        {SMS_TEXT_REDIAL_PHONE}
+        
+        https://intersmartgroup.com/
+        
+        Ефективність – наш стандарт. Довіряйте Inter Smart.'''
 
-https://intersmartgroup.com/
-
-Ефективність – наш стандарт. Довіряйте Inter Smart.'''
-
-    return fstring
+    return dedent(fstring).lstrip()
 
 
 def __generate_map_url(*args):
@@ -62,62 +64,51 @@ def __generate_place_chain(*args):
 
 
 def compose_telegram(intent, calculation, url, ip, phone_num='#'):
-    s = list()
+    intent_dict = {
+        'calc': 'Просчет',
+        'callback': 'Клиент нажал Перезвонить',
+        'acquire': 'Просчет без номера'
+    }
 
-    # Просчет или Клиент нажал ПЕРЕЗВОНИТЬ
-    if intent == 'calc':
-        s.append('Просчет\n\n')
-    elif intent == 'callback':
-        s.append('Клиент нажал Перезвонить\n\n')
-    elif intent == 'acquire':
-        s.append('Просчет без номера\n\n')
-    else:
-        raise RuntimeError('Internal Error 5')
-
-    s.append(f'Lang: {"ua" if calculation.locale.is_uk_ua() else "ru"}\n')
-    s.append(f'Page URL: `{url}`\n\n')
-    s.append(f'IP: [{ip}](http://ip-api.com/line/{ip})\n\n')
-
-    # Из: Репки, Черниговская область, Украина
-    # В: Смела, Черкасская область, Украина
-    # Маршрут: https://www.google.com.ua/maps/dir/50.5465397,30.4010721/50.5380305,30.4443308/50.554393,30.469565/
-    s.append(f'{calculation.place_a_name} - {calculation.place_b_name}\n\n')
-    s.append(f'[Google Maps]({calculation.map_link})\n\n')
-
-    # Расчитанный маршрут: Чернигов - Репки - Смела - Черкассы
-    # Расчитанное растояние: 985 км
-    # [ссылка](https://)
-    s.append(f'Расчет: *{calculation.place_chain}*\n')
-    s.append(f'Расстояние: {calculation.distance} км\n')
-    s.append(f'[Google Maps]({calculation.chain_map_link})\n\n')
-
-    # Авто: Тент 10
-    # Цена: 13600,00
-    # Телефон клиента: 380672232586
-    s.append(f'Авто: {calculation.transport_name}\n')
-    s.append('Цена: ')
-
-    # 10 700.68
     if calculation.is_price_per_ton:
         # s.append(str(rounded_cost) + '0')
         # returns format '10 700.68' https://stackoverflow.com/questions/13082620/
-        s.append(calculation.price_per_ton)
-        s.append(f' {calculation.currency} за тонну')
+        price = f'{calculation.price_per_ton} {calculation.currency} за тонну'
     else:
         # s.append(str(__round_cost(details['cost'])) + '0')
-        s.append(calculation.price)
-        s.append(f' {calculation.currency}')
+        price = f'{calculation.price} {calculation.currency} {calculation.currency}'
 
-    s.append(f', ({calculation.price_per_km} за км):\n')
-    s.append(f'  Vehicle: {calculation.pfactor_vehicle}\n')
-    s.append(f'  Departure: {calculation.pfactor_departure}\n')
-    s.append(f'  Arrival: {calculation.pfactor_arrival}\n')
-    s.append(f'  Distance: {calculation.pfactor_distance}\n')
-    s.append(f'  Currency: {calculation.currency_rate}')
     if phone_num is not None:
-        s.append(f'\n\nТелефон клиента: +{phone_num}')
+        phone = f'Телефон клиента: +{phone_num}'
+    else:
+        phone = ''
 
-    return str().join(s)
+    fstring = f'''
+        {intent_dict[intent]}
+        Lang: {"ua" if calculation.locale.is_uk_ua() else "ru"}
+        Page URL: `{url}`
+        
+        IP: [{ip}](http://ip-api.com/line/{ip})
+        
+        {calculation.place_a_name} - {calculation.place_b_name}
+        
+        [Google Maps]({calculation.map_link})
+        
+        Расчет: *{calculation.place_chain}*
+        Расстояние: {calculation.distance} км
+        [Google Maps]({calculation.chain_map_link})
+        
+        Авто: {calculation.transport_name}
+        Цена: {price}, ({calculation.price_per_km} за км):
+          Vehicle: {calculation.pfactor_vehicle}
+          Departure: {calculation.pfactor_departure}
+          Arrival: {calculation.pfactor_arrival}
+          Distance: {calculation.pfactor_distance}
+          Currency: {calculation.currency_rate}
+          
+        {phone}
+    '''
+    return dedent(fstring).strip()
 
 
 def make_calculation_dto(details, locale) -> CalculationDTO:

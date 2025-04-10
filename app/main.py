@@ -1,23 +1,22 @@
-from lib.utils import cache
 from flask import Flask
 from flask import request
 import json
 from flask import Response
-from lib.utils import compositor
-from lib.calc import vehicles
-from lib.apis import smsapi, telegramapi2
-from lib.utils.QueryLogger import query_logger_factory
+from app.lib.utils import compositor, cache
+from app.lib.calc import vehicles
+from app.lib.apis import smsapi, telegramapi2
+from app.lib.utils.QueryLogger import query_logger_factory
 from flask_cors import CORS
-import lib.utils.blacklist as blacklist
-import lib.utils.request_processor as request_processor
-import lib.calc.calc_itself as calc_itself
-from lib.utils.DTOs import CalculationDTO
-import lib.utils.number_tools as number_tools
-from lib.apis.googleapi import ZeroDistanceResultsError
-from lib.utils.number_tools import WrongNumberError
-from lib.loads.loads import Loads
-from lib.loads.interface import TelegramInterface
-from impsettings import settings
+import app.lib.utils.blacklist as blacklist
+import app.lib.utils.request_processor as request_processor
+import app.lib.calc.calc_itself as calc_itself
+from app.lib.utils.DTOs import CalculationDTO
+import app.lib.utils.number_tools as number_tools
+from app.lib.apis.googleapi import ZeroDistanceResultsError
+from app.lib.utils.number_tools import WrongNumberError
+from app.lib.loads.loads import Loads
+from app.lib.loads.interface import TelegramInterface
+from app.impsettings import settings
 
 """
 pip install flask
@@ -28,8 +27,7 @@ pip uninstall python-telegram-bot
 pip uninstall urllib3
 pip install urllib3==1.26.16
 pip install python-telegram-bot==13.15
-
-pip install asyncio
+pip install pyngrok
 """
 
 CACHE = cache.cache_instance_factory()
@@ -40,12 +38,16 @@ app = Flask(__name__)
 CORS = CORS(app)
 
 
-loads = Loads.from_file_storage(settings.LOADS_NOSQL_LOC)
-interface = TelegramInterface(loads=loads)
+LOADS = Loads.from_file_storage(settings.LOADS_NOSQL_LOC)
 
-# interface = TelegramInterface(loads=loads,
-#                               webhook_url='https://0ef0-194-233-96-196.ngrok-free.app/webhook-aibot/',
-#                               chat_id=settings.TELEGRAM_DEVELOPER_CHAT_ID)
+if settings.isDeveloperPC:
+    from pyngrok import ngrok
+    tunnel = ngrok.connect('http://localhost:5000')
+    interface = TelegramInterface(loads=LOADS,
+                                  webhook_url=f'{tunnel.public_url}/webhook-aibot/',
+                                  chat_id=settings.TELEGRAM_DEVELOPER_CHAT_ID)
+else:
+    INTERFACE = TelegramInterface(loads=LOADS)
 
 
 def __gen_response(http_status: int, json_status: str, details: str = '', workload: CalculationDTO = None) -> Response:
@@ -86,6 +88,8 @@ def __gen_response2(http_status: int, json_status: str, message: str = None, wor
 
 @app.route('/blacklist/<string:req>', methods=['GET'])
 def blacklist_add(req: str):
+    # https://api.intersmartgroup.com/blacklist/192.168.0.1
+    # https://api.intersmartgroup.com/blacklist/380951234567
     blacklist.append(req)
     return __gen_response(201, f'BLACKLISTED', req)
 
@@ -95,62 +99,7 @@ def get_vehicles():
     resp = Response(response=json.dumps(vehicles.VEHICLES, cls=vehicles.VehicleEncoder, ensure_ascii=False),
                     content_type='application/json; charset=utf-8')
     resp.headers.add('Access-Control-Allow-Origin', '*')
-
     return resp
-
-
-@app.route('/do-submit-calculation/', methods=['POST'])
-def submit():
-    try:
-        rqst = request_processor.preprocess(request)
-    except (TypeError, ValueError, KeyError) as e:
-        telegramapi2.send_developer('Request processing failed', e)
-        return __gen_response(400, 'ERROR', details="Request processing error")
-
-    try:
-        route_calculations = calc_itself.calculate_route(rqst)
-    except Exception as e:
-        message = f'Calculator itself error\n\nRequest = {json.dumps(rqst, ensure_ascii=False)}\n\nException = {str(e)}'
-        telegramapi2.send_developer(message, e)
-        return __gen_response(500, 'ERROR', details="Calc itself error")
-
-    calculation_dto = compositor.make_calculation_dto(route_calculations, rqst['locale'])
-
-    tg_msg = compositor.compose_telegram(
-        rqst['intent'],
-        calculation_dto,
-        rqst['url'],
-        rqst['ip'],
-        rqst["phone_number"])
-
-    sms_msg: str = compositor.make_sms_text(calculation_dto)
-
-    LOGGER.put_request(phone_number=rqst["phone_number"],
-                       query=json.dumps(rqst, ensure_ascii=False),
-                       response=json.dumps([tg_msg, sms_msg], ensure_ascii=False))
-
-    blacklisted = blacklist.check(rqst["phone_number"], rqst['ip'])
-    if blacklisted:
-        blacklist.spread(rqst["phone_number"], rqst['ip'])
-        telegramapi2.send_silent(f'BLACKLISTED\n\n{tg_msg}')
-        return __gen_response(200, 'SMS_SENT')
-
-    if rqst['intent'] == 'calc':
-
-        requests_exceeded = LOGGER.get_today_requests_count(rqst['phone_number']) > MAX_REQUESTS
-        if requests_exceeded:
-            telegramapi2.send_silent(f'DAILY REQUESTS EXCEEDED\n\n{tg_msg}')
-            return __gen_response(403, 'MAX_DAILY_REQUESTS_EXCEEDED')
-
-        telegramapi2.send_silent(tg_msg)
-        smsapi.send_sms(rqst['phone_number'], sms_msg)
-        return __gen_response(200, 'SMS_SENT')
-
-    elif rqst['intent'] == 'callback':
-        telegramapi2.send_loud(tg_msg)
-        return __gen_response(200, 'CALLBACK_SCHEDULED')
-    else:
-        raise RuntimeError('Internal error 9')
 
 
 @app.route('/calculate/', methods=['POST'])
@@ -172,7 +121,7 @@ def calculate():
     except Exception as e:
         try:
             telegramapi2.send_developer(
-                f'Unspecified calculation error\n\nRequest = {json.dumps(rqst, ensure_ascii=False)}\n\nException = {str(e)}',
+                f'Unspecified calc error\n\nRequest = {json.dumps(rqst, ensure_ascii=False)}\n\nException = {str(e)}',
                 e)
         finally:
             return __gen_response(500, 'ERROR', details='Unspecified calculation error')
@@ -235,13 +184,7 @@ def submit_new():
 
 @app.route('/loads/', methods=['GET'])
 def get_loads():
-    _loads = loads.expose_active_loads()
-    return __gen_response2(http_status=200, json_status='success', workload={'len': len(_loads), 'loads': _loads})
-
-
-@app.route('/loads_test_0/', methods=['GET'])
-def get_loads0():
-    _loads = []
+    _loads = LOADS.expose_active_loads()
     return __gen_response2(http_status=200, json_status='success', workload={'len': len(_loads), 'loads': _loads})
 
 
@@ -253,13 +196,12 @@ def get_driver():
     if not load_id or auth_num:
         __gen_response2(http_status=400, json_status='error', message='load_id and client_num are required')
 
-    from lib.loads.loads import Load
+    from app.lib.loads.loads import Load
     try:
-        driver, js_status, http_status = loads.get_load_by_id(load_id).get_driver_details(auth_num)
+        driver, js_status, http_status = LOADS.get_load_by_id(load_id).get_driver_details(auth_num)
         return __gen_response2(http_status, js_status, workload=driver)
     except Load.NoSuchLoadID:
         return __gen_response2(400, 'No such load ID')
-        # TODO Тут уязвимость т.к. можно явно сказать когда неверный телефон а когда лоад айди
 
 
 @app.route(f'/webhook-aibot/', methods=['POST'])
@@ -270,6 +212,22 @@ def loads_webhook():
         return "Forbidden", 403
     interface.catch_webhook(request.get_json())
     return "OK", 200
+
+
+# This route is designed to be easily triggered from a mobile device,
+# often via a simple browser request (e.g., URL typed into browser or QR code scan).
+# Using GET allows for maximum accessibility without requiring a dedicated client or POST tooling.
+# https://api.intersmartgroup.com/webhook_reset/?token=WEBHOOK_RESET_SECRET_TOKEN
+@app.route('/webhook_reset/', methods=['GET'])
+def webhook_reset():
+    global INTERFACE
+    try:
+        if request.args.get('token') != settings.WEBHOOK_RESET_SECRET_TOKEN:
+            return "Unauthorized", 403
+        INTERFACE = TelegramInterface(loads=LOADS)
+        return "DONE", 200
+    except Exception as e:
+        return f'FAIL: {e}', 500
 
 
 @app.errorhandler(RuntimeError)
@@ -291,5 +249,4 @@ def create_app():
 
 if __name__ == '__main__':
     settings.GOOGLE_APIKEY = settings.GOOGLE_APIKEY_DEV
-    settings.SMS_BLACKLIST = ('380953459607',)
     app.run(debug=True, use_reloader=False)

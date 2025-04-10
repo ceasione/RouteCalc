@@ -2,7 +2,7 @@ import datetime
 import _md5
 import random
 import time
-from impsettings import settings
+from app.impsettings import settings
 import json
 LOADS_NOSQL_LOC = settings.LOADS_NOSQL_LOC
 
@@ -85,7 +85,7 @@ class Load:
         )
 
     def get_driver_details(self, client_num):
-        time.sleep(2)
+        time.sleep(2)  # Bruteforce defense
         if client_num == self.client_num:
             return dict(
                 driver_name=self.driver['name'],
@@ -176,34 +176,3 @@ class Loads:
             if load.id == _id:
                 return load
         raise Load.NoSuchLoadID(f'There is no Loads with ID: {_id} in a memory storage')
-
-
-# def base_input(cls):
-#     cls.loads_instance.add_load(Load(_type='internal',
-#                                      stage='start',
-#                                      start='Староконстантиновка',
-#                                      engage=None,
-#                                      clear=None,
-#                                      finish='Николаев',
-#                                      client_num='380953459607',
-#                                      driver_name='Микола',
-#                                      driver_num='380991231213',
-#                                      _id=None,
-#                                      last_update=None))
-#     cls.loads_instance.add_load(Load(_type='external',
-#                                      stage='finish',
-#                                      start='Староконстантиновка',
-#                                      engage='Киев',
-#                                      clear='Вроцлав',
-#                                      finish='Варшава',
-#                                      client_num='380953459607',
-#                                      driver_name='Микола',
-#                                      driver_num='380991231213',
-#                                      _id=None,
-#                                      last_update=None))
-#
-#
-# def storage_init(cls):
-#     _str = json.dumps(cls.loads_instance.to_loads_storage(), ensure_ascii=False)
-#     with open(file=LOADS_NOSQL_LOC, mode='w') as file:
-#         file.write(_str)

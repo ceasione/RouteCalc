@@ -1,5 +1,5 @@
 import json
-from impsettings import settings
+from app.impsettings import settings
 
 
 class Currency:
@@ -110,4 +110,3 @@ class StatePark:
 # statepark_init.to_file(filename=f'../../{settings.STATEPARK_NOSQL_LOC}')
 # statepark = StatePark.from_file(f'../../{settings.STATEPARK_NOSQL_LOC}')
 statepark = StatePark.from_file(settings.STATEPARK_NOSQL_LOC)
-pass

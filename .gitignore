@@ -2,7 +2,7 @@
 .idea/
 venv/
 __pycache__/
-lib/apis/__pycache__/
-lib/calc/__pycache__/
-lib/utils/__pycache__/
+app/lib/apis/__pycache__/
+app/lib/calc/__pycache__/
+app/lib/utils/__pycache__/
 .vscode/

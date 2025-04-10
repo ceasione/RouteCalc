@@ -1,5 +1,5 @@
-from impsettings import settings
-from lib.apis import telegramapi2
+from app.impsettings import settings
+from app.lib.apis import telegramapi2
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup
 from telegram.ext import Dispatcher, CommandHandler, MessageHandler, Filters, CallbackQueryHandler
 from queue import Queue
@@ -7,7 +7,8 @@ import secrets
 from abc import ABC, abstractmethod
 import time
 import threading
-from lib.loads.loads import Load, Loads
+from app.lib.loads.loads import Load, Loads
+from textwrap import dedent
 
 
 class TelegramInterface:
@@ -38,69 +39,13 @@ class TelegramInterface:
 
     @staticmethod
     def craft_load(_load):
-
         load = _load.expose_to_dict()
 
-        def craft_stage():
-            if load['type'] == 'external':
-                stages = {
-                    'start': f'''*{load['stages']['start']} ({load['last_update']})*
-{load['stages']['engage']}
-{load['stages']['clear']}
-{load['stages']['finish']}
-''',
-                    'engage': f'''{load['stages']['start']}
-*{load['stages']['engage']} ({load['last_update']})*
-{load['stages']['clear']}
-{load['stages']['finish']}
-''',
-                    'drive': f'''{load['stages']['start']}
-{load['stages']['engage']}
-*Drive ({load['last_update']})*
-{load['stages']['clear']}
-{load['stages']['finish']}
-''',
-                    'clear': f'''{load['stages']['start']}
-{load['stages']['engage']}
-*{load['stages']['clear']} ({load['last_update']})*
-{load['stages']['finish']}
-''',
-                    'finish': f'''{load['stages']['start']}
-{load['stages']['engage']}
-{load['stages']['clear']}
-*{load['stages']['finish']} ({load['last_update']})*
-''',
-                    'history': f'''{load['stages']['start']}
-{load['stages']['engage']}
-{load['stages']['clear']}
-{load['stages']['finish']}
-'''
-                }
-                return stages[load['stage']]
-            elif load['type'] == 'internal':
-                stages = {
-                    'start': f'''*{load['stages']['start']} ({load['last_update']})*
-{load['stages']['finish']}
-''',
-                    'drive': f'''{load['stages']['start']}
-*Drive ({load['last_update']})*
-{load['stages']['finish']}
-''',
-                    'finish': f'''{load['stages']['start']}
-*{load['stages']['finish']} ({load['last_update']})*
-''',
-                    'history': f'''{load['stages']['start']}
-{load['stages']['finish']}
-'''
-                }
-                return stages[load['stage']]
-            else:
-                raise (RuntimeError('Given load type neither internal neither external'))
-
-        craft = f'''{craft_stage()}
-{_load.driver['name']}, +{_load.driver['num']}
-{load['id'][:4]}...{load['id'][-4:]}
-'''
+        craft = f'''\
+            {load['stages']['start']} ... {load['stages']['finish']}
+            {_load.driver['name']}, +{_load.driver['num']}
+            
+            Stage: {load['stage']} ({load['last_update']})'''
 
         keyboard = {
             'external': [
@@ -119,7 +64,7 @@ class TelegramInterface:
             ]
         }
         reply_markup = InlineKeyboardMarkup(keyboard[_load.type])
-        return craft, reply_markup
+        return dedent(craft).lstrip(), reply_markup
 
     def render_load(self, load):
         _message, reply_markup = self.craft_load(load)
@@ -252,30 +197,30 @@ class TelegramInterface:
 
             elif message == 'Create new':
                 draft_ext = '''
-new:external
-Полтава
-Черновцы
-Яссы
-Плопени
-
-Козак Григорий
-+380501231212
-
-Client: +380953459607
+                    new:external
+                    Полтава
+                    Черновцы
+                    Яссы
+                    Плопени
+                    
+                    Козак Григорий
+                    +380501231212
+                    
+                    Client: +380953459607
                 '''
                 draft_int = '''
-new:internal
-Днепр
-Конотоп
-
-Козак Григорий
-+380501231212
-
-Client: +380953459607
+                    new:internal
+                    Днепр
+                    Конотоп
+                    
+                    Козак Григорий
+                    +380501231212
+                    
+                    Client: +380953459607
                 '''
                 iface.bot.send_message(iface.chat_id, 'Copy, edit and send back')
-                iface.bot.send_message(iface.chat_id, draft_int.strip())
-                iface.bot.send_message(iface.chat_id, draft_ext.strip())
+                iface.bot.send_message(iface.chat_id, dedent(draft_int).strip())
+                iface.bot.send_message(iface.chat_id, dedent(draft_ext).strip())
                 return self
             elif message == 'Craft sms':
                 iface.bot.send_message(iface.chat_id, 'Not implemented')
@@ -284,8 +229,7 @@ Client: +380953459607
                 try:
                     load = iface.create_new_load(message)
                     iface.render_load(load)
-                    # threading.Thread(target=self.enumerate_worker, args=([load])).start()
-                except Exception:
+                except (AttributeError, LookupError, NameError, ValueError, TypeError):
                     iface.bot.send_message(iface.chat_id, 'Try again')
             return self
 
@@ -323,15 +267,6 @@ Client: +380953459607
 
         self.dialog_context.state = self.StandbyState()
         self.dialog_context.handle_event(update)
-
-        # keyboard = [
-        #     ['Show active', 'Show deleted'],
-        #     ['Create new', 'Clear'],
-        #     ['Craft sms']
-        # ]
-        #
-        # reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True)
-        # update.message.reply_text("Select option:", reply_markup=reply_markup)
 
     def handle_messages(self, update: Update, context):
 

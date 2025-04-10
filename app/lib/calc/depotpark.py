@@ -1,18 +1,15 @@
-from lib.calc.place import Place
-from impsettings import settings
-from lib.utils import cache
+from app.lib.calc.place import Place
+from app.impsettings import settings
 import sqlite3
 import json
-from lib.calc.depot import Depot
-from lib.utils import utils
-
+from app.lib.calc.depot import Depot
+from app.lib.utils import utils, cache
 
 APIADR = settings.GOOGLE_APIADR
 APIKEY = settings.GOOGLE_APIKEY
 DB_LOCATION = settings.DEPOT_DB_LOC
 
 
-# Database creation script to make a base from scratch
 """
 CREATE TABLE "DepotPark" (
   "id"  INTEGER NOT NULL UNIQUE,
@@ -35,11 +32,6 @@ class NoDepots(RuntimeError):
 
 
 class DepotPark:
-    # def __new__(cls):
-    #     # Singleton
-    #     if not hasattr(cls, 'instance'):
-    #         cls.instance = super(DepotPark, cls).__new__(cls)
-    #     return cls.instance
 
     def __init__(self, already_park: [Place] = None):
         self.cache = cache.cache_instance_factory()
@@ -123,15 +115,13 @@ class DepotPark:
         distances = self.cache.fetch_cached_distance(list_from, list_to)
         distances.sort()
         if many_to_one:
-            test = distances[0].place_from
             return distances[0].place_from
 
         else:
             #  one to many
-            test = distances[0].place_from
             return distances[0].place_to
 
-    def select_closest_starting_depot(self, place, look_outbounds=False):
+    def select_closest_starting_depot(self, place):
         """DEPRECATED"""
         # Make a cache search and schedule to search cache-misses
         # Make a call to server
@@ -170,7 +160,4 @@ def test_depotpark_storage_restoring():
 
 
 # test_depotpark_storage_restoring()
-
-
 depotpark = DepotPark.from_file(filename=settings.DEPOTPARK_NOSQL_LOC)
-pass

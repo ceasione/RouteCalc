@@ -1,13 +1,12 @@
 import sqlite3
-from impsettings import settings
-from lib.calc.distance import Distance
-import lib.apis.telegramapi2 as tgapi2
-from lib.utils import utils
+from app.impsettings import settings
+from app.lib.calc.distance import Distance
+import app.lib.apis.telegramapi2 as tgapi2
+from app.lib.utils import utils
 
 
 class Cache:
 
-    # Database creation script to make a base from scratch
     """
     CREATE TABLE "Distances" (
         "from_lat"	REAL NOT NULL,
@@ -85,7 +84,7 @@ class Cache:
         self.cache_it_safe(from_lat, from_lng, to_lat, to_lng, distance)
 
     def fetch_cached_distance(self, places_from, places_to):
-        from lib.apis import googleapi
+        from app.lib.apis import googleapi
         api = googleapi.api_instance_factory()
         # Takes list(Places) even if Place to Place -> [Place] to [Place]
         # 1. Check arguments

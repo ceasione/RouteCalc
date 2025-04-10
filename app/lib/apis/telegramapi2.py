@@ -1,9 +1,9 @@
-from impsettings import settings
+from app.impsettings import settings
 import telegram
 from telegram.error import BadRequest
 import traceback
 from datetime import datetime
-import lib.utils.utils as utils
+import app.lib.utils.utils as utils
 
 
 APIKEY = settings.TELEGRAM_BOT_APIKEY
@@ -59,11 +59,8 @@ def send_developer(msg: str, cause: Exception = None) -> None:
         utils.log_safely(error_message)
     except Exception as e:
         timestamp = datetime.now().isoformat()
-        error_message = f"{timestamp} Failed to send developer telegram report\n\n{str(e)}\n\nTraceback: {traceback.format_exc()}\n\nmsg = {msg}"
+        error_message = f"{timestamp} Failed to send dev tg report\n\n{str(e)}\n\n{traceback.format_exc()}\n\n{msg}"
         utils.log_safely(error_message)
 
 
-# Test
 send_developer(f'Application boot at {datetime.now().strftime("%H:%M:%S")}')
-# send_developer('Test Exception at startup', Exception('Test Exception'))
-# send_message(chat_id=DEVELOPER_CHAT_ID, msg=test_text)

@@ -1,8 +1,8 @@
-from impsettings import settings
+from app.impsettings import settings
 import requests
 import json
-from lib.utils import cache
-from lib.calc.distance import Distance
+from app.lib.utils import cache
+from app.lib.calc.distance import Distance
 
 
 class ZeroDistanceResultsError(RuntimeError):
@@ -20,7 +20,8 @@ class API:
     def __del__(self):
         pass
 
-    def __parse_distance(self, json_obj):
+    @staticmethod
+    def __parse_distance(json_obj):
 
         _1 = json_obj['rows']
         _2 = _1[0]
@@ -33,8 +34,8 @@ class API:
         distance = int(_6)
         return distance
 
-
-    def __parse_distances(self, json_obj):
+    @staticmethod
+    def __parse_distances(json_obj):
 
         if json_obj['status'] != 'OK':
             raise RuntimeError('GOOGLE api call unexpected output: '+json_obj['status'])
@@ -51,7 +52,8 @@ class API:
 
         return distances
 
-    def __assemble_places_geo_coords(self, places):
+    @staticmethod
+    def __assemble_places_geo_coords(places):
         string_builder = list()
         for place in places:
             string_builder.append(str(place.lat))
@@ -61,7 +63,8 @@ class API:
         string_builder.pop()
         return str().join(string_builder)
 
-    def __chunks(self, lst, n):
+    @staticmethod
+    def __chunks(lst, n):
         """Yield successive n-sized chunks from lst."""
         for i in range(0, len(lst), n):
             yield lst[i:i + n]
@@ -119,10 +122,7 @@ class API:
         return pairs
 
     def fetch_distance(self, places_from, places_to):
-        # Takes list(Places) even if Place to Place -> [Place] to [Place]
-        # 1 to many
-        # many to 1
-        # 1 to 1
+        # Takes list(Places) even if Place to Place -> [Place, ] to [Place, ]
         # many to many not realized
 
         if len(places_from) == 1 and len(places_to) > 1:

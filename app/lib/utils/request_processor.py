@@ -1,7 +1,7 @@
 
 import json
-import lib.utils.number_tools as number_tools
-import lib.calc.vehicles as vehicles
+import app.lib.utils.number_tools as number_tools
+import app.lib.calc.vehicles as vehicles
 
 request_example = {'intent': str('calc'+'callback'),
                    'from': {'name_short': str(''),
@@ -104,8 +104,3 @@ def preprocess(request):
         return __validate_numless_request(input_dict, request.remote_addr)
     else:
         return __validate_request(input_dict, request.remote_addr)
-
-
-def preprocess_calc_dto(dto):
-
-    pass

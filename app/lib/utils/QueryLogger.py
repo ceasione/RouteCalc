@@ -1,11 +1,9 @@
-from impsettings import settings
+from app.impsettings import settings
 import sqlite3
 from datetime import datetime
-import lib.apis.telegramapi2 as tgapi2
-import lib.utils.utils as utils
+import app.lib.apis.telegramapi2 as tgapi2
 
 
-# Database creation script to make a base from scratch
 """
 CREATE TABLE "queries" (
     "date"      TEXT,

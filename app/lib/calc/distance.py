@@ -6,5 +6,5 @@ class Distance(object):
         self.place_to = place_to
         self.distance = distance
 
-    def __lt__(self, other):  # Need to implement to make it sortable
+    def __lt__(self, other):  # Makes that sortable
         return self.distance < other.distance

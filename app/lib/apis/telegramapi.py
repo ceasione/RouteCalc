@@ -1,4 +1,4 @@
-from impsettings import settings
+from app.impsettings import settings
 import requests
 
 APIKEY = settings.TELEGRAM_BOT_APIKEY

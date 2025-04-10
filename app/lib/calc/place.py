@@ -1,5 +1,5 @@
-from impsettings import settings
-from lib.utils import cache
+from app.impsettings import settings
+from app.lib.utils import cache
 import json
 
 

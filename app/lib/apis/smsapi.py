@@ -1,6 +1,6 @@
-from impsettings import settings
+from app.impsettings import settings
 import requests
-import lib.utils.utils as utils
+import app.lib.utils.utils as utils
 
 
 APIKEY = settings.SMS_APIKEY
@@ -13,17 +13,12 @@ class SmsSendingError(RuntimeError):
 
 
 def send_sms(number, text):
-
-    if number in settings.SMS_BLACKLIST:
-        return  # rudimentary
-
     url = 'https://im.smsclub.mobi/sms/send'
     payload = {
         'phone': [number],
         'message': text,
         'src_addr': ALPHANAME
     }
-
     if not settings.isDeveloperPC:
         response = requests.post(url, json=payload, headers=HEADERS)
         if response.status_code != 200:
@@ -49,11 +44,3 @@ def __get_available_alphanames():
     response = requests.post(url, headers=HEADERS)
     response = response.json()
     utils.log_safely(response)
-
-
-# test = SmsApi()
-# a = __get_available_alphanames()
-# print()
-# test.send_sms('380953459607', 'test \ntest')
-# test.get_sent_status('946036921')
-# test.check_balance()

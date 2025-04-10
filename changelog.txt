@@ -63,3 +63,7 @@ I don't remember why I haven't commited that earlier
 
 2025-04-06
 Data and settings have been moved to an external directory
+
+2025-04-08 Refactoring
+
+2025-04-10 Refactoring and testing
