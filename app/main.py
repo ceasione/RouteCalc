@@ -43,7 +43,7 @@ LOADS = Loads.from_file_storage(settings.LOADS_NOSQL_LOC)
 if settings.isDeveloperPC:
     from pyngrok import ngrok
     tunnel = ngrok.connect('http://localhost:5000')
-    interface = TelegramInterface(loads=LOADS,
+    INTERFACE = TelegramInterface(loads=LOADS,
                                   webhook_url=f'{tunnel.public_url}/webhook-aibot/',
                                   chat_id=settings.TELEGRAM_DEVELOPER_CHAT_ID)
 else:
@@ -206,11 +206,11 @@ def get_driver():
 
 @app.route(f'/webhook-aibot/', methods=['POST'])
 def loads_webhook():
-    own_secret = interface.own_secret
+    own_secret = INTERFACE.own_secret
     got_secret = request.headers.get("X-Telegram-Bot-Api-Secret-Token")
     if got_secret != own_secret:
         return "Forbidden", 403
-    interface.catch_webhook(request.get_json())
+    INTERFACE.catch_webhook(request.get_json())
     return "OK", 200
 
 
