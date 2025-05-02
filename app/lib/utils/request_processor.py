@@ -1,7 +1,7 @@
 
 import json
 import app.lib.utils.number_tools as number_tools
-import app.lib.calc.vehicles as vehicles
+from app.lib.calc.vehicles import VEHICLES
 
 request_example = {'intent': str('calc'+'callback'),
                    'from': {'name_short': str(''),
@@ -21,14 +21,10 @@ request_example = {'intent': str('calc'+'callback'),
 
 
 def __validate_transport_id(vehicle_id):
-
-    for vehicle in vehicles.VEHICLES:
-
-        if vehicle.id == vehicle_id:
-
-            return vehicle_id
-
-    raise ValueError('Unknown vehicle_id')
+    ids = [vehicle.id for vehicle in VEHICLES]
+    if vehicle_id not in ids:
+        raise ValueError('Unknown vehicle_id')
+    return vehicle_id
 
 
 def __validate_request(input_dict, user_ip):

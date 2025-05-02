@@ -17,9 +17,6 @@ class API:
         self.MAX_REQUEST_PLACES = settings.GOOGLE_MAX_REQUEST_PLACES
         self.cache = cache.cache_instance_factory()
 
-    def __del__(self):
-        pass
-
     @staticmethod
     def __parse_distance(json_obj):
 
@@ -48,7 +45,7 @@ class API:
                 try:
                     distances.append(element['distance']['value'])
                 except (IndexError, KeyError):
-                    distances.append(40075000)  # the length of equator
+                    raise RuntimeError('GOOGLE api call unexpected output: '+json_obj['status'])
 
         return distances
 

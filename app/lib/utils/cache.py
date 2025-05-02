@@ -112,6 +112,7 @@ class Cache:
                         distances.append(Distance(place_from, place_to, rest))
 
             if len(missed_from) == 0 and len(missed_to) == 0:
+                print('Cache hit')
                 return distances
             else:
                 utils.log_safely('Cache miss, fetching ...')
@@ -123,6 +124,7 @@ class Cache:
                     self.cache_it(_place_from.lat, _place_from.lng,
                                   _place_to.lat, _place_to.lng,
                                   _distance)
+                utils.log_safely('Cached succesfully!')
                 continue
 
         return api.fetch_distance(places_from, places_to)

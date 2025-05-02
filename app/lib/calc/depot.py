@@ -17,7 +17,8 @@ class Depot(Place):
     def __init__(self, lat: float, lng: float,
                  name: str, state_iso: str,
                  departure_ratio: float = None,
-                 arrival_ratio: float = None):
+                 arrival_ratio: float = None,
+                 _id: int = None):
         super().__init__(lat=lat,
                          lng=lng,
                          name=name)
@@ -27,6 +28,7 @@ class Depot(Place):
         if arrival_ratio is not None:
             self.arrival_ratio = arrival_ratio
         self.cache = cache.cache_instance_factory()
+        self.id = _id
 
     def __getattr__(self, item):
         return getattr(self.state, item)
@@ -44,12 +46,15 @@ class Depot(Place):
                    name=dct['name'],
                    state_iso=dct['state'],
                    departure_ratio=departure_ratio,
-                   arrival_ratio=arrival_ratio)
+                   arrival_ratio=arrival_ratio,
+                   _id=dct['id'])
 
     def to_dict(self):
         d = copy(self.__dict__)
         d['state'] = d['state'].iso_code
         del d['cache']
+        del d['name_long']
+        del d['countrycode']
         return d
 
 

@@ -106,7 +106,4 @@ class StatePark:
         raise RuntimeError(f'No such state: {iso_code}')
 
 
-# statepark_init = StatePark([State(iso_code='UA', state_name='Ukraine', departure_ratio=1.0, arrival_ratio=1.0)])
-# statepark_init.to_file(filename=f'../../{settings.STATEPARK_NOSQL_LOC}')
-# statepark = StatePark.from_file(f'../../{settings.STATEPARK_NOSQL_LOC}')
 statepark = StatePark.from_file(settings.STATEPARK_NOSQL_LOC)

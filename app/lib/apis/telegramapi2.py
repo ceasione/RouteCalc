@@ -16,7 +16,6 @@ bot = telegram.Bot(token=APIKEY)
 
 
 def _send_message(chat_id, text, parse_mode=None):
-    # asyncio.run(bot.send_message(chat_id=chat_id, text=text, parse_mode=parse_mode))
     bot.send_message(chat_id=chat_id, text=text, parse_mode=parse_mode)
 
 
@@ -61,6 +60,3 @@ def send_developer(msg: str, cause: Exception = None) -> None:
         timestamp = datetime.now().isoformat()
         error_message = f"{timestamp} Failed to send dev tg report\n\n{str(e)}\n\n{traceback.format_exc()}\n\n{msg}"
         utils.log_safely(error_message)
-
-
-send_developer(f'Application boot at {datetime.now().strftime("%H:%M:%S")}')

@@ -111,15 +111,24 @@ class DepotPark:
             raise NoDepots(f'No available depots at {iso_code} iso_code')
         return some
 
-    def select_closest(self, list_from: [Place], list_to: [Place], many_to_one: bool):
-        distances = self.cache.fetch_cached_distance(list_from, list_to)
-        distances.sort()
-        if many_to_one:
-            return distances[0].place_from
-
-        else:
-            #  one to many
-            return distances[0].place_to
+    # def select_closest(self, list_from: [Place], list_to: [Place], many_to_one: bool):
+    #
+    #     # Check and return as soon as duplicate is found
+    #     for from_item in list_from:
+    #         for to_item in list_to:
+    #             match = from_item.lat == to_item.lat and \
+    #                     from_item.lng == to_item.lng
+    #             if match:
+    #                 return from_item if many_to_one else to_item
+    #
+    #     distances = self.cache.fetch_cached_distance(list_from, list_to)
+    #     distances.sort()
+    #     if many_to_one:
+    #         return distances[0].place_from
+    #
+    #     else:
+    #         #  one to many
+    #         return distances[0].place_to
 
     def select_closest_starting_depot(self, place):
         """DEPRECATED"""
@@ -160,4 +169,5 @@ def test_depotpark_storage_restoring():
 
 
 # test_depotpark_storage_restoring()
-depotpark = DepotPark.from_file(filename=settings.DEPOTPARK_NOSQL_LOC)
+DEPOTPARK = DepotPark.from_file(filename=settings.DEPOTPARK_NOSQL_LOC)
+pass
