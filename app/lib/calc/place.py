@@ -51,7 +51,8 @@ class Place:
 
     def _select_closest(self, list_from, list_to):
         distances = self.cache.fetch_cached_distance(list_from, list_to)
-        return distances.sort()[0]
+        distances.sort()
+        return distances[0]
 
     def chose_starting_depot(self, park):
         return self._select_closest(park, [self]).place_from
