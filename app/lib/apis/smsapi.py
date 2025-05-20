@@ -1,6 +1,7 @@
 from app.impsettings import settings
 import requests
 import app.lib.utils.utils as utils
+from app.lib.apis import telegramapi2
 
 
 APIKEY = settings.SMS_APIKEY
@@ -22,7 +23,10 @@ def send_sms(number, text):
     if not settings.isDeveloperPC:
         response = requests.post(url, json=payload, headers=HEADERS)
         if response.status_code != 200:
-            raise SmsSendingError(f'status {response.status_code} {response.text}')
+            telegramapi2.send_developer(
+                f'Error sending SMS\n'
+                f'Status code: {response.status_code}\n'
+                f'Response: {response.text}')
 
 
 def get_sent_status(a_id):

@@ -28,10 +28,9 @@ CORS = CORS(app)
 def __gen_response(http_status: int, json_status: str, details: str = '', workload: CalculationDTO = None) -> Response:
 
     """
-    Additional layer for generating a standardized JSON HTTP response with validation and CORS headers.
+    Additional layer for generating a standardized JSON HTTP response.
 
-    This function validates the `json_status` against a predefined list of allowed status values.
-    If valid, it returns a Flask `Response` object containing a JSON payload with the specified
+    It returns a Flask `Response` object containing a JSON payload with the specified
     status, optional details message, and an optional workload (typically a `CalculationDTO` object).
     It also adds a CORS header to allow cross-origin requests.
 
@@ -43,56 +42,12 @@ def __gen_response(http_status: int, json_status: str, details: str = '', worklo
     :type details: str
     :param workload: Optional data payload to include in the response (e.g., calculation results).
     :type workload: CalculationDTO or None
-    :raises RuntimeError: If the provided `json_status` is not in the allowed list.
     :return: A Flask Response object with JSON content and appropriate headers.
     :rtype: flask.Response
     """
 
-    if json_status not in ('SMS_SENT',
-                           'SMS_ERROR',
-                           'MAX_DAILY_REQUESTS_EXCEEDED',
-                           'REGION_NOT_IMPLEMENTED',
-                           'CALLBACK_SCHEDULED',
-                           'ERROR',
-                           'BLACKLISTED',
-                           'WORKLOAD',
-                           'ZeroDistanceResultsError',
-                           'WrongNumberError'):
-        raise RuntimeError('Internal error 8')
-
     resp = Response(response=json.dumps({'status': json_status,
                                          'details': details,
-                                         'workload': workload},
-                                        ensure_ascii=False),
-                    status=http_status,
-                    content_type='application/json; charset=utf-8')
-
-    resp.headers.add('Access-Control-Allow-Origin', '*')
-    return resp
-
-
-def __gen_response2(http_status: int, json_status: str, message: str = None, workload=None) -> Response:
-
-    """
-    Additional layer to generate a standardized JSON HTTP response with CORS headers.
-
-    Constructs a Flask `Response` object containing a JSON payload with the specified status,
-    message, and optional workload. Adds the `Access-Control-Allow-Origin: *` header to
-    enable cross-origin requests.
-
-    :param http_status: The HTTP status code for the response (e.g., 200, 400).
-    :type http_status: int
-    :param json_status: A string representing the application-level status (e.g., "ERROR", "SUCCESS").
-    :type json_status: str
-    :param message: Optional message providing additional information about the response.
-    :type message: str, optional
-    :param workload: Optional payload data to include in the response under the 'workload' key.
-    :type workload: any, optional
-    :return: A Flask `Response` object with JSON content and appropriate headers.
-    :rtype: flask.Response
-    """
-    resp = Response(response=json.dumps({'status': json_status,
-                                         'message': message,
                                          'workload': workload},
                                         ensure_ascii=False),
                     status=http_status,
@@ -165,26 +120,10 @@ def calculate():
     """
 
     # Step 1: Preprocess request
-    try:
-        rqst = request_processor.preprocess(request)
-    except (TypeError, ValueError, KeyError) as e:
-        return __gen_response(400, 'ERROR', details=str(e.args))
+    rqst = request_processor.preprocess(request)
 
     # Step 2: Perform the calculationn
-    try:
-        calculation_dto = calc_itself.calculate_route_ai(rqst)
-    except ZeroDistanceResultsError as e:
-        telegramapi2.send_developer(
-            f'No available route can be built\n\n'
-            f'Request = {json.dumps(rqst, ensure_ascii=False)}\n\n'
-            f'Exception = {str(e)}', e)
-        return __gen_response(404, 'ZeroDistanceResultsError', details=str(e))
-    except Exception as e:
-        telegramapi2.send_developer(
-            f'Unspecified calc error\n\n'
-            f'Request = {json.dumps(rqst, ensure_ascii=False)}\n\n'
-            f'Exception = {str(e)}', e)
-        return __gen_response(500, 'ERROR', details='Unspecified calculation error')
+    calculation_dto = calc_itself.calculate_route_ai(rqst)
 
     # Step 3: Prepare TG message
     tg_msg = compositor.compose_telegram(
@@ -195,13 +134,9 @@ def calculate():
         phone_num=rqst["phone_number"])
 
     # Step 4: Log request and calculation
-    try:
-        LOGGER.put_request(phone_number='nosms',
-                           query=json.dumps(rqst, ensure_ascii=False),
-                           response=json.dumps([tg_msg, 'nosms'], ensure_ascii=False))
-    except Exception as e:
-        telegramapi2.send_developer(
-            f'LOGGER.put_request error\n\nException = {str(e)}', e)
+    LOGGER.put_request(phone_number='nosms',
+                       query=json.dumps(rqst, ensure_ascii=False),
+                       response=json.dumps([tg_msg, 'nosms'], ensure_ascii=False))
 
     # Step 5: Check if IP blacklisted
     if blacklist.check_ip(rqst['ip']):
@@ -235,22 +170,16 @@ def submit_new():
 
     # Step 1: Preprocess request
     num_validator = number_tools.get_instance()
-    try:
-        dto = CalculationDTO.from_dict(request.json['dto'])
-        num = num_validator.validate_phone_ukr(request.json['num'])
-        url = request.json['url']
-        ip = request.remote_addr
-    except WrongNumberError as e:
-        return __gen_response(422, 'WrongNumberError', details=str(e.args))
-    except (TypeError, ValueError, KeyError) as e:
-        return __gen_response(400, 'ERROR', details=str(e.args))
+    dto = CalculationDTO.from_dict(request.json['dto'])
+    num = num_validator.validate_phone_ukr(request.json['num'])
+    ip = request.remote_addr
 
     # Step 2 Prepare TG and SMS message
     sms_msg = compositor.make_sms_text(dto)
     tg_msg = compositor.compose_telegram(
         intent='callback',
         calculation=dto,
-        url=url,
+        url=request.json['url'],
         ip=ip,
         phone_num=num)
 
@@ -259,13 +188,13 @@ def submit_new():
                        query=json.dumps(dto.to_dict(), ensure_ascii=False),
                        response=json.dumps([tg_msg, sms_msg], ensure_ascii=False))
 
-    # Step 4: Check for blacklist and make actions
+    # Step 4: Check for blacklist and make notifications
     if not blacklist.check(num, ip):
-        # Send TG to managers and SMS to client if not blacklisted
+        # Not blacklisted -> Send TG message to managers and SMS to client
         telegramapi2.send_loud(tg_msg)
         smsapi.send_sms(num, sms_msg)
     else:
-        # Send only modified TG to managers if blacklisted. Spreading blacklist by mapping num to ip
+        # Blacklisted -> Send modified TG message to managers only -> Spreading blacklist by mapping num and ip
         blacklist.spread(num, ip)
         telegramapi2.send_loud('*BLACKLISTED*\n\n'+tg_msg)
 
@@ -273,16 +202,46 @@ def submit_new():
     return __gen_response(200, 'CALLBACK_SCHEDULED')
 
 
+@app.errorhandler(ZeroDistanceResultsError)
+def handle_zero_distance_error(e: Exception) -> Response:
+    telegramapi2.send_developer(
+        f'No available route can be built\n\n'
+        f'Exception = {str(e)}', e)
+    return __gen_response(404, 'ZeroDistanceResultsError', details=str(e))
+
+
+@app.errorhandler(WrongNumberError)
+def handle_wrong_number(e :Exception) -> Response:
+    return __gen_response(422, 'WrongNumberError', details=str(e.args))
+
+
+@app.errorhandler(TypeError)
+def handle_preprocessing_errs(e: Exception) -> Response:
+    return __gen_response(400, 'ERROR', details='Invalid input')
+
+
+@app.errorhandler(LookupError)
+def handle_preprocessing_errs2(e: Exception) -> Response:
+    return __gen_response(400, 'ERROR', details='Invalid input')
+
+
 @app.errorhandler(RuntimeError)
 def handle_runtime_error(e: Exception) -> Response:
     telegramapi2.send_developer(f'Errorhandler error caught', e)
-    return __gen_response(500, 'ERROR', details='Errorhandler error caught')
+    return __gen_response(500, 'ERROR', details='Internal server error')
 
 
-@app.errorhandler(smsapi.SmsSendingError)
-def handle_sms_error(e):
-    telegramapi2.send_developer(f'SmsSendingError', e)
-    return __gen_response(503, 'SMS_ERROR', details='SmsSendingError')
+@app.errorhandler(Exception)
+def handle_broad(e: Exception) -> Response:
+    telegramapi2.send_developer(
+        f'Unspecified calc error\n\n'
+        f'Exception = {str(e)}', e)
+    return __gen_response(500, 'ERROR', details='Internal server error')
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return 'Not found', 404
 
 
 def create_app():
