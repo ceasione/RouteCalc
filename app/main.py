@@ -202,46 +202,46 @@ def submit_new():
     return __gen_response(200, 'CALLBACK_SCHEDULED')
 
 
-# @app.errorhandler(ZeroDistanceResultsError)
-# def handle_zero_distance_error(e: Exception) -> Response:
-#     telegramapi2.send_developer(
-#         f'No available route can be built\n\n'
-#         f'Exception = {str(e)}', e)
-#     return __gen_response(404, 'ZeroDistanceResultsError', details=str(e))
-#
-#
-# @app.errorhandler(WrongNumberError)
-# def handle_wrong_number(e: Exception) -> Response:
-#     return __gen_response(422, 'WrongNumberError', details=str(e.args))
-#
-#
-# @app.errorhandler(TypeError)
-# def handle_preprocessing_errs(e: Exception) -> Response:
-#     return __gen_response(400, 'ERROR', details='Invalid input')
-#
-#
-# @app.errorhandler(LookupError)
-# def handle_preprocessing_errs2(e: Exception) -> Response:
-#     return __gen_response(400, 'ERROR', details='Invalid input')
-#
-#
-# @app.errorhandler(RuntimeError)
-# def handle_runtime_error(e: Exception) -> Response:
-#     telegramapi2.send_developer(f'Errorhandler error caught', e)
-#     return __gen_response(500, 'ERROR', details='Internal server error')
-#
-#
-# @app.errorhandler(Exception)
-# def handle_broad(e: Exception) -> Response:
-#     telegramapi2.send_developer(
-#         f'Broad calc error\n\n'
-#         f'Exception = {str(e)}', e)
-#     return __gen_response(500, 'ERROR', details='Internal server error')
-#
-#
-# @app.errorhandler(404)
-# def page_not_found(e: Exception):
-#     return 'Not found', 404
+@app.errorhandler(ZeroDistanceResultsError)
+def handle_zero_distance_error(e: Exception) -> Response:
+    telegramapi2.send_developer(
+        f'No available route can be built\n\n'
+        f'Exception = {str(e)}', e)
+    return __gen_response(404, 'ZeroDistanceResultsError', details=str(e))
+
+
+@app.errorhandler(WrongNumberError)
+def handle_wrong_number(e: Exception) -> Response:
+    return __gen_response(422, 'WrongNumberError', details=str(e.args))
+
+
+@app.errorhandler(TypeError)
+def handle_preprocessing_errs(e: Exception) -> Response:
+    return __gen_response(400, 'ERROR', details='Invalid input')
+
+
+@app.errorhandler(LookupError)
+def handle_preprocessing_errs2(e: Exception) -> Response:
+    return __gen_response(400, 'ERROR', details='Invalid input')
+
+
+@app.errorhandler(RuntimeError)
+def handle_runtime_error(e: Exception) -> Response:
+    telegramapi2.send_developer(f'Errorhandler error caught', e)
+    return __gen_response(500, 'ERROR', details='Internal server error')
+
+
+@app.errorhandler(Exception)
+def handle_broad(e: Exception) -> Response:
+    telegramapi2.send_developer(
+        f'Broad calc error\n\n'
+        f'Exception = {str(e)}', e)
+    return __gen_response(500, 'ERROR', details='Internal server error')
+
+
+@app.errorhandler(404)
+def page_not_found(e: Exception):
+    return 'Not found', 404
 
 
 def create_app():
