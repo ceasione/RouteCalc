@@ -1,14 +1,64 @@
 from app.impsettings import settings
 from app.lib.utils import cache
 import json
-import math
+from abc import ABC
 
 
 APIADR = settings.GOOGLE_APIADR
 APIKEY = settings.GOOGLE_APIKEY
 
 
-class Place:
+class LatLngAble(ABC):
+    def __init__(self, lat, lng):
+        self.lat = lat
+        self. lng = lng
+        self.cache = cache.cache_instance_factory()
+
+    def distance_to(self, place_to):
+        """
+        Method to easily fetch distance from self to place_to
+        :param place_to: Place
+        :return: lib.calc.distance.Distance object
+        """
+        return self.cache.fetch_cached_distance([self], [place_to])[0]
+
+    def distance_from(self, place_from):
+        """
+        Method to easily fetch distance from place_from to self
+        :param place_from: Place
+        :return: lib.calc.distance.Distance object
+        """
+        return self.cache.fetch_cached_distance([place_from], [self])[0]
+
+    def _select_closest(self, list_from, list_to):
+        """
+        Select from two lists of Places a pair with minimum distance between them
+        :param list_from: [Place, ]
+        :param list_to: [Place, ]
+        :return: lib.calc.distance.Distance object
+        """
+        distances = self.cache.fetch_cached_distance(list_from, list_to)
+        distances.sort()
+        return distances[0]
+
+    def chose_starting_depot(self, park):
+        """
+        Chooses the closest depot from places in park to this Place
+        :param park: Depotpark
+        :return: Depot
+        """
+        return self._select_closest(park, [self]).place_from
+
+    def chose_ending_depot(self, park):
+        """
+        Chooses the closest depot from this Place to the places in park
+        :param park: Depotpark
+        :return: Depot
+        """
+        return self._select_closest([self], park).place_to
+
+
+class Place(LatLngAble):
 
     def __init__(self,
                  lat,
@@ -16,8 +66,7 @@ class Place:
                  name=None,
                  name_long=None,
                  countrycode=None):
-        self.lat = lat
-        self.lng = lng
+        super().__init__(lat, lng)
         self.name = name
         self.name_long = name_long
         self.countrycode = countrycode
@@ -42,34 +91,6 @@ class Place:
                    lng=dct['lng'],
                    name=dct['name'],
                    name_long=None)
-
-    def distance_to(self, place_to):
-        return self.cache.fetch_cached_distance([self], [place_to])
-
-    def distance_from(self, place_from):
-        return self.cache.fetch_cached_distance([place_from], [self])
-
-    def _select_closest(self, list_from, list_to):
-        distances = self.cache.fetch_cached_distance(list_from, list_to)
-        distances.sort()
-        return distances[0]
-
-    def chose_starting_depot(self, park):
-        return self._select_closest(park, [self]).place_from
-
-    def chose_ending_depot(self, park):
-        return self._select_closest([self], park).place_to
-
-    def distance_haversine(self, place_to):
-        r = 6371000  # Globe radius in meters
-        phi1, phi2 = math.radians(self.lat), math.radians(place_to.lat)
-        dphi = math.radians(place_to.lat - self.lat)
-        dlambda = math.radians(place_to.lng - self.lng)
-
-        a = math.sin(dphi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2) ** 2
-        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-
-        return r * c
 
 
 class PlaceEncoder(json.JSONEncoder):

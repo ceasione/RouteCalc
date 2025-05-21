@@ -199,20 +199,20 @@ class PricePredictor:
         # plot(history)
         self.model.save(self.model_loc)
 
-    def predict(self, dpt_from: Depot, dpt_to: Depot, vehicle: Vehicle):
+    def predict(self, dpt_from_id: int, dpt_to_id: int, vehicle_id: int) -> float:
         """
         Makes predictions on route cost.
-        param dpt_from: Starting Depot
-        param dpt_to: Ending Depot
-        param vehicle: Chosen Vehicle
+        param dpt_from: Starting Depot id
+        param dpt_to: Ending Depot id
+        param vehicle: Chosen Vehicle id
         :return: Approx price of 1 kilometer of the route
         """
-        x = numpy.array([self.vectorize_input(dpt_from.id, dpt_to.id, vehicle.id)])
+        x = numpy.array([self.vectorize_input(dpt_from_id, dpt_to_id, vehicle_id)])
         y = self.model.predict(x)
         return float(y[0][0])
 
 
-PRICE_AI_PREDICTOR = PricePredictor()
+ML_MODEL = PricePredictor()
 
 
 def test():
@@ -220,7 +220,7 @@ def test():
     dpt_from = rnd.choice(DEPOTPARK.park)
     dpt_to = rnd.choice(DEPOTPARK.park)
     vehicle = rnd.choice(VEHICLES)
-    value = PRICE_AI_PREDICTOR.predict(dpt_from, dpt_to, vehicle)
+    value = ML_MODEL.predict(dpt_from, dpt_to, vehicle)
     if isinstance(value, float):
         print(f'TEST OK Value is float and equal {value}')
     else:

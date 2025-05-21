@@ -120,26 +120,26 @@ def calculate():
     """
 
     # Step 1: Preprocess request
-    rqst = request_processor.preprocess(request)
+    preprocessed = request_processor.preprocess(request)
 
     # Step 2: Perform the calculationn
-    calculation_dto = calc_itself.calculate_route_ai(rqst)
+    calculation_dto = calc_itself.process_request(preprocessed)
 
     # Step 3: Prepare TG message
     tg_msg = compositor.compose_telegram(
-        intent=rqst['intent'],
+        intent=preprocessed['intent'],
         calculation=calculation_dto,
-        url=rqst['url'],
-        ip=rqst['ip'],
-        phone_num=rqst["phone_number"])
+        url=preprocessed['url'],
+        ip=preprocessed['ip'],
+        phone_num=preprocessed["phone_number"])
 
     # Step 4: Log request and calculation
     LOGGER.put_request(phone_number='nosms',
-                       query=json.dumps(rqst, ensure_ascii=False),
+                       query=json.dumps(preprocessed, ensure_ascii=False),
                        response=json.dumps([tg_msg, 'nosms'], ensure_ascii=False))
 
     # Step 5: Check if IP blacklisted
-    if blacklist.check_ip(rqst['ip']):
+    if blacklist.check_ip(preprocessed['ip']):
         tg_msg = '*BLACKLISTED*\n\n'+tg_msg
 
     # Step 6: Notify managers via Telegram Bot
@@ -202,46 +202,46 @@ def submit_new():
     return __gen_response(200, 'CALLBACK_SCHEDULED')
 
 
-@app.errorhandler(ZeroDistanceResultsError)
-def handle_zero_distance_error(e: Exception) -> Response:
-    telegramapi2.send_developer(
-        f'No available route can be built\n\n'
-        f'Exception = {str(e)}', e)
-    return __gen_response(404, 'ZeroDistanceResultsError', details=str(e))
-
-
-@app.errorhandler(WrongNumberError)
-def handle_wrong_number(e :Exception) -> Response:
-    return __gen_response(422, 'WrongNumberError', details=str(e.args))
-
-
-@app.errorhandler(TypeError)
-def handle_preprocessing_errs(e: Exception) -> Response:
-    return __gen_response(400, 'ERROR', details='Invalid input')
-
-
-@app.errorhandler(LookupError)
-def handle_preprocessing_errs2(e: Exception) -> Response:
-    return __gen_response(400, 'ERROR', details='Invalid input')
-
-
-@app.errorhandler(RuntimeError)
-def handle_runtime_error(e: Exception) -> Response:
-    telegramapi2.send_developer(f'Errorhandler error caught', e)
-    return __gen_response(500, 'ERROR', details='Internal server error')
-
-
-@app.errorhandler(Exception)
-def handle_broad(e: Exception) -> Response:
-    telegramapi2.send_developer(
-        f'Unspecified calc error\n\n'
-        f'Exception = {str(e)}', e)
-    return __gen_response(500, 'ERROR', details='Internal server error')
-
-
-@app.errorhandler(404)
-def page_not_found(e):
-    return 'Not found', 404
+# @app.errorhandler(ZeroDistanceResultsError)
+# def handle_zero_distance_error(e: Exception) -> Response:
+#     telegramapi2.send_developer(
+#         f'No available route can be built\n\n'
+#         f'Exception = {str(e)}', e)
+#     return __gen_response(404, 'ZeroDistanceResultsError', details=str(e))
+#
+#
+# @app.errorhandler(WrongNumberError)
+# def handle_wrong_number(e: Exception) -> Response:
+#     return __gen_response(422, 'WrongNumberError', details=str(e.args))
+#
+#
+# @app.errorhandler(TypeError)
+# def handle_preprocessing_errs(e: Exception) -> Response:
+#     return __gen_response(400, 'ERROR', details='Invalid input')
+#
+#
+# @app.errorhandler(LookupError)
+# def handle_preprocessing_errs2(e: Exception) -> Response:
+#     return __gen_response(400, 'ERROR', details='Invalid input')
+#
+#
+# @app.errorhandler(RuntimeError)
+# def handle_runtime_error(e: Exception) -> Response:
+#     telegramapi2.send_developer(f'Errorhandler error caught', e)
+#     return __gen_response(500, 'ERROR', details='Internal server error')
+#
+#
+# @app.errorhandler(Exception)
+# def handle_broad(e: Exception) -> Response:
+#     telegramapi2.send_developer(
+#         f'Broad calc error\n\n'
+#         f'Exception = {str(e)}', e)
+#     return __gen_response(500, 'ERROR', details='Internal server error')
+#
+#
+# @app.errorhandler(404)
+# def page_not_found(e: Exception):
+#     return 'Not found', 404
 
 
 def create_app():

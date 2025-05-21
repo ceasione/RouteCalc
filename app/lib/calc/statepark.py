@@ -8,10 +8,10 @@ class Currency:
     def get_preferred(cls, cur1, cur2):
         priority = {'USD': 3, 'EUR': 2, 'UAH': 1}
 
-        cur1_priority = priority[cur1.iso_code]
-        cur2_priority = priority[cur2.iso_code]
+        prio1 = priority[cur1.iso_code]
+        prio2 = priority[cur2.iso_code]
 
-        if cur1_priority >= cur2_priority:
+        if prio1 >= prio2:
             return cur1
         else:
             return cur2
@@ -68,24 +68,19 @@ class StateEncoder(json.JSONEncoder):
 class StatePark:
 
     def __init__(self, already_park: [State] = None):
+        self.park = []
         if already_park is not None and isinstance(already_park, list):
             """This is used by the def from_file(cls, filename) method"""
             self.park = already_park
-        else:
-            """This part will soon be deleted"""
-            self.park = []
 
     @classmethod
     def from_file(cls, filename=settings.STATEPARK_NOSQL_LOC):
         # Reconstructing from file
-        try:
-            with open(file=filename, mode='r', encoding='utf8', ) as f:
-                contents = f.read()
-            struct = json.loads(contents)
-            park = [State.from_dict(item) for item in struct['statepark']]
-            return cls(park)
-        except Exception as e:
-            raise e
+        with open(file=filename, mode='r', encoding='utf8', ) as f:
+            contents = f.read()
+        struct = json.loads(contents)
+        park = [State.from_dict(item) for item in struct['statepark']]
+        return cls(park)
 
     def to_file(self, filename=settings.STATEPARK_NOSQL_LOC):
         # Saving to file
