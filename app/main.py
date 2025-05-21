@@ -108,7 +108,7 @@ def calculate():
 
     This endpoint performs the following steps:
     1. Parses and validates the incoming request using a preprocessing function.
-    2. Runs a route calculation algorithm and handles possible errors.
+    2. Processes request and making CalculationDTO containing result
     3. Composes a Telegram message with calculation details.
     4. Logs the request and response data.
     5. Checks if the request IP is blacklisted and adjusts the message accordingly.
