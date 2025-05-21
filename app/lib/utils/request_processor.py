@@ -1,6 +1,6 @@
 
 import json
-import app.lib.utils.number_tools as number_tools
+from app.lib.utils import number_tools
 from app.lib.calc.vehicles import VEHICLES
 
 request_example = {'intent': str('calc'+'callback'),
@@ -29,8 +29,6 @@ def __validate_transport_id(vehicle_id):
 
 def __validate_request(input_dict, user_ip):
 
-    num_validator = number_tools.get_instance()
-
     if input_dict['intent'] != 'calc' and input_dict['intent'] != 'callback' and input_dict['intent'] != 'acquire':
         raise ValueError('Expected intent "calc", "callback" or "acquire". Got ' + input_dict['intent'])
 
@@ -52,7 +50,7 @@ def __validate_request(input_dict, user_ip):
                          'lng': float(input_dict['to']['lng']),
                          'countrycode': str(input_dict['to']['countrycode'])},
             'transport_id': __validate_transport_id(int(input_dict['transport_id'])),
-            'phone_number': num_validator.validate_phone_ukr(input_dict['phone_number']),
+            'phone_number': number_tools.validate_phone_ukr(input_dict['phone_number']),
             'locale': input_dict['locale'] if input_dict.get('locale') is not None else 'uk_UA',
             'url': input_dict['url'] if input_dict.get('url') is not None else 'url undefined',
             'ip': user_ip}

@@ -11,9 +11,9 @@ import app.lib.utils.blacklist as blacklist
 import app.lib.utils.request_processor as request_processor
 import app.lib.calc.calc_itself as calc_itself
 from app.lib.utils.DTOs import CalculationDTO
-import app.lib.utils.number_tools as number_tools
-from app.lib.apis.googleapi import ZeroDistanceResultsError
+from app.lib.utils import number_tools
 from app.lib.utils.number_tools import WrongNumberError
+from app.lib.apis.googleapi import ZeroDistanceResultsError
 from app.impsettings import settings
 
 
@@ -169,9 +169,8 @@ def submit_new():
     """
 
     # Step 1: Preprocess request
-    num_validator = number_tools.get_instance()
     dto = CalculationDTO.from_dict(request.json['dto'])
-    num = num_validator.validate_phone_ukr(request.json['num'])
+    num = number_tools.validate_phone_ukr(request.json['num'])
     ip = request.remote_addr
 
     # Step 2 Prepare TG and SMS message
