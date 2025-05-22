@@ -7,7 +7,7 @@ from app.lib.calc import vehicles
 from app.lib.apis import smsapi, telegramapi2
 from app.lib.utils.QueryLogger import query_logger_factory
 from flask_cors import CORS
-import app.lib.utils.blacklist as blacklist
+from app.lib.utils.blacklist import BLACKLIST
 import app.lib.utils.request_processor as request_processor
 import app.lib.calc.calc_itself as calc_itself
 from app.lib.utils.DTOs import CalculationDTO
@@ -75,7 +75,7 @@ def blacklist_add(req: str):
     :rtype: flask.Response
     """
 
-    blacklist.append(req)
+    BLACKLIST.blacklist(req)
     return __gen_response(201, f'BLACKLISTED', req)
 
 
@@ -137,7 +137,7 @@ def calculate():
                        response=json.dumps([tg_msg, 'nosms'], ensure_ascii=False))
 
     # Step 5: Check if IP blacklisted
-    if blacklist.check_ip(request_dto.ip):
+    if BLACKLIST.check(request_dto.ip):
         tg_msg = '*BLACKLISTED*\n\n'+tg_msg
 
     # Step 6: Notify managers via Telegram Bot
@@ -186,13 +186,13 @@ def submit_new():
                        response=json.dumps([tg_msg, sms_msg], ensure_ascii=False))
 
     # Step 4: Check for blacklist and make notifications
-    if not blacklist.check(num, ip):
+    if not BLACKLIST.check(num, ip):
         # Not blacklisted -> Send TG message to managers and SMS to client
         telegramapi2.send_loud(tg_msg)
         smsapi.send_sms(num, sms_msg)
     else:
         # Blacklisted -> Send modified TG message to managers only -> Spreading blacklist by mapping num and ip
-        blacklist.spread(num, ip)
+        BLACKLIST.spread(num, ip)
         telegramapi2.send_loud('*BLACKLISTED*\n\n'+tg_msg)
 
     # Step 5: Return resopnse to frontend

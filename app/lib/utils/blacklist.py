@@ -1,54 +1,65 @@
 
 from app import settings
-from app.lib.utils import utils
 
 
-# TODO make stateful class
+class Blacklist:
+
+    def __init__(self):
+        self.fname = settings.BLACKLIST_FILE_LOC
+        self.list = self.__load_file(self.fname)
+
+    @staticmethod
+    def __load_file(fname) -> list:
+        """
+        Opens file, reads and renovates :self.list: with fresh copy
+        :return: None
+        """
+        with open(fname, 'r') as file:
+            return [line.strip() for line in file]
+
+    def blacklist(self, req: str) -> None:
+        """
+        Adds an item (it supposed to be a phone number or an ip adress) to blacklist
+        and appends item to the file
+        Mode 'a' open for writing, appending to the end of the file if it exists
+
+        :param req: (str) item to add
+        :return: None
+        """
+        self.list.append(req)
+        with open(settings.BLACKLIST_FILE_LOC, 'a') as file:
+            file.write(f'{req}\n')
+
+    def check(self, *args) -> bool:
+        """
+        Return True if any of items of :param args: is blacklisted
+        Otherwise return False
+        :param args: Tuple[str, ...]
+        :return: True or False
+        """
+        return any(arg in self.list for arg in args)
+
+    def spread(self, phone_number, client_ip) -> bool:
+        """
+        This method ensures pair of arguments are blacklisted
+        Blacklisting other if one is present.
+
+        :param phone_number: (str) Phone number to check
+        :param client_ip: (str) IP to check
+        :return: True if blacklist was modified, else False
+        """
+        num_present = self.check(phone_number)
+        ip_present = self.check(client_ip)
+
+        match (num_present, ip_present):
+            case (True, False):
+                self.blacklist(client_ip)
+                return True
+            case (False, True):
+                self.blacklist(phone_number)
+                return True
+            case _:
+                return False
 
 
-def __renew():
-    with open(settings.BLACKLIST_FILE_LOC, 'rt') as file:
-
-        settings.SMS_BLACKLIST = list()
-
-        for line in file:
-            settings.SMS_BLACKLIST.append(line.rstrip())
-    utils.log_safely(f'Successfully loaded BLACKLIST file')
-
-
-def __lookup(req: str):
-    return True if req in settings.SMS_BLACKLIST else False
-
-
-def append(req: str):
-    with open(settings.BLACKLIST_FILE_LOC, 'at') as file:
-        file.write(f'{req}\n')
-        
-
-def spread(phone_number, client_ip):
-    __renew()
-
-    num_is_present = __lookup(phone_number)
-    ip_is_present = __lookup(client_ip)
-
-    if num_is_present and ip_is_present:
-        return
-
-    if num_is_present:
-        append(client_ip)
-
-    if ip_is_present:
-        append(phone_number)
-
-    __renew()
-
-
-def check(phone_number, client_ip):
-    __renew()
-
-    return True if (__lookup(phone_number) or __lookup(client_ip)) else False
-
-
-def check_ip(client_ip):
-    __renew()
-    return True if __lookup(client_ip) else False
+BLACKLIST = Blacklist()
