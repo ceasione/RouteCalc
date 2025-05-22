@@ -14,12 +14,10 @@ from app.lib.utils.DTOs import CalculationDTO
 from app.lib.utils import number_tools
 from app.lib.utils.number_tools import WrongNumberError
 from app.lib.apis.googleapi import ZeroDistanceResultsError
-from app.impsettings import settings
 
 
 CACHE = cache.cache_instance_factory()
 LOGGER = query_logger_factory()
-MAX_REQUESTS = settings.MAX_REQUESTS
 
 app = Flask(__name__)
 CORS = CORS(app)
@@ -249,10 +247,8 @@ def page_not_found(e: Exception):
 
 
 def create_app():
-    settings.GOOGLE_APIKEY = settings.GOOGLE_APIKEY_PROD
     return app
 
 
 if __name__ == '__main__':
-    settings.GOOGLE_APIKEY = settings.GOOGLE_APIKEY_DEV
     app.run(debug=True, use_reloader=False)

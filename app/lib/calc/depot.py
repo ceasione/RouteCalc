@@ -1,6 +1,6 @@
 from copy import copy
 
-from app.impsettings import settings
+from app import settings
 from app.lib.utils import cache
 import json
 import app.lib.calc.statepark as statepark

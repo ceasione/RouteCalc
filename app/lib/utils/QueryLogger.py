@@ -1,4 +1,4 @@
-from app.impsettings import settings
+from app import settings
 import sqlite3
 from datetime import datetime
 import app.lib.apis.telegramapi2 as tgapi2

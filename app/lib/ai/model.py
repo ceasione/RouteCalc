@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 from keras.api.optimizers import Adam
 from keras.api.models import load_model
 import seaborn as sns
-from app.impsettings import settings
+from app import settings
 from app.lib.calc.depotpark import Depot
 from app.lib.calc.vehicles import Vehicle
 

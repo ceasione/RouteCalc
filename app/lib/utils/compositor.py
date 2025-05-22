@@ -1,5 +1,5 @@
 
-from app.impsettings import settings
+from app import settings
 from app.lib.utils.DTOs import CalculationDTO
 from app.lib.utils.DTOs import LocaleDTO
 from textwrap import dedent

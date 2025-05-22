@@ -1,5 +1,5 @@
 from app.lib.calc.place import Place
-from app.impsettings import settings
+from app import settings
 import sqlite3
 import json
 from app.lib.calc.depot import Depot

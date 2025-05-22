@@ -1,4 +1,4 @@
-from app.impsettings import settings
+from app import settings
 import requests
 import app.lib.utils.utils as utils
 from app.lib.apis import telegramapi2

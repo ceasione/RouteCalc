@@ -1,5 +1,5 @@
 import sqlite3
-from app.impsettings import settings
+from app import settings
 from app.lib.calc.distance import Distance
 import app.lib.apis.telegramapi2 as tgapi2
 from app.lib.utils import utils

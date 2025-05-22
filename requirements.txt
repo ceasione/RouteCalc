@@ -1,3 +1,4 @@
+dotenv
 urllib3==1.26.16
 flask
 flask-cors

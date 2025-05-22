@@ -1,6 +1,9 @@
 
-from app.impsettings import settings
+from app import settings
 from app.lib.utils import utils
+
+
+# TODO make stateful class
 
 
 def __renew():

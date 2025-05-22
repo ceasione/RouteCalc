@@ -1,5 +1,5 @@
 import json
-from app.impsettings import settings
+from app import settings
 
 
 class Currency:

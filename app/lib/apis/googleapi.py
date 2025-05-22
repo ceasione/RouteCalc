@@ -1,4 +1,4 @@
-from app.impsettings import settings
+from app import settings
 import requests
 import json
 from app.lib.utils import cache

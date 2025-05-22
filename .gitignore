@@ -7,3 +7,4 @@ app/lib/calc/__pycache__/
 app/lib/utils/__pycache__/
 .vscode/
 release/
+.env
