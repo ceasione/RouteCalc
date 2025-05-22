@@ -120,26 +120,26 @@ def calculate():
     """
 
     # Step 1: Preprocess request
-    preprocessed = request_processor.preprocess(request)
+    request_dto = request_processor.process(request)
 
     # Step 2: Perform the calculationn
-    calculation_dto = calc_itself.process_request(preprocessed)
+    calculation_dto = calc_itself.process_request(request_dto)
 
     # Step 3: Prepare TG message
     tg_msg = compositor.compose_telegram(
-        intent=preprocessed['intent'],
+        intent=request_dto.intent,
         calculation=calculation_dto,
-        url=preprocessed['url'],
-        ip=preprocessed['ip'],
-        phone_num=preprocessed["phone_number"])
+        url=request_dto.url,
+        ip=request_dto.ip,
+        phone_num=request_dto.phone_num)
 
     # Step 4: Log request and calculation
-    LOGGER.put_request(phone_number='nosms',
-                       query=json.dumps(preprocessed, ensure_ascii=False),
+    LOGGER.put_request(phone_number=request_dto.phone_num,
+                       query=json.dumps(request_dto.to_dict(), ensure_ascii=False),
                        response=json.dumps([tg_msg, 'nosms'], ensure_ascii=False))
 
     # Step 5: Check if IP blacklisted
-    if blacklist.check_ip(preprocessed['ip']):
+    if blacklist.check_ip(request_dto.ip):
         tg_msg = '*BLACKLISTED*\n\n'+tg_msg
 
     # Step 6: Notify managers via Telegram Bot
@@ -212,6 +212,11 @@ def handle_zero_distance_error(e: Exception) -> Response:
 @app.errorhandler(WrongNumberError)
 def handle_wrong_number(e: Exception) -> Response:
     return __gen_response(422, 'WrongNumberError', details=str(e.args))
+
+
+@app.errorhandler(request_processor.ValidationError)
+def handle_validation_error(e: Exception) -> Response:
+    return __gen_response(400, 'ERROR', details='Input validation error')
 
 
 @app.errorhandler(TypeError)

@@ -1,14 +1,21 @@
+from app.lib.calc.place import Place
+from app.lib.calc.vehicles import Vehicle
+from dataclasses import dataclass
+
 
 class LocaleDTO:
 
-    def __init__(self, locale: str):
+    ALLOWED_LOCALES = ('uk_UA', 'ru_UA')
 
-        if locale == 'ru_UA':
-            self.value = locale
-        elif locale == 'uk_UA':
-            self.value = locale
-        else:
-            raise RuntimeError('Only uk_UA and ru_UA locales are currently supported')
+    def __init__(self, locale: str):
+        self.value = locale
+
+        if self.value not in LocaleDTO.ALLOWED_LOCALES:
+            # TODO: LOG
+            self.value = LocaleDTO.ALLOWED_LOCALES[0]
+
+    def __str__(self):
+        return self.value
 
     def is_uk_ua(self):
         return True if self.value == 'uk_UA' else False
@@ -119,3 +126,31 @@ class CalculationDTO:
                    pfactor_arrival=dct['pfactor_arrival'],
                    pfactor_distance=dct['pfactor_distance'],
                    locale=LocaleDTO(dct['locale']))
+
+
+# noinspection PyTypeChecker
+@dataclass
+class RequestDTO:
+
+    def __init__(self):
+
+        self.intent: str = None
+        self.origin: Place = None
+        self.destination: Place = None
+        self.vehicle: Vehicle = None
+        self.phone_num: str = None
+        self.locale: LocaleDTO = None
+        self.url: str = None
+        self.ip: str = None
+
+    def to_dict(self):
+        return {
+            'intent': self.intent,
+            'origin': self.origin.to_dict(),
+            'destination': self.destination.to_dict(),
+            'vehicle': self.vehicle.id,
+            'phone_num': self.phone_num,
+            'locale': self.locale.to_dict(),
+            'url': self.url,
+            'ip': self.ip
+        }

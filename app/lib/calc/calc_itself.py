@@ -10,9 +10,9 @@ from app.lib.calc.vehicles import Vehicle
 from app.lib.calc.depotpark import Depot
 from app.lib.calc.place import LatLngAble
 from app.lib.utils.DTOs import CalculationDTO
+from app.lib.utils.DTOs import RequestDTO
 from typing import Callable
 from typing import Tuple
-from typing import Dict
 from typing import cast
 
 
@@ -144,10 +144,10 @@ def calculate(route: Tuple[LatLngAble, LatLngAble, LatLngAble, LatLngAble],
     return distance, price, cost
 
 
-def process_request(request: Dict) -> CalculationDTO:
-    place_a = Place.from_rqst(request['from'])
-    place_b = Place.from_rqst(request['to'])
-    vehicle = __select_vehicle(request['transport_id'])
+def process_request(request: RequestDTO) -> CalculationDTO:
+    place_a = request.origin
+    place_b = request.destination
+    vehicle = request.vehicle
     route = plan_route(place_a, place_b)
     starting_depot, ending_depot = cast(Depot, route[0]), cast(Depot, route[3])
     visible_route = route[1:-1]
@@ -167,5 +167,5 @@ def process_request(request: Dict) -> CalculationDTO:
         'route': visible_route,
         'place_a': place_a,
         'place_b': place_b,
-        'client_phone': request['phone_number']}
-    return compositor.make_calculation_dto(details=details, locale=request['locale'])
+        'client_phone': request.phone_num}
+    return compositor.make_calculation_dto(details=details, locale=request.locale)

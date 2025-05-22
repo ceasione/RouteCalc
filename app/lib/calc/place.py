@@ -9,9 +9,9 @@ APIKEY = settings.GOOGLE_APIKEY
 
 
 class LatLngAble(ABC):
-    def __init__(self, lat, lng):
-        self.lat = lat
-        self. lng = lng
+    def __init__(self, lat: float, lng: float):
+        self.lat: float = lat
+        self.lng: float = lng
         self.cache = cache.cache_instance_factory()
 
     def distance_to(self, place_to):
@@ -61,8 +61,8 @@ class LatLngAble(ABC):
 class Place(LatLngAble):
 
     def __init__(self,
-                 lat,
-                 lng,
+                 lat: float,
+                 lng: float,
                  name=None,
                  name_long=None,
                  countrycode=None):

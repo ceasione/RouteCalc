@@ -1,100 +1,137 @@
 
-import json
+from typing import Tuple
+import flask
 from app.lib.utils import number_tools
 from app.lib.calc.vehicles import VEHICLES
-
-request_example = {'intent': str('calc'+'callback'),
-                   'from': {'name_short': str(''),
-                            'name_long': str(''),
-                            'lat': float(0),
-                            'lng': float(0),
-                            'countrycode': str('')},
-                   'to':   {'name_short': str(''),
-                            'name_long': str(''),
-                            'lat': float(0),
-                            'lng': float(0),
-                            'countrycode': str('')},
-                   'transport_id': int(0),
-                   'phone_number': str('12 digits'),
-                   'locale': str('ru_UA'),
-                   'url': str('https://inters...')}
+from app.lib.utils.DTOs import RequestDTO
+from app.lib.utils.DTOs import LocaleDTO
+from app.lib.calc.place import Place
 
 
-def __validate_transport_id(vehicle_id):
-    ids = [vehicle.id for vehicle in VEHICLES]
-    if vehicle_id not in ids:
-        raise ValueError('Unknown vehicle_id')
-    return vehicle_id
+class ValidationError(Exception):
+    ...
 
 
-def __validate_request(input_dict, user_ip):
-
-    if input_dict['intent'] != 'calc' and input_dict['intent'] != 'callback' and input_dict['intent'] != 'acquire':
-        raise ValueError('Expected intent "calc", "callback" or "acquire". Got ' + input_dict['intent'])
-
-    if len(input_dict['from']['name_short']) < 1 or len(input_dict['to']['name_short']) < 1:
-        raise ValueError('Field name_short could not be empty')
-
-    if len(input_dict['from']['name_long']) < 1 or len(input_dict['to']['name_long']) < 1:
-        raise ValueError('Field name_long could not be empty')
-
-    return {'intent':   str(input_dict['intent']),
-            'from':     {'name_short': str(input_dict['from']['name_short']),
-                         'name_long': str(input_dict['from']['name_long']),
-                         'lat': float(input_dict['from']['lat']),
-                         'lng': float(input_dict['from']['lng']),
-                         'countrycode': str(input_dict['from']['countrycode'])},
-            'to':       {'name_short': str(input_dict['to']['name_short']),
-                         'name_long': str(input_dict['to']['name_long']),
-                         'lat': float(input_dict['to']['lat']),
-                         'lng': float(input_dict['to']['lng']),
-                         'countrycode': str(input_dict['to']['countrycode'])},
-            'transport_id': __validate_transport_id(int(input_dict['transport_id'])),
-            'phone_number': number_tools.validate_phone_ukr(input_dict['phone_number']),
-            'locale': input_dict['locale'] if input_dict.get('locale') is not None else 'uk_UA',
-            'url': input_dict['url'] if input_dict.get('url') is not None else 'url undefined',
-            'ip': user_ip}
+ALLOWED_INTENTS = {'calc', 'callback', 'acquire'}
 
 
-def __validate_numless_request(input_dict, user_ip):
-
-    if input_dict['intent'] != 'acquire':
-        raise ValueError('Expected intent "acquire". Got ' + input_dict['intent'])
-
-    if len(input_dict['from']['name_short']) < 1 or len(input_dict['to']['name_short']) < 1:
-        raise ValueError('Field name_short could not be empty')
-
-    if len(input_dict['from']['name_long']) < 1 or len(input_dict['to']['name_long']) < 1:
-        raise ValueError('Field name_long could not be empty')
-
-    return {'intent':   str(input_dict['intent']),
-            'from':     {'name_short': str(input_dict['from']['name_short']),
-                         'name_long': str(input_dict['from']['name_long']),
-                         'lat': float(input_dict['from']['lat']),
-                         'lng': float(input_dict['from']['lng']),
-                         'countrycode': str(input_dict['from']['countrycode'])},
-            'to':       {'name_short': str(input_dict['to']['name_short']),
-                         'name_long': str(input_dict['to']['name_long']),
-                         'lat': float(input_dict['to']['lat']),
-                         'lng': float(input_dict['to']['lng']),
-                         'countrycode': str(input_dict['to']['countrycode'])},
-            'transport_id': __validate_transport_id(int(input_dict['transport_id'])),
-            'phone_number': None,
-            'locale': input_dict['locale'] if input_dict.get('locale') is not None else 'uk_UA',
-            'url': input_dict['url'] if input_dict.get('url') is not None else 'url undefined',
-            'ip': user_ip}
+def pre(request_: flask.Request) -> Tuple[dict, str]:
+    raw = request_.get_json(force=True)
+    return raw, request_.remote_addr
 
 
-def preprocess(request):
+def intent(raw: dict, dto: RequestDTO):
+    _intent = raw['intent'].strip()
+    if _intent not in ALLOWED_INTENTS:
+        raise ValidationError('Unexpected intent, got: '+raw['intent'])
 
-    if isinstance(request.json, str):
-        input_dict = json.loads(request.json)
-    elif isinstance(request.json, dict):
-        input_dict = request.json
+    dto.intent = _intent
+
+
+def origin(raw: dict, dto: RequestDTO):
+    _origin = raw['from']
+    _name_short = _origin['name_short']
+    _name_long = _origin['name_long']
+
+    if not _name_short:
+        raise ValidationError('Place from name_short could not be empty')
+    if not _name_long:
+        raise ValidationError('Place from name_long could not be empty')
+
+    dto.origin = Place(float(_origin['lat']),
+                       float(_origin['lng']),
+                       _origin['name_short'],
+                       _origin['name_long'],
+                       _origin['countrycode'])
+
+
+def destination(raw: dict, dto: RequestDTO):
+    _destination = raw['to']
+    _name_short = _destination['name_short']
+    _name_long = _destination['name_long']
+
+    if not _name_short:
+        raise ValidationError('Place to name_short could not be empty')
+    if not _name_long:
+        raise ValidationError('Place to name_long could not be empty')
+
+    dto.destination = Place(float(_destination['lat']),
+                            float(_destination['lng']),
+                            _destination['name_short'],
+                            _destination['name_long'],
+                            _destination['countrycode'])
+
+
+def transport(raw: dict, dto: RequestDTO):
+    t_id = int(raw['transport_id'])
+    for vehicle in VEHICLES:
+        if vehicle.id == t_id:
+            dto.vehicle = vehicle
+            break
     else:
-        raise TypeError('Expected input json be str or dict')
+        raise ValidationError(f'Unknown vehicle_id {t_id}')
 
-    if input_dict['intent'] == 'acquire':
-        return __validate_numless_request(input_dict, request.remote_addr)
-    else:
-        return __validate_request(input_dict, request.remote_addr)
+
+def phone_number(raw: dict, dto: RequestDTO):
+    _phone_number = raw['phone_number']
+
+    if _phone_number is not None:
+        dto.phone_num = number_tools.validate_phone_ukr(_phone_number)
+
+
+def locale(raw: dict, dto: RequestDTO):
+    _locale = raw['locale'].strip()
+    dto.locale = LocaleDTO(_locale)
+
+
+def url(raw: dict, dto: RequestDTO):
+    _url = raw['url']
+    dto.url = _url
+
+
+def process(request_raw: flask.Request) -> RequestDTO:
+    """
+    Process and validate a flask.Request (typically received from the frontend) to create
+    and populate a RequestDTO object that's convenient for further use
+
+      input_example = {'intent': str,
+                       'from': {'name_short': str,
+                                'name_long': str,
+                                'lat': float,
+                                'lng': float,
+                                'countrycode': str},
+                       'to':   {'name_short': str,
+                                'name_long': str,
+                                'lat': float,
+                                'lng': float,
+                                'countrycode': str},
+                       'transport_id': int,
+                       'phone_number': str,
+                       'locale': str,
+                       'url': str}
+
+    :param: request_raw: flask.Request object
+    :return: RequestDTO object
+    :raises: ValidationError
+    """
+    raw, ip = pre(request_raw)
+
+    dto = RequestDTO()
+    pipeline = (
+        intent,
+        origin,
+        destination,
+        transport,
+        phone_number,
+        locale,
+        url
+    )
+
+    for stage in pipeline:
+        try:
+            stage(raw, dto)
+        except (TypeError, IndexError, KeyError, AttributeError, ValueError) as e:
+            raise ValidationError(e)
+
+    dto.ip = ip
+    return dto

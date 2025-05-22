@@ -27,6 +27,9 @@ def validate_phone_ukr(phone_number):
 
     phone_number = phone_number.strip()
 
+    if phone_number == 'nosms':
+        return None  # This was hardcoded in frontend side and means that phone_number = None
+
     if len(phone_number) != 12:
         raise ValueError(f'Phone number expected length is 12. Got {len(phone_number)}')
 
