@@ -1,7 +1,7 @@
 from app import settings
 import requests
-import app.lib.utils.utils as utils
 from app.lib.apis import telegramapi2
+import logging
 
 
 APIKEY = settings.SMS_APIKEY
@@ -34,7 +34,7 @@ def get_sent_status(a_id):
     payload = {'id_sms': [a_id]}
     response = requests.post(url, json=payload, headers=HEADERS)
     response = response.json()
-    utils.log_safely(response)
+    logging.debug(response)
 
 
 def check_balance():
@@ -47,4 +47,4 @@ def __get_available_alphanames():
     url = 'https://im.smsclub.mobi/sms/originator'
     response = requests.post(url, headers=HEADERS)
     response = response.json()
-    utils.log_safely(response)
+    logging.debug(response)

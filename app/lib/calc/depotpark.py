@@ -4,6 +4,7 @@ import sqlite3
 import json
 from app.lib.calc.depot import Depot
 from app.lib.utils import utils, cache
+import logging
 
 APIADR = settings.GOOGLE_APIADR
 APIKEY = settings.GOOGLE_APIKEY
@@ -141,9 +142,9 @@ def test_depotpark_storage_restoring():
     dp2 = DepotPark.from_file(filename=settings.DEPOTPARK_NOSQL_LOC)
     if sum(1 for place in dp.park if isinstance(place, Place)) == \
             sum(1 for place in dp2.park if isinstance(place, Place)):
-        utils.log_safely('test_depotpark_storage_restoring() COMPLETE')
+        logging.debug('test_depotpark_storage_restoring() COMPLETE')
     else:
-        utils.log_safely('test_depotpark_storage_restoring() FAILED')
+        logging.debug('test_depotpark_storage_restoring() FAILED')
 
 
 DEPOTPARK = DepotPark.from_file(filename=settings.DEPOTPARK_NOSQL_LOC)

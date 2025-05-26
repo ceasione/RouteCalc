@@ -2,7 +2,7 @@ import sqlite3
 from app import settings
 from app.lib.calc.distance import Distance
 import app.lib.apis.telegramapi2 as tgapi2
-from app.lib.utils import utils
+import logging
 
 
 class Cache:
@@ -182,7 +182,7 @@ class Cache:
                 print('Cache hit')
                 return distances
             else:
-                utils.log_safely('Cache miss, fetching ...')
+                logging.debug('Cache miss, fetching ...')
 
                 # Avoiding circular import error
                 if self.g_api is None:
@@ -197,7 +197,7 @@ class Cache:
                     self.cache_it(_place_from.lat, _place_from.lng,
                                   _place_to.lat, _place_to.lng,
                                   _distance)
-                utils.log_safely('Cached succesfully!')
+                logging.debug(f'Succesfully cached distance')
 
         return self.g_api.fetch_distance(places_from, places_to)
 

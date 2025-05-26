@@ -14,6 +14,8 @@ from app.lib.utils.DTOs import CalculationDTO
 from app.lib.utils import number_tools
 from app.lib.utils.number_tools import WrongNumberError
 from app.lib.apis.googleapi import ZeroDistanceResultsError
+from app.lib.utils import utils
+from app import settings
 
 
 CACHE = cache.cache_instance_factory()
@@ -21,6 +23,8 @@ LOGGER = query_logger_factory()
 
 app = Flask(__name__)
 CORS = CORS(app)
+
+utils.setup_logger(settings.LOGLEVEL)
 
 
 def __gen_response(http_status: int, json_status: str, details: str = '', workload: CalculationDTO = None) -> Response:
