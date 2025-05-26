@@ -2,76 +2,76 @@ from app import settings
 import sqlite3
 from datetime import datetime
 import app.lib.apis.telegramapi2 as tgapi2
-
-
-"""
-CREATE TABLE "queries" (
-    "date"      TEXT,
-    "time"      TEXT,
-    "number"    TEXT,
-    "query"     TEXT,
-    "response"	TEXT
-);"""
-
-
-def _today():
-    now = datetime.now()
-    return now.strftime('%Y-%m-%d')
-
-
-def _now():
-    now = datetime.now()
-    return now.strftime('%H:%M:%S')
+import logging
+import traceback
 
 
 class QueryLogger:
 
+    """
+    Database connection class for storing queries and responses
+    from Calc for auditing or debugging purposes.
+
+    Intended usage via context manager.
+
+    Schema:
+    CREATE TABLE "queries" (
+        "date"      TEXT,
+        "time"      TEXT,
+        "number"    TEXT,
+        "query"     TEXT,
+        "response"	TEXT
+    );
+    """
+
     def __init__(self):
-
         self.DB_LOCATION = settings.LOG_DB_LOCATION
-        self.conn = sqlite3.connect(self.DB_LOCATION, check_same_thread=False)
+        self.conn = sqlite3.connect(self.DB_LOCATION)
         self.conn.row_factory = sqlite3.Row
-        self.c = self.conn.cursor()
+        self.cursor = self.conn.cursor()
 
-    def __del__(self):
+    def __enter__(self):
+        return self
 
+    def __exit__(self, exc_type, exc_value, tb):
         self.conn.close()
 
-    def put_request_safe(self, phone_number, query, response):
+    @staticmethod
+    def _today() -> str:
+        """
+        We are agreed that under this database Date are stored as a text in form of this specific pattern
+        :return: datetime.now().strftime('%Y-%m-%d')
+        """
+        return datetime.now().strftime('%Y-%m-%d')
+
+    @staticmethod
+    def _now() -> str:
+        """
+        The same as above
+        :return: datetime.now().strftime('%H:%M:%S')
+        """
+        return datetime.now().strftime('%H:%M:%S')
+
+    INSERT_QUERY = """
+        INSERT INTO queries( "date", "time", "number", "query", "response")
+        VALUES (?, ?, ?, ?, ?)
+    """
+
+    def log_calculation(self, phone_number: str, query: str, response: str) -> None:
+        """
+        Logs a query and response to the database
+        :param phone_number: (str) phone number formatted as '380501234567'
+        :param query: (str) The input query to store
+        :param response: (str) The system's response to the query
+        :return: None
+        """
         try:
-            self.c.execute("""
-                        INSERT INTO queries(
-                            "date",
-                            "time",
-                            "number",
-                            "query",
-                            "response")
-                        VALUES (?, ?, ?, ?, ?) 
-                        """, (_today(),
-                              _now(),
-                              phone_number,
-                              query,
-                              response))
+            self.cursor.execute(self.INSERT_QUERY, (self._today(),
+                                self._now(),
+                                phone_number,
+                                query,
+                                response))
             self.conn.commit()
-        except sqlite3.OperationalError as e:
-            tgapi2.send_developer('sqlite3.OperationalError at QueryLogger', e)
-
-    def put_request(self, phone_number, query, response):
-        self.put_request_safe(phone_number, query, response)
-
-    def get_today_requests_count(self, phone_number):
-
-        self.c.execute("""
-            SELECT date, number 
-            FROM queries
-            WHERE date = ? and number = ?
-            """, (_today(), phone_number))
-        rows = self.c.fetchall()
-        return len(rows)
-
-
-singleton = QueryLogger()
-
-
-def query_logger_factory():
-    return singleton
+        except sqlite3.DatabaseError as e:
+            logging.error(f'sqlite3.DatabaseError at QueryLogger\n{traceback.format_exc()}')
+            tgapi2.send_developer('sqlite3.DatabaseError at QueryLogger', e)

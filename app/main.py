@@ -5,7 +5,7 @@ from flask import Response
 from app.lib.utils import compositor, cache
 from app.lib.calc import vehicles
 from app.lib.apis import smsapi, telegramapi2
-from app.lib.utils.QueryLogger import query_logger_factory
+from app.lib.utils.QueryLogger import QueryLogger
 from flask_cors import CORS
 from app.lib.utils.blacklist import BLACKLIST
 import app.lib.utils.request_processor as request_processor
@@ -19,7 +19,6 @@ from app import settings
 
 
 CACHE = cache.cache_instance_factory()
-LOGGER = query_logger_factory()
 
 app = Flask(__name__)
 CORS = CORS(app)
@@ -136,9 +135,10 @@ def calculate():
         phone_num=request_dto.phone_num)
 
     # Step 4: Log request and calculation
-    LOGGER.put_request(phone_number=request_dto.phone_num,
-                       query=json.dumps(request_dto.to_dict(), ensure_ascii=False),
-                       response=json.dumps([tg_msg, 'nosms'], ensure_ascii=False))
+    with QueryLogger() as qlogger:
+        qlogger.log_calculation(phone_number=request_dto.phone_num,
+                                query=json.dumps(request_dto.to_dict(), ensure_ascii=False),
+                                response=json.dumps([tg_msg, 'nosms'], ensure_ascii=False))
 
     # Step 5: Check if IP blacklisted
     if BLACKLIST.check(request_dto.ip):
@@ -185,9 +185,10 @@ def submit_new():
         phone_num=num)
 
     # Step 3: Log request and calculation
-    LOGGER.put_request(phone_number=num,
-                       query=json.dumps(dto.to_dict(), ensure_ascii=False),
-                       response=json.dumps([tg_msg, sms_msg], ensure_ascii=False))
+    with QueryLogger() as qlogger:
+        qlogger.log_calculation(phone_number=num,
+                                query=json.dumps(dto.to_dict(), ensure_ascii=False),
+                                response=json.dumps([tg_msg, sms_msg], ensure_ascii=False))
 
     # Step 4: Check for blacklist and make notifications
     if not BLACKLIST.check(num, ip):
@@ -217,17 +218,17 @@ def handle_wrong_number(e: Exception) -> Response:
 
 
 @app.errorhandler(request_processor.ValidationError)
-def handle_validation_error(e: Exception) -> Response:
+def handle_validation_error(_e: Exception) -> Response:
     return __gen_response(400, 'ERROR', details='Input validation error')
 
 
 @app.errorhandler(TypeError)
-def handle_preprocessing_errs(e: Exception) -> Response:
+def handle_preprocessing_errs(_e: Exception) -> Response:
     return __gen_response(400, 'ERROR', details='Invalid input')
 
 
 @app.errorhandler(LookupError)
-def handle_preprocessing_errs2(e: Exception) -> Response:
+def handle_preprocessing_errs2(_e: Exception) -> Response:
     return __gen_response(400, 'ERROR', details='Invalid input')
 
 
@@ -246,7 +247,7 @@ def handle_broad(e: Exception) -> Response:
 
 
 @app.errorhandler(404)
-def page_not_found(e: Exception):
+def page_not_found(_e: Exception):
     return 'Not found', 404
 
 
