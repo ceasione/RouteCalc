@@ -179,7 +179,7 @@ class Cache:
                         distances.append(Distance(place_from, place_to, rest))
 
             if len(missed_from) == 0 and len(missed_to) == 0:
-                print('Cache hit')
+                logging.info('Cache hit')
                 return distances
             else:
                 logging.debug('Cache miss, fetching ...')
