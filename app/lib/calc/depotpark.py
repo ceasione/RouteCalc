@@ -3,7 +3,7 @@ from app import settings
 import sqlite3
 import json
 from app.lib.calc.depot import Depot
-from app.lib.utils import utils, cache
+from app.lib.utils import cache
 import logging
 
 APIADR = settings.GOOGLE_APIADR
