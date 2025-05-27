@@ -16,6 +16,7 @@ from app.lib.utils.number_tools import WrongNumberError
 from app.lib.apis.googleapi import ZeroDistanceResultsError
 from app.lib.utils import utils
 from app import settings
+import dataclasses
 
 
 CACHE = cache.cache_instance_factory()
@@ -26,7 +27,7 @@ CORS = CORS(app)
 utils.setup_logger(settings.LOGLEVEL)
 
 
-def __gen_response(http_status: int, json_status: str, details: str = '', workload: CalculationDTO = None) -> Response:
+def __gen_response(http_status: int, json_status: str, details: str = '', workload: dict = None) -> Response:
 
     """
     Additional layer for generating a standardized JSON HTTP response.
@@ -42,7 +43,7 @@ def __gen_response(http_status: int, json_status: str, details: str = '', worklo
     :param details: Optional string providing additional information about the response.
     :type details: str
     :param workload: Optional data payload to include in the response (e.g., calculation results).
-    :type workload: CalculationDTO or None
+    :type workload: dict or None
     :return: A Flask Response object with JSON content and appropriate headers.
     :rtype: flask.Response
     """
@@ -148,7 +149,7 @@ def calculate():
     telegramapi2.send_silent(tg_msg)
 
     # Step 7: Response to frontend
-    return __gen_response(200, 'WORKLOAD', workload=calculation_dto.to_dict())
+    return __gen_response(200, 'WORKLOAD', workload=dataclasses.asdict(calculation_dto))
 
 
 @app.route('/submit/', methods=['POST'])
@@ -187,7 +188,7 @@ def submit_new():
     # Step 3: Log request and calculation
     with QUERY_LOGGER as qlogger:
         qlogger.log_calculation(phone_number=num,
-                                query=json.dumps(dto.to_dict(), ensure_ascii=False),
+                                query=json.dumps(dataclasses.asdict(dto), ensure_ascii=False),
                                 response=json.dumps([tg_msg, sms_msg], ensure_ascii=False))
 
     # Step 4: Check for blacklist and make notifications

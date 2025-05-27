@@ -1,7 +1,6 @@
 
 from app import settings
 from app.lib.utils.DTOs import CalculationDTO
-from app.lib.utils.DTOs import LocaleDTO
 from textwrap import dedent
 
 SMS_TEXT_REDIAL_PHONE = settings.SMS_TEXT_REDIAL_PHONE
@@ -36,7 +35,7 @@ def make_sms_text(calculation: CalculationDTO) -> str:
     return dedent(fstring).lstrip()
 
 
-def __generate_map_url(*args):
+def generate_map_url(*args):
     if len(args) < 2:
         raise RuntimeError('Internal error 6')
 
@@ -49,7 +48,7 @@ def __generate_map_url(*args):
     return str().join(s)
 
 
-def __generate_place_chain(*args):
+def generate_place_chain(*args):
 
     if len(args) < 1:
         raise RuntimeError('Internal error 7')
@@ -85,7 +84,7 @@ def compose_telegram(intent, calculation, url, ip, phone_num='#'):
 
     fstring = f'''
         {intent_dict[intent]}
-        Lang: {"ua" if calculation.locale.is_uk_ua() else "ru"}
+        Lang: {"ru" if calculation.locale == 'ru_UA' else "ua"}
         Page URL: `{url}`
         
         IP: [{ip}](http://ip-api.com/line/{ip})
@@ -111,31 +110,9 @@ def compose_telegram(intent, calculation, url, ip, phone_num='#'):
     return dedent(fstring).strip()
 
 
-def make_calculation_dto(details, locale) -> CalculationDTO:
-    raw_price = details['cost']
-    transport_capacity = details['vehicle'].weight_capacity
-    price_per_ton = '{:,.2f}'.format(__round_cost(raw_price/float(transport_capacity))).replace(',', ' ')
-    price = '{:,.2f}'.format(__round_cost(raw_price)).replace(',', ' ')
+def format_cost(cost: float) -> str:
+    return '{:,.2f}'.format(__round_cost(cost)).replace(',', ' ')
 
-    return CalculationDTO(place_a_name=details["place_a"].name,
-                          place_a_name_long=details["place_a"].name_long,
-                          place_b_name=details["place_b"].name,
-                          place_b_name_long=details["place_b"].name_long,
-                          map_link=__generate_map_url(details["place_a"], details["place_b"]),
-                          place_chain=__generate_place_chain(*details["route"]),
-                          chain_map_link=__generate_map_url(*details["route"]),
-                          distance=str(round(float(details["total_distance"])/1000, 1)),
-                          transport_id=details['vehicle'].id,
-                          transport_name=details['vehicle'].name if locale == 'ru_UA' else details['vehicle'].name_ua,
-                          transport_capacity=transport_capacity,
-                          price=price,
-                          currency=details['currency'],
-                          currency_rate=details['currency_rate'],
-                          price_per_ton=price_per_ton,
-                          price_per_km=str(round(details['price'], 2)),
-                          is_price_per_ton=details['vehicle'].price_per_ton,
-                          pfactor_vehicle=details['pfactor_vehicle'],
-                          pfactor_departure=details['pfactor_departure'],
-                          pfactor_arrival=details['pfactor_arrival'],
-                          pfactor_distance=details['pfactor_distance'],
-                          locale=LocaleDTO(locale))
+
+def format_cost_per_ton(cpt: float) -> str:
+    return '{:,.2f}'.format(__round_cost(cpt)).replace(',', ' ')

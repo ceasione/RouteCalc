@@ -4,7 +4,6 @@ import flask
 from app.lib.utils import number_tools
 from app.lib.calc.vehicles import VEHICLES
 from app.lib.utils.DTOs import RequestDTO
-from app.lib.utils.DTOs import LocaleDTO
 from app.lib.calc.place import Place
 
 
@@ -80,8 +79,7 @@ def phone_number(raw: dict, dto: RequestDTO):
 
 
 def locale(raw: dict, dto: RequestDTO):
-    _locale = raw['locale'].strip()
-    dto.locale = LocaleDTO(_locale)
+    dto.locale = raw['locale'].strip()
 
 
 def url(raw: dict, dto: RequestDTO):

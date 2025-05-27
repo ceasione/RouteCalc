@@ -153,19 +153,25 @@ def process_request(request: RequestDTO) -> CalculationDTO:
     visible_route = route[1:-1]
     distance, price, cost = calculate(route, vehicle, DistanceMeters.matrix, Predictors.ml)
     currency = Currency.get_preferred(starting_depot.currency, ending_depot.currency)
-    details = {
-        'vehicle': vehicle,
-        'total_distance': distance,
-        'price': price / currency.rate(),
-        'pfactor_vehicle': vehicle.price,
-        'pfactor_departure': starting_depot.departure_ratio,
-        'pfactor_arrival': ending_depot.arrival_ratio,
-        'pfactor_distance': 0.0,
-        'cost': cost / currency.rate(),
-        'currency': str(currency),
-        'currency_rate': currency.rate(),
-        'route': visible_route,
-        'place_a': place_a,
-        'place_b': place_b,
-        'client_phone': request.phone_num}
-    return compositor.make_calculation_dto(details=details, locale=request.locale)
+    return CalculationDTO(place_a_name=place_a.name,
+                          place_a_name_long=place_a.name_long,
+                          place_b_name=place_b.name,
+                          place_b_name_long=place_b.name_long,
+                          map_link=compositor.generate_map_url(place_a, place_b),
+                          place_chain=compositor.generate_place_chain(*visible_route),
+                          chain_map_link=compositor.generate_map_url(*visible_route),
+                          distance=str(round(float(distance)/1000, 1)),
+                          transport_id=vehicle.id,
+                          transport_name=vehicle.name if request.locale == 'ru_UA' else vehicle.name_ua,
+                          transport_capacity=vehicle.weight_capacity,
+                          price=compositor.format_cost(cost),
+                          currency=str(currency),
+                          currency_rate=currency.rate(),
+                          price_per_ton=compositor.format_cost_per_ton(cost / float(vehicle.weight_capacity)),
+                          price_per_km=str(round(price, 2)),
+                          is_price_per_ton=vehicle.price_per_ton,
+                          pfactor_vehicle=vehicle.price,
+                          pfactor_departure=str(starting_depot.departure_ratio),
+                          pfactor_arrival=str(ending_depot.arrival_ratio),
+                          pfactor_distance=str(0.0),
+                          locale=request.locale)
