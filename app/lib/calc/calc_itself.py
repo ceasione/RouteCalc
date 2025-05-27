@@ -164,10 +164,12 @@ def process_request(request: RequestDTO) -> CalculationDTO:
                           transport_id=vehicle.id,
                           transport_name=vehicle.name if request.locale == 'ru_UA' else vehicle.name_ua,
                           transport_capacity=vehicle.weight_capacity,
-                          price=compositor.format_cost(cost),
+                          price=compositor.format_cost(compositor.round_cost(
+                              cost)),
                           currency=str(currency),
                           currency_rate=currency.rate(),
-                          price_per_ton=compositor.format_cost_per_ton(cost / float(vehicle.weight_capacity)),
+                          price_per_ton=compositor.format_cost(compositor.round_cost(
+                              cost / float(vehicle.weight_capacity))),
                           price_per_km=str(round(price, 2)),
                           is_price_per_ton=vehicle.price_per_ton,
                           pfactor_vehicle=vehicle.price,

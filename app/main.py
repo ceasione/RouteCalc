@@ -128,7 +128,7 @@ def calculate():
     calculation_dto = calc_itself.process_request(request_dto)
 
     # Step 3: Prepare TG message
-    tg_msg = compositor.compose_telegram(
+    tg_msg = compositor.compose_telegram_message_text(
         intent=request_dto.intent,
         calculation=calculation_dto,
         url=request_dto.url,
@@ -178,7 +178,7 @@ def submit_new():
 
     # Step 2 Prepare TG and SMS message
     sms_msg = compositor.make_sms_text(dto)
-    tg_msg = compositor.compose_telegram(
+    tg_msg = compositor.compose_telegram_message_text(
         intent='callback',
         calculation=dto,
         url=request.json['url'],
