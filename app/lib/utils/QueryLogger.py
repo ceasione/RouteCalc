@@ -26,15 +26,20 @@ class QueryLogger:
 
     def __init__(self):
         self.DB_LOCATION = settings.LOG_DB_LOCATION
+        self.conn = None
+        self.cursor = None
+
+    def __enter__(self):
         self.conn = sqlite3.connect(self.DB_LOCATION)
         self.conn.row_factory = sqlite3.Row
         self.cursor = self.conn.cursor()
-
-    def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_value, tb):
-        self.conn.close()
+        if self.conn:
+            self.conn.close()
+        self.conn = None
+        self.cursor = None
 
     @staticmethod
     def _today() -> str:
@@ -65,6 +70,8 @@ class QueryLogger:
         :param response: (str) The system's response to the query
         :return: None
         """
+        if not self.conn or not self.cursor:
+            raise RuntimeError("QueryLogger must be used within a context manager")
         try:
             self.cursor.execute(self.INSERT_QUERY, (self._today(),
                                 self._now(),
@@ -75,3 +82,6 @@ class QueryLogger:
         except sqlite3.DatabaseError as e:
             logging.error(f'sqlite3.DatabaseError at QueryLogger\n{traceback.format_exc()}')
             tgapi2.send_developer('sqlite3.DatabaseError at QueryLogger', e)
+
+
+QUERY_LOGGER = QueryLogger()

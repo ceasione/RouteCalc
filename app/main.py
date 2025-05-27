@@ -5,7 +5,7 @@ from flask import Response
 from app.lib.utils import compositor, cache
 from app.lib.calc import vehicles
 from app.lib.apis import smsapi, telegramapi2
-from app.lib.utils.QueryLogger import QueryLogger
+from app.lib.utils.QueryLogger import QUERY_LOGGER
 from flask_cors import CORS
 from app.lib.utils.blacklist import BLACKLIST
 import app.lib.utils.request_processor as request_processor
@@ -135,7 +135,7 @@ def calculate():
         phone_num=request_dto.phone_num)
 
     # Step 4: Log request and calculation
-    with QueryLogger() as qlogger:
+    with QUERY_LOGGER as qlogger:
         qlogger.log_calculation(phone_number=request_dto.phone_num,
                                 query=json.dumps(request_dto.to_dict(), ensure_ascii=False),
                                 response=json.dumps([tg_msg, 'nosms'], ensure_ascii=False))
@@ -185,7 +185,7 @@ def submit_new():
         phone_num=num)
 
     # Step 3: Log request and calculation
-    with QueryLogger() as qlogger:
+    with QUERY_LOGGER as qlogger:
         qlogger.log_calculation(phone_number=num,
                                 query=json.dumps(dto.to_dict(), ensure_ascii=False),
                                 response=json.dumps([tg_msg, sms_msg], ensure_ascii=False))
