@@ -27,7 +27,6 @@ class Depot(Place):
             self.departure_ratio = departure_ratio
         if arrival_ratio is not None:
             self.arrival_ratio = arrival_ratio
-        self.cache = cache.cache_instance_factory()
         self.id = _id
 
     def __getattr__(self, item):

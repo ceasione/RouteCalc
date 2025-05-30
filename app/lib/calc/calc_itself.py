@@ -1,9 +1,10 @@
+import logging
 
 from app.lib.calc.place import Place
-from app.lib.calc import depotpark, vehicles
+from app.lib.calc.distance import Distance
+from app.lib.calc import depotpark
 import math
 from app.lib.calc.statepark import Currency
-from app.lib.calc.depotpark import NoDepots
 from app.lib.ai.model import ML_MODEL
 from app.lib.utils import compositor
 from app.lib.calc.vehicles import Vehicle
@@ -11,28 +12,102 @@ from app.lib.calc.depotpark import Depot
 from app.lib.calc.place import LatLngAble
 from app.lib.utils.DTOs import CalculationDTO
 from app.lib.utils.DTOs import RequestDTO
-from typing import Callable
-from typing import Tuple
+from typing import Callable, Tuple, Iterable, List
 from typing import cast
+from app.lib.utils import cache
+from app.lib.apis import googleapi
 
 
 DEPOT_PARK = depotpark.DEPOTPARK
+CACHE = cache.CACHE
+GAPI = googleapi.GAPI
+
+
+class ZeroDistanceResultsError(RuntimeError):
+    pass
 
 
 class DistanceMeters:
 
     @staticmethod
-    def matrix(place_from: LatLngAble, place_to: LatLngAble) -> float:
+    def _produce_distances_from_places(places_from: Iterable[LatLngAble],
+                                       places_to: Iterable[LatLngAble]) -> List[Distance]:
         """
-        Fetches distance between two Places with Google Matrix API or cache
-        :param place_from: Place of the origin
-        :param place_to: Place object of the destination
-        :return: distance in meters
+        Generate a list of unresolved Distance objects for every unique pair of
+        (place_from, place_to) where the two places are not the same.
+
+        :param places_from: Iterable of Places or LatLngAbles
+        :param places_to: Iterable of Places or LatLngAbles
+        :return: List of unresolved Distance objects
         """
-        return float(place_from.distance_to(place_to).distance)
+        product = []
+        for plc_from in places_from:
+            for plc_to in places_to:
+                if plc_from != plc_to:
+                    product.append(Distance(plc_from, plc_to))
+        return product
 
     @staticmethod
-    def haversine(place_from: LatLngAble, place_to: LatLngAble) -> float:
+    def _resolve_distances_using_cache(dists: Iterable[Distance]) -> Tuple[List[Distance], List[Distance]]:
+        resolved = []
+        unresolved = []
+
+        for dist in dists:
+            meters: float = CACHE.cache_look(
+                dist.place_from.lat,
+                dist.place_from.lng,
+                dist.place_to.lat,
+                dist.place_to.lng)
+            if meters is not None and isinstance(meters, (int, float)):
+                dist.distance = meters
+                resolved.append(dist)
+            else:
+                unresolved.append(dist)
+
+        return resolved, unresolved
+
+    @staticmethod
+    def _resolve_distances_using_api(dists: Iterable[Distance]) -> Tuple[List[Distance], List[Distance]]:
+        return GAPI.resolve_distances(dists)
+
+    @staticmethod
+    def matrix(places_from: Iterable[LatLngAble], places_to: Iterable[LatLngAble]) -> List[Distance]:
+        """
+        Fetches distance between two Places with Google Matrix API or cache
+        :param places_from: Iterable of origin Places
+        :param places_to: Iterable of destination Places
+        :return: List of resolved Distance objects (sorted ascending)
+        that containing .distance property or None if there is no land way existed
+        :raises: ZeroDistanceResultsError in case any of the methods (Cache, API)
+        did not produce useful distance
+        """
+        resolved, unresolved = [], DistanceMeters._produce_distances_from_places(places_from, places_to)
+
+        accum, unresolved = DistanceMeters._resolve_distances_using_cache(unresolved)
+        resolved.extend(accum)
+
+        accum, unresolved = DistanceMeters._resolve_distances_using_api(unresolved)
+        for dist in accum:
+            CACHE.cache_it(
+                dist.place_from.lat,
+                dist.place_from.lng,
+                dist.place_to.lat,
+                dist.place_to.lng,
+                dist.distance)
+        resolved.extend(accum)
+
+        if len(unresolved) > 0:
+            logging.warning(f'Distance matrix API failed to resolve some Distances: '
+                            f'{", ".join(d.__repr__() for d in unresolved)}')
+
+        if len(resolved) < 1:
+            raise ZeroDistanceResultsError
+
+        resolved.sort()
+        return resolved
+
+    @staticmethod
+    def _haversine_step(place_from: LatLngAble, place_to: LatLngAble) -> float:
         """
         Calculates distance between two Places with Haversine method
         :param place_from: Place of the origin
@@ -48,6 +123,15 @@ class DistanceMeters:
         c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
         return r * c * 1.33  # Add 33% to better fit matrix distance so both of them are +- the same
+
+    @staticmethod
+    def haversine(places_from: Iterable[LatLngAble], places_to: Iterable[LatLngAble]) -> List[Distance]:
+        distances = DistanceMeters._produce_distances_from_places(places_from, places_to)
+
+        for dist in distances:
+            dist.distance = DistanceMeters._haversine_step(dist.place_from, dist.place_to)
+        distances.sort()
+        return distances
 
 
 class Predictors:
@@ -105,40 +189,44 @@ class Predictors:
         return Predictors.ml_model.predict(starting_depot.id, ending_depot.id, vehicle.id)
 
 
-def __select_vehicle(vehicle_id):
-    for vehicle in vehicles.VEHICLES:
-        if vehicle.id == vehicle_id:
-            return vehicle
-
-
-def plan_route(place_a: Place, place_b: Place) -> Tuple[LatLngAble, LatLngAble, LatLngAble, LatLngAble]:
+def plan_route(place_a: Place, place_b: Place, dptpark=DEPOT_PARK
+               ) -> Tuple[LatLngAble, LatLngAble, LatLngAble, LatLngAble]:
     """
     Makes a complete route a vehicle should pass to complete an order
     :param place_a: Place from
     :param place_b: Place to
+    :param dptpark: Depotpark or None for default
     :return: planned route
     """
+    meter = DistanceMeters.matrix
     try:
-        in_country_depots = DEPOT_PARK.filter_by(place_a.countrycode)
-        starting_depot = place_a.chose_starting_depot(in_country_depots)
+        # Acquiring distances from every filtered depots to our place, choosing the closest one
+        in_country_depots = dptpark.filter_by(place_a.countrycode)
+        starting_depot = meter(in_country_depots, [place_a])[0].place_from
 
-        in_country_depots = DEPOT_PARK.filter_by(place_b.countrycode)
-        ending_depot = place_b.chose_ending_depot(in_country_depots)
-    except NoDepots:
-        all_depots = DEPOT_PARK.filter_by(None)
-        starting_depot = place_a.chose_starting_depot(all_depots)
-        ending_depot = place_b.chose_ending_depot(all_depots)
+        # Acquiring distances from our place to every filtered depots, choosing the closest one
+        in_country_depots = dptpark.filter_by(place_b.countrycode)
+        ending_depot = meter([place_b], in_country_depots)[0].place_to
+
+    except IndexError:  # That means the meter did not return any reasonable distance
+        # Acquiring distances from our place to all depots ve have, choosing the closest one
+        all_depots = dptpark.filter_by(None)
+        starting_depot = meter(all_depots, [place_a])[0].place_from
+        ending_depot = meter([place_b], all_depots)[0].place_to
     return starting_depot, place_a, place_b, ending_depot
 
 
 def calculate(route: Tuple[LatLngAble, LatLngAble, LatLngAble, LatLngAble],
               vehicle: Vehicle,
-              meter: Callable[[LatLngAble, LatLngAble], float],
+              meter: Callable[[Iterable[LatLngAble], Iterable[LatLngAble]], List[Distance]],
               predictor: Callable[[Depot, Depot, Vehicle, float], float]) -> Tuple[float, float, float]:
 
     assert len(route) == 4
     starting_depot, ending_depot = cast(Depot, route[0]), cast(Depot, route[3])
-    distance = meter(route[0], route[1]) + meter(route[1], route[2]) + meter(route[2], route[3])
+    distance = \
+        meter([route[0]], [route[1]])[0].distance + \
+        meter([route[1]], [route[2]])[0].distance + \
+        meter([route[2]], [route[3]])[0].distance
     price = predictor(starting_depot, ending_depot, vehicle, distance)
     cost = distance / 1000 * price  # Convert dist from m to km first as price is per kilometer
     return distance, price, cost
@@ -165,12 +253,12 @@ def process_request(request: RequestDTO) -> CalculationDTO:
                           transport_name=vehicle.name if request.locale == 'ru_UA' else vehicle.name_ua,
                           transport_capacity=vehicle.weight_capacity,
                           price=compositor.format_cost(compositor.round_cost(
-                              cost)),
+                              cost/currency.rate())),
                           currency=str(currency),
                           currency_rate=currency.rate(),
                           price_per_ton=compositor.format_cost(compositor.round_cost(
-                              cost / float(vehicle.weight_capacity))),
-                          price_per_km=str(round(price, 2)),
+                              cost / currency.rate() / float(vehicle.weight_capacity))),
+                          price_per_km=str(round(price/currency.rate(), 2)),
                           is_price_per_ton=vehicle.price_per_ton,
                           pfactor_vehicle=vehicle.price,
                           pfactor_departure=str(starting_depot.departure_ratio),

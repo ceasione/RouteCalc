@@ -35,7 +35,6 @@ class NoDepots(RuntimeError):
 class DepotPark:
 
     def __init__(self, already_park: [Place] = None):
-        self.cache = cache.cache_instance_factory()
         if already_park is not None and isinstance(already_park, list):
             """This is used by the def from_file(cls, filename) method"""
             self.park = already_park
@@ -90,16 +89,6 @@ class DepotPark:
         d['depotpark'] = [place.to_dict() for place in self.park]
         return d
 
-    def select_closest_depot_raw(self, place):
-        # Raw because we can do this more efficient by query several places at one GET-request
-        # Find out which one of the depots is the closest to given place
-        # Return Place
-        closest_depot = self.park[0]
-        for current_depot in self.park:
-            if place.distance_to(current_depot) < place.distance_to(closest_depot):
-                closest_depot = current_depot
-        return closest_depot
-
     def filter_by(self, iso_code: str):
         if iso_code is None:
             return self.park
@@ -108,29 +97,6 @@ class DepotPark:
         if len(some) < 1:
             raise NoDepots(f'No available depots at {iso_code} iso_code')
         return some
-
-    def select_closest_starting_depot(self, place):
-        """DEPRECATED"""
-        # Make a cache search and schedule to search cache-misses
-        # Make a call to server
-        # Cache it
-        # Then select minimal
-
-        distances = self.cache.fetch_cached_distance(self.park, [place])
-        zipped = list(zip(distances, self.park))
-        distances.sort()
-        for pair in zipped:
-            if pair[0] == distances[0]:
-                return pair[1]
-
-    def select_closest_ending_depot(self, place):
-        """DEPRECATED"""
-        distances = self.cache.fetch_cached_distance([place], self.park)
-        zipped = list(zip(distances, self.park))
-        distances.sort()
-        for pair in zipped:
-            if pair[0] == distances[0]:
-                return pair[1]
 
 
 def test_depotpark_storage_restoring():

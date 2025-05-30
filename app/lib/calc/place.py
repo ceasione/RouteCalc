@@ -1,5 +1,5 @@
 from app import settings
-from app.lib.utils import cache
+# from app.lib.utils import cache
 import json
 from abc import ABC
 
@@ -12,50 +12,18 @@ class LatLngAble(ABC):
     def __init__(self, lat: float, lng: float):
         self.lat: float = lat
         self.lng: float = lng
-        self.cache = cache.cache_instance_factory()
 
-    def distance_to(self, place_to):
-        """
-        Method to easily fetch distance from self to place_to
-        :param place_to: Place
-        :return: lib.calc.distance.Distance object
-        """
-        return self.cache.fetch_cached_distance([self], [place_to])[0]
+    def __eq__(self, other):
+        if not isinstance(other, LatLngAble):
+            raise NotImplemented
 
-    def distance_from(self, place_from):
-        """
-        Method to easily fetch distance from place_from to self
-        :param place_from: Place
-        :return: lib.calc.distance.Distance object
-        """
-        return self.cache.fetch_cached_distance([place_from], [self])[0]
+        return all((
+            round(self.lat, 6) == round(other.lat, 6),
+            round(self.lng, 6) == round(other.lng, 6)
+        ))
 
-    def _select_closest(self, list_from, list_to):
-        """
-        Select from two lists of Places a pair with minimum distance between them
-        :param list_from: [Place, ]
-        :param list_to: [Place, ]
-        :return: lib.calc.distance.Distance object
-        """
-        distances = self.cache.fetch_cached_distance(list_from, list_to)
-        distances.sort()
-        return distances[0]
-
-    def chose_starting_depot(self, park):
-        """
-        Chooses the closest depot from places in park to this Place
-        :param park: Depotpark
-        :return: Depot
-        """
-        return self._select_closest(park, [self]).place_from
-
-    def chose_ending_depot(self, park):
-        """
-        Chooses the closest depot from this Place to the places in park
-        :param park: Depotpark
-        :return: Depot
-        """
-        return self._select_closest([self], park).place_to
+    def __hash__(self):
+        return hash((round(self.lat), round(self.lng)))
 
 
 class Place(LatLngAble):
@@ -70,11 +38,12 @@ class Place(LatLngAble):
         self.name = name
         self.name_long = name_long
         self.countrycode = countrycode
-        self.cache = cache.cache_instance_factory()
+
+    def __repr__(self):
+        return f'Place [{self.name} lat: {self.lat}, lng: {self.lng}]'
 
     def to_dict(self):
         d = self.__dict__
-        del d['cache']
         return d
 
     @classmethod
