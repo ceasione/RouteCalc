@@ -13,13 +13,11 @@ import app.lib.calc.calc_itself as calc_itself
 from app.lib.utils.DTOs import CalculationDTO
 from app.lib.utils import number_tools
 from app.lib.utils.number_tools import WrongNumberError
-from app.lib.apis.googleapi import ZeroDistanceResultsError
+from app.lib.calc.calc_itself import ZeroDistanceResultsError
 from app.lib.utils import utils
 from app import settings
 import dataclasses
 
-
-CACHE = cache.cache_instance_factory()
 
 app = Flask(__name__)
 CORS = CORS(app)
