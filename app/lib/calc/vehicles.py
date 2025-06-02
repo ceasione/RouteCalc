@@ -12,7 +12,30 @@ DATA_PATH = Path(VEHICLES_LOC)
 
 @dataclass
 class Vehicle:
+    """
+    Represents a transport type used for cost calculations and selection.
 
+    A Vehicle instance encapsulates all necessary parameters for:
+    - Pricing and logistics calculations
+    - UI display and localization
+    - Text generation and user interaction
+
+    Attributes:
+        id (int): Unique identifier for the vehicle.
+        name (str): Vehicle name (default language).
+        name_ua (str): Vehicle name in Ukrainian.
+        price (float): Base price for using this vehicle.
+        order (int): Display or processing order priority.
+        length (float): Vehicle length in meters.
+        width (float): Vehicle width in meters.
+        height (float): Vehicle height in meters.
+        weight_capacity (float): Maximum weight capacity in tons.
+        space_capacity (int): Volume or item count capacity.
+        cargoes_possible (str): Description of possible cargo types (default language).
+        cargoes_possible_ua (str): Description of possible cargo types in Ukrainian.
+        picture (str): URL or path to the vehicle image.
+        price_per_ton (bool): Whether pricing is calculated per ton (default: False).
+    """
     id: int
     name: str
     name_ua: str
@@ -30,6 +53,19 @@ class Vehicle:
 
 
 class Vehicles(Sequence):
+
+    """
+    Represents a collection of Vehicle objects loaded from a JSON file.
+
+    This class implements the Sequence interface, allowing iteration,
+    indexing, and length queries over the loaded vehicles.
+
+    Attributes:
+        _vehicles (List[Vehicle]): Internal list of Vehicle instances.
+
+    Methods:
+        as_list(): Returns the internal list of vehicles.
+    """
 
     _vehicles: List[Vehicle]
 
@@ -64,6 +100,19 @@ class VehicleEncoder(json.JSONEncoder):
 
 
 def initialize_file_storage():
+    """
+    Initialize the vehicle data file with default hardcoded values.
+
+    This function should be run only once during the initial setup.
+    It attempts to create a new file at DATA_PATH and writes a predefined
+    list of Vehicle objects to it in JSON format using the VehicleEncoder.
+
+    If the file already exists, the function does nothing except log the
+    FileExistsError exception.
+
+    Returns:
+        None
+    """
     init_vehicles = [
         Vehicle(
             id=0,
