@@ -2,7 +2,7 @@ from flask import Flask
 from flask import request
 import json
 from flask import Response
-from app.lib.utils import compositor, cache
+from app.lib.utils import compositor
 from app.lib.calc import vehicles
 from app.lib.apis import smsapi, telegramapi2
 from app.lib.utils.QueryLogger import QUERY_LOGGER
@@ -95,7 +95,7 @@ def get_vehicles():
     :rtype: flask.Response
     """
 
-    resp = Response(response=json.dumps(vehicles.VEHICLES, cls=vehicles.VehicleEncoder, ensure_ascii=False),
+    resp = Response(response=json.dumps(vehicles.VEHICLES.as_list(), cls=vehicles.VehicleEncoder, ensure_ascii=False),
                     content_type='application/json; charset=utf-8')
     resp.headers.add('Access-Control-Allow-Origin', '*')
     return resp
