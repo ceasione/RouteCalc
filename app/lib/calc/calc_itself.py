@@ -8,7 +8,7 @@ from app.lib.calc.statepark import Currency
 from app.lib.ai.model import ML_MODEL
 from app.lib.utils import compositor
 from app.lib.calc.vehicles import Vehicle
-from app.lib.calc.depotpark import Depot
+from app.lib.calc.depotpark import Depot, NoDepots
 from app.lib.calc.place import LatLngAble
 from app.lib.utils.DTOs import CalculationDTO
 from app.lib.utils.DTOs import RequestDTO
@@ -208,7 +208,7 @@ def plan_route(place_a: Place, place_b: Place, dptpark=DEPOT_PARK
         in_country_depots = dptpark.filter_by(place_b.countrycode)
         ending_depot = meter([place_b], in_country_depots)[0].place_to
 
-    except IndexError:  # That means the meter did not return any reasonable distance
+    except (NoDepots, IndexError):  # That means the meter did not return any reasonable distance
         # Acquiring distances from our place to all depots ve have, choosing the closest one
         all_depots = dptpark.filter_by(None)
         starting_depot = meter(all_depots, [place_a])[0].place_from
@@ -251,7 +251,7 @@ def process_request(request: RequestDTO) -> CalculationDTO:
                           distance=str(round(float(distance)/1000, 1)),
                           transport_id=vehicle.id,
                           transport_name=vehicle.name if request.locale == 'ru_UA' else vehicle.name_ua,
-                          transport_capacity=vehicle.weight_capacity,
+                          transport_capacity=int(vehicle.weight_capacity),
                           price=compositor.format_cost(compositor.round_cost(
                               cost/currency.rate())),
                           currency=str(currency),
@@ -260,7 +260,7 @@ def process_request(request: RequestDTO) -> CalculationDTO:
                               cost / currency.rate() / float(vehicle.weight_capacity))),
                           price_per_km=str(round(price/currency.rate(), 2)),
                           is_price_per_ton=vehicle.price_per_ton,
-                          pfactor_vehicle=vehicle.price,
+                          pfactor_vehicle=str(vehicle.price),
                           pfactor_departure=str(starting_depot.departure_ratio),
                           pfactor_arrival=str(ending_depot.arrival_ratio),
                           pfactor_distance=str(0.0),

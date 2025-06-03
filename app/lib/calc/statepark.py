@@ -2,9 +2,11 @@ import json
 from app import settings
 from pathlib import Path
 from dataclasses import dataclass, asdict
-from typing import List, Optional
+from typing import Type
+from app.lib.calc.loadable import Itemable, Loadable
 
-DATA_PATH = Path(settings.STATEPARK_NOSQL_LOC)
+STATE_PATH = Path(settings.STATEPARK_NOSQL_LOC)
+STATE_TAG = 'statepark'
 CURRENCY_PRIORITY = {'USD': 3, 'EUR': 2, 'UAH': 1}
 CURRENCY_RATES = {'UAH': 1.0, 'USD': 41.0, 'EUR': 45.0}
 
@@ -32,7 +34,7 @@ class Currency:
 
 
 @dataclass
-class State:
+class State(Itemable):
     """
     State represents a country and have departure and arrival ratios
     (which can be reassigned by the Depots although)
@@ -40,23 +42,6 @@ class State:
     is used instead
 
     Represents a country (state) with associated currency and transport ratios.
-
-    The State object holds information about a country's ISO code, currency, and
-    its default departure and arrival ratios used to make calculations.
-    These ratios can be overridden by a Depot, if available. If not,
-    the State's ratios are used as fallback values.
-
-    Attributes:
-        iso_code (str): ISO country code.
-        currency (str or Currency): Currency used in the state; converted to a Currency instance on init.
-        state_name (str): Human-readable name of the country/state.
-        departure_ratio (float): Ratio used for calculating departure-related costs.
-        arrival_ratio (float): Ratio used for calculating arrival-related costs.
-
-    Methods:
-        __post_init__(): Ensures currency is an instance of Currency.
-        from_dict(dct): Creates a State instance from a dictionary.
-        to_dict(): Converts the State to a serializable dictionary, stringifying the currency.
     """
     iso_code: str
     currency: str or Currency
@@ -85,49 +70,27 @@ class StateEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
-class StatePark:
+class StatePark(Loadable):
+
     """
     A container class for managing a collection of `State` instances.
-
-    Provides functionality to load states from a JSON file, save them back,
-    convert them to a dictionary format, and retrieve individual states by
-    their ISO code.
-
-    Attributes:
-        park (List[State]): The list of State objects currently in the park.
-
-    Methods:
-        from_file(filename): Class method to create a StatePark from a JSON file.
-        to_file(filename): Saves the current StatePark to a JSON file.
-        as_dict(): Returns a dictionary representation of the StatePark.
-        find_by_iso(iso_code): Returns the State with the given ISO code.
+    Provides functionality to retrieve individual states by their ISO code.
     """
-    park: List[State]
 
-    def __init__(self, already_park: Optional[List[State]] = None):
-        self.park = []
-        if already_park is not None and isinstance(already_park, list):
-            """This is used by the def from_file(cls, filename) method"""
-            self.park = already_park
+    @property
+    def data_path(self) -> Path:
+        return STATE_PATH
 
-    @classmethod
-    def from_file(cls, filename: str = DATA_PATH):
-        with open(file=filename, mode='r', encoding='utf8', ) as f:
-            contents = f.read()
-        struct = json.loads(contents)
-        park = [State.from_dict(item) for item in struct['statepark']]
-        return cls(park)
+    @property
+    def item_type(self) -> Type:
+        return State
 
-    def to_file(self, filename: str = settings.STATEPARK_NOSQL_LOC):
-        a_dict = self.as_dict()
-        a_str = json.dumps(a_dict, ensure_ascii=False)
-        with open(file=filename, mode='w') as f:
-            f.write(a_str)
+    @property
+    def item_tag(self) -> str:
+        return STATE_TAG
 
-    def as_dict(self):
-        return {
-            'statepark': [state.to_dict() for state in self.park]
-        }
+    def __init__(self):
+        super().__init__()
 
     def find_by_iso(self, iso_code: str) -> State:
         """
@@ -136,13 +99,14 @@ class StatePark:
         :return: State object
         """
         try:
-            return next((state for state in self.park if state.iso_code == iso_code))
+            return next((state for state in self.items if state.iso_code == iso_code))
         except StopIteration:
             raise ValueError(f'No such state: {iso_code}')
 
 
 if __name__ == '__main__':
-    DATA_PATH = Path('../../../') / settings.STATEPARK_NOSQL_LOC
+    STATE_PATH = Path('../../../') / settings.STATEPARK_NOSQL_LOC
+    from pathlib import Path
 
 
-statepark = StatePark.from_file(DATA_PATH)
+statepark = StatePark().load()

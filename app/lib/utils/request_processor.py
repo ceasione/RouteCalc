@@ -62,13 +62,11 @@ def destination(raw: dict, dto: RequestDTO):
 
 
 def transport(raw: dict, dto: RequestDTO):
-    t_id = int(raw['transport_id'])
-    for vehicle in VEHICLES:
-        if vehicle.id == t_id:
-            dto.vehicle = vehicle
-            break
-    else:
-        raise ValidationError(f'Unknown vehicle_id {t_id}')
+    transport_id = int(raw['transport_id'])
+    try:
+        dto.vehicle = VEHICLES.get_by_id(transport_id)
+    except ValueError:
+        raise ValidationError(f'Unknown vehicle ID: {transport_id}')
 
 
 def phone_number(raw: dict, dto: RequestDTO):
