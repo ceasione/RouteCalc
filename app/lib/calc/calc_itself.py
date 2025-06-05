@@ -1,21 +1,20 @@
-import logging
 
-from app.lib.calc.place import Place
-from app.lib.calc.distance import Distance
-from app.lib.calc.loadables import depotpark
 import math
-from app.lib.calc.loadables.statepark import Currency
-from app.lib.ai.model import ML_MODEL
-from app.lib.utils import compositor
-from app.lib.calc.loadables.vehicles import Vehicle
-from app.lib.calc.loadables.depotpark import Depot, NoDepots
-from app.lib.calc.place import LatLngAble
-from app.lib.utils.DTOs import CalculationDTO
-from app.lib.utils.DTOs import RequestDTO
 from typing import Callable, Tuple, Iterable, List
 from typing import cast
-from app.lib.utils import cache
+from app.lib.ai.model import ML_MODEL
 from app.lib.apis import googleapi
+from app.lib.calc.place import Place, LatLngAble
+from app.lib.calc.distance import Distance
+from app.lib.calc.loadables import depotpark
+from app.lib.calc.loadables.statepark import Currency
+from app.lib.calc.loadables.vehicles import Vehicle
+from app.lib.calc.loadables.depotpark import Depot, NoDepots
+from app.lib.utils.DTOs import CalculationDTO
+from app.lib.utils.DTOs import RequestDTO
+from app.lib.utils import cache
+from app.lib.utils import compositor
+from app.lib.utils.logger import logger
 
 
 DEPOT_PARK = depotpark.DEPOTPARK
@@ -35,7 +34,6 @@ class DistanceMeters:
         """
         Generate a list of unresolved Distance objects for every unique pair of
         (place_from, place_to) where the two places are not the same.
-
         :param places_from: Iterable of Places or LatLngAbles
         :param places_to: Iterable of Places or LatLngAbles
         :return: List of unresolved Distance objects
@@ -85,6 +83,7 @@ class DistanceMeters:
 
         accum, unresolved = DistanceMeters._resolve_distances_using_cache(unresolved)
         resolved.extend(accum)
+        logger.debug(f'Cache resolved, unresolved: {len(resolved)}, {len(unresolved)}')
 
         accum, unresolved = DistanceMeters._resolve_distances_using_api(unresolved)
         for dist in accum:
@@ -95,12 +94,14 @@ class DistanceMeters:
                 dist.place_to.lng,
                 dist.distance)
         resolved.extend(accum)
+        logger.debug(f'Matrix API resolved, unresolved: {len(resolved)}, {len(unresolved)}')
 
         if len(unresolved) > 0:
-            logging.warning(f'Distance matrix API failed to resolve some Distances: '
-                            f'{", ".join(d.__repr__() for d in unresolved)}')
+            logger.warning(f'Distance matrix API failed to resolve some Distances: '
+                           f'{", ".join(d.__repr__() for d in unresolved)}')
 
         if len(resolved) < 1:
+            logger.error(f'No distances have been resolved')
             raise ZeroDistanceResultsError
 
         resolved.sort()
@@ -126,6 +127,14 @@ class DistanceMeters:
 
     @staticmethod
     def haversine(places_from: Iterable[LatLngAble], places_to: Iterable[LatLngAble]) -> List[Distance]:
+        """
+        Making a list of Distance's based on list of origins and list of destinations.
+        Uses Haversine method at self._haversine_step
+        The reason we need this is that to train a ml model matrix method is too slow.
+        :param places_from: (LatLngAble, ) Iterable of origins
+        :param places_to: (LatLngAble, ) Iterable of destinations
+        :return: List of calculated Distance objects (sorted ascending)
+        """
         distances = DistanceMeters._produce_distances_from_places(places_from, places_to)
 
         for dist in distances:
@@ -220,7 +229,15 @@ def calculate(route: Tuple[LatLngAble, LatLngAble, LatLngAble, LatLngAble],
               vehicle: Vehicle,
               meter: Callable[[Iterable[LatLngAble], Iterable[LatLngAble]], List[Distance]],
               predictor: Callable[[Depot, Depot, Vehicle, float], float]) -> Tuple[float, float, float]:
-
+    """
+    Calculator itself. Makes distance calculation using meter, predicts price per km for
+    given vehicle using predictor. Also makes cost calculation (= distance * price)
+    :param route: Tuple of 4 LatLngAble. A route vehicle shold pass to complete an order
+    :param vehicle: Vehicle object
+    :param meter: One of the DistanceMeters methods. Calculates distance between LatLngAble's
+    :param predictor: One of the Predictors methods. Calculates price for given route and vehicle
+    :return: (float, float, float) -> distance in meters, price in UAH per km, cost
+    """
     assert len(route) == 4
     starting_depot, ending_depot = cast(Depot, route[0]), cast(Depot, route[3])
     distance = \
@@ -233,6 +250,11 @@ def calculate(route: Tuple[LatLngAble, LatLngAble, LatLngAble, LatLngAble],
 
 
 def process_request(request: RequestDTO) -> CalculationDTO:
+    """
+    Receives request dto, orchestrates calculation and produces response dto
+    :param request: (RequestDTO)
+    :return: (CalculationDTO)
+    """
     place_a = request.origin
     place_b = request.destination
     vehicle = request.vehicle
@@ -241,6 +263,8 @@ def process_request(request: RequestDTO) -> CalculationDTO:
     visible_route = route[1:-1]
     distance, price, cost = calculate(route, vehicle, DistanceMeters.matrix, Predictors.ml)
     currency = Currency.get_preferred(starting_depot.currency, ending_depot.currency)
+    logger.debug(f'distance, price, cost; currency: '
+                 f'{distance}, {price}, {cost}; {currency.iso_code}: {currency.rate()}')
     return CalculationDTO(place_a_name=place_a.name,
                           place_a_name_long=place_a.name_long,
                           place_b_name=place_b.name,

@@ -14,15 +14,12 @@ from app.lib.utils.DTOs import CalculationDTO
 from app.lib.utils import number_tools
 from app.lib.utils.number_tools import WrongNumberError
 from app.lib.calc.calc_itself import ZeroDistanceResultsError
-from app.lib.utils import utils
-from app import settings
 import dataclasses
+from app.lib.utils.logger import logger
 
 
 app = Flask(__name__)
 CORS = CORS(app)
-
-utils.setup_logger(settings.LOGLEVEL)
 
 
 def __gen_response(http_status: int, json_status: str, details: str = '', workload: dict = None) -> Response:
@@ -121,9 +118,11 @@ def calculate():
 
     # Step 1: Preprocess request
     request_dto = request_processor.process(request)
+    logger.debug('Acquired request has been processed. Got Request DTO')
 
     # Step 2: Perform the calculationn
     calculation_dto = calc_itself.process_request(request_dto)
+    logger.debug('Calculation was succesfully performed. Got Calculation DTO')
 
     # Step 3: Prepare TG message
     tg_msg = compositor.compose_telegram_message_text(
@@ -138,6 +137,7 @@ def calculate():
         qlogger.log_calculation(phone_number=request_dto.phone_num,
                                 query=json.dumps(request_dto.to_dict(), ensure_ascii=False),
                                 response=json.dumps([tg_msg, 'nosms'], ensure_ascii=False))
+    logger.debug('Query Logger has succesfully logged calculation')
 
     # Step 5: Check if IP blacklisted
     if BLACKLIST.check(request_dto.ip):
@@ -145,6 +145,7 @@ def calculate():
 
     # Step 6: Notify managers via Telegram Bot
     telegramapi2.send_silent(tg_msg)
+    logger.debug('Telegram message has been sent to silent chat')
 
     # Step 7: Response to frontend
     return __gen_response(200, 'WORKLOAD', workload=dataclasses.asdict(calculation_dto))

@@ -1,10 +1,11 @@
-import logging
+
 from app import settings
 import requests
 from app.lib.calc.distance import Distance
 from typing import Iterable, Tuple, List, Set
 from app.lib.calc.place import LatLngAble, Place
 import backoff
+from app.lib.utils.logger import logger
 
 
 class API:
@@ -46,7 +47,7 @@ class API:
                             distance=element['distance']['value']
                         ))
         except (IndexError, KeyError):
-            logging.exception('Failed to process Google Matrix API response')
+            logger.exception('Failed to process Google Matrix API response')
             pass
         return extracted_distances
 

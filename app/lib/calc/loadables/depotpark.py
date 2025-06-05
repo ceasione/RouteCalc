@@ -1,8 +1,6 @@
-from app.lib.calc.place import Place
+
 from app import settings
-import json
 from app.lib.calc.loadables.depot import Depot
-import logging
 from app.lib.calc.loadables.loadable import Loadable
 from pathlib import Path
 from typing import Type

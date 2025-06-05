@@ -5,6 +5,7 @@ from app.lib.utils import number_tools
 from app.lib.calc.loadables.vehicles import VEHICLES
 from app.lib.utils.DTOs import RequestDTO
 from app.lib.calc.place import Place
+from app.lib.utils.logger import logger
 
 
 class ValidationError(Exception):
@@ -127,6 +128,8 @@ def process(request_raw: flask.Request) -> RequestDTO:
         try:
             stage(raw, dto)
         except (TypeError, IndexError, KeyError, AttributeError, ValueError) as e:
+            logger.error(f'Failed to validate stage: {stage.__name__}')
+            logger.exception(e)
             raise ValidationError(e)
 
     dto.ip = ip

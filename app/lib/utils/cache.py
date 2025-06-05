@@ -1,8 +1,9 @@
-import logging
+
 import sqlite3
 from app import settings
 import app.lib.apis.telegramapi2 as tgapi2
 from typing import Optional
+from app.lib.utils.logger import logger
 
 
 class Cache:
@@ -104,7 +105,7 @@ class Cache:
             self.c.execute(self.INSERT_QUERY, (from_lat, from_lng, to_lat, to_lng, int(distance)))
             self.conn.commit()
         except sqlite3.Error as e:
-            logging.exception('Error adding item to Cache')
+            logger.exception('Error adding item to Cache')
             tgapi2.send_developer('Error adding item to Cache', e)
 
 

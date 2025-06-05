@@ -1,5 +1,5 @@
 
-class Distance(object):
+class Distance:
     """
     Represents a directional distance between two geographic places, optionally including
     a numeric distance value in meters.

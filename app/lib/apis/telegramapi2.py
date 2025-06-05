@@ -3,7 +3,7 @@ import telegram
 from telegram.error import BadRequest
 import traceback
 from datetime import datetime
-import logging
+from app.lib.utils.logger import logger
 
 
 APIKEY = settings.TELEGRAM_BOT_APIKEY
@@ -29,7 +29,7 @@ def send_message(chat_id: str, msg: str) -> None:
             send_developer(error_message, e)
         else:
             error_message = f"{str(e)}\n\nTraceback: {traceback.format_exc()}\n\nmsg = {msg}"
-            logging.error(error_message)
+            logger.error(error_message)
             send_developer(error_message, e)
 
 
@@ -55,7 +55,7 @@ def send_developer(msg: str, cause: Exception = None) -> None:
 
         error_message = \
             f"DEV TG report has been sent: {msg}\n\nCause: {txt_cause}\n\nTraceback: {trace}"
-        logging.error(error_message)
+        logger.error(error_message)
     except Exception as e:
         error_message = f"Failed to send dev tg report\n\n{str(e)}\n\n{traceback.format_exc()}\n\n{msg}"
-        logging.error(error_message)
+        logger.error(error_message)
