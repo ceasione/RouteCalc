@@ -65,7 +65,7 @@ class Place(LatLngAble):
         self.countrycode = countrycode
 
     def __repr__(self):
-        return f'Place [{self.name} lat: {self.lat}, lng: {self.lng}]'
+        return f'{self.name} lat: {self.lat}, lng: {self.lng}'
 
     def to_dict(self):
         return self.__dict__
