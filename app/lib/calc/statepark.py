@@ -3,7 +3,7 @@ from app import settings
 from pathlib import Path
 from dataclasses import dataclass, asdict
 from typing import Type
-from app.lib.calc.loadable import Itemable, Loadable
+from app.lib.calc.loadables.loadable import Itemable, Loadable
 
 STATE_PATH = Path(settings.STATEPARK_NOSQL_LOC)
 STATE_TAG = 'statepark'
@@ -89,9 +89,6 @@ class StatePark(Loadable):
     def item_tag(self) -> str:
         return STATE_TAG
 
-    def __init__(self):
-        super().__init__()
-
     def find_by_iso(self, iso_code: str) -> State:
         """
         Find and return State by iso code
@@ -102,11 +99,6 @@ class StatePark(Loadable):
             return next((state for state in self.items if state.iso_code == iso_code))
         except StopIteration:
             raise ValueError(f'No such state: {iso_code}')
-
-
-if __name__ == '__main__':
-    STATE_PATH = Path('../../../') / settings.STATEPARK_NOSQL_LOC
-    from pathlib import Path
 
 
 statepark = StatePark().load()

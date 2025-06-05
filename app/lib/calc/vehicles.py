@@ -4,7 +4,7 @@ from dataclasses import asdict
 from pathlib import Path
 from app.settings import VEHICLES_LOC
 from typing import Type
-from app.lib.calc.loadable import Itemable, Loadable
+from app.lib.calc.loadables.loadable import Itemable, Loadable
 
 
 VEHICLES_PATH = Path(VEHICLES_LOC)
@@ -59,9 +59,6 @@ class Vehicles(Loadable):
     def item_tag(self) -> str:
         return VEHICLES_TAG
 
-    def __init__(self):
-        super().__init__()
-
     def __iter__(self):
         return iter(self.items)
 
@@ -84,7 +81,7 @@ class VehicleEncoder(json.JSONEncoder):
 
 
 if __name__ == '__main__':
-    test_path = Path('../../../') / VEHICLES_LOC
+    test_path = Path('../../../../') / VEHICLES_LOC
     vehicles = Vehicles().load(test_path)
 
 VEHICLES = Vehicles().load()

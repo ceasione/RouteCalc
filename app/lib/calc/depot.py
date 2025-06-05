@@ -1,60 +1,58 @@
-from copy import copy
-
 from app import settings
-from app.lib.utils import cache
 import json
-import app.lib.calc.statepark as statepark
+import app.lib.calc.loadables.statepark as statepark
 from app.lib.calc.place import Place
-from app.lib.calc.statepark import State
+from app.lib.calc.loadables.statepark import State
+from app.lib.calc.loadables.loadable import Itemable
 
 
 APIADR = settings.GOOGLE_APIADR
 APIKEY = settings.GOOGLE_APIKEY
 
 
-class Depot(Place):
+class Depot(Place, Itemable):
 
     def __init__(self, lat: float, lng: float,
-                 name: str, state_iso: str,
+                 name: str,
+                 state_iso: str,
+                 depot_id: int,
                  departure_ratio: float = None,
-                 arrival_ratio: float = None,
-                 _id: int = None):
-        super().__init__(lat=lat,
-                         lng=lng,
-                         name=name)
+                 arrival_ratio: float = None):
+
+        super().__init__(lat=lat, lng=lng, name=name)
         self.state: State = statepark.statepark.find_by_iso(state_iso)
-        if departure_ratio is not None:
-            self.departure_ratio = departure_ratio
-        if arrival_ratio is not None:
-            self.arrival_ratio = arrival_ratio
-        self.id = _id
+        self.id = depot_id
+        self._departure_ratio = departure_ratio
+        self._arrival_ratio = arrival_ratio
 
-    def __getattr__(self, item):
-        return getattr(self.state, item)
+    @property
+    def departure_ratio(self):
+        # If own ratio is None we return ratio of the state (country/region)
+        if not self._departure_ratio:
+            return self.state.departure_ratio
+        return self._departure_ratio
 
-    @classmethod
-    def from_dict(cls, dct):
-        departure_ratio = None
-        arrival_ratio = None
-        if 'departure_ratio' in dct:
-            departure_ratio = dct['departure_ratio']
-        if 'arrival_ratio' in dct:
-            arrival_ratio = dct['arrival_ratio']
-        return cls(lat=dct['lat'],
-                   lng=dct['lng'],
-                   name=dct['name'],
-                   state_iso=dct['state'],
-                   departure_ratio=departure_ratio,
-                   arrival_ratio=arrival_ratio,
-                   _id=dct['id'])
+    @property
+    def arrival_ratio(self):
+        # As above
+        if not self._arrival_ratio:
+            return self.state.arrival_ratio
+        return self._arrival_ratio
+
+    @property
+    def currency(self):
+        return self.state.currency
 
     def to_dict(self):
-        d = copy(self.__dict__)
-        d['state'] = d['state'].iso_code
-        del d['cache']
-        del d['name_long']
-        del d['countrycode']
-        return d
+        return {
+            'lat': self.lat,
+            'lng': self.lng,
+            'name': self.name,
+            'state_iso': self.state.iso_code,
+            'depot_id': self.id,
+            'departure_ratio': self._departure_ratio,
+            'arrival_ratio': self._arrival_ratio
+        }
 
 
 class DepotEncoder(json.JSONEncoder):

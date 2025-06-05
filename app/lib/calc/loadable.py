@@ -1,14 +1,17 @@
 
 from abc import ABC, abstractmethod
 from typing import List, Any, Optional, Type
-from pathlib import Path
-from json import JSONDecodeError
 import json
+from json import JSONDecodeError
+from pathlib import Path
+
 import logging
 
 
 class Itemable(ABC):
-
+    """
+    Item of the Loadable class. See below.
+    """
     @abstractmethod
     def to_dict(self):
         pass
@@ -16,19 +19,40 @@ class Itemable(ABC):
 
 class Loadable(ABC):
 
+    """
+    Abstract class providing centralized interface for Loadables.
+    There is items property which contain loaded items of type item_type
+    Each item shold be a child of Itemable providing to_dict method for
+    proper serialization process.
+    Loadable contains load() and save() methods which do the work
+    It ensures children to override necessary settings for proper work
+    """
+
     @property
     @abstractmethod
     def data_path(self) -> Path:
+        """
+        Should be overriden with actual Loadable child
+        :return: Returns a path to file where serialized data is located
+        """
         pass
 
     @property
     @abstractmethod
     def item_type(self) -> Type:
+        """
+        Type of the items members
+        :return: Itemable child
+        """
         pass
 
     @property
     @abstractmethod
     def item_tag(self) -> str:
+        """
+        This is a tag that is present in serialized data
+        :return:
+        """
         pass
 
     _items: Optional[List[Itemable]]
@@ -53,13 +77,13 @@ class Loadable(ABC):
                 struct = json.load(f)
             except (JSONDecodeError, OSError) as e:
                 logging.exception(e)
-                # TODO Regenerate file
+                # Ability to regenerate storage. For future releases
                 raise e
         self.items = [self.item_type(**item) for item in struct[self.item_tag]]
         logging.info(f'Succesfully loaded {self.item_tag}')
         return self
 
-    def save(self, path=None, force=False) -> None:
+    def save(self, path: Path = None, force: bool = False):
         struct = {
             self.item_tag: [item.to_dict() for item in self.items]
         }
@@ -67,3 +91,5 @@ class Loadable(ABC):
         with open(self.data_path if path is None else path, mode=filemode, encoding='utf8') as f:
             f.write(json.dumps(struct, ensure_ascii=False, indent=2))
         logging.info(f'Succesfully saved {self.item_tag}')
+        logging.info(f'Reloading {self.item_tag} from recently saved file')
+        return self.load(path)
