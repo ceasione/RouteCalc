@@ -1,5 +1,5 @@
 from app.lib.calc.place import Place
-from app.lib.calc.vehicles import Vehicle
+from app.lib.calc.loadables.vehicles import Vehicle
 from dataclasses import dataclass
 
 

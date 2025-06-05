@@ -2,13 +2,13 @@ import logging
 
 from app.lib.calc.place import Place
 from app.lib.calc.distance import Distance
-from app.lib.calc import depotpark
+from app.lib.calc.loadables import depotpark
 import math
-from app.lib.calc.statepark import Currency
+from app.lib.calc.loadables.statepark import Currency
 from app.lib.ai.model import ML_MODEL
 from app.lib.utils import compositor
-from app.lib.calc.vehicles import Vehicle
-from app.lib.calc.depotpark import Depot, NoDepots
+from app.lib.calc.loadables.vehicles import Vehicle
+from app.lib.calc.loadables.depotpark import Depot, NoDepots
 from app.lib.calc.place import LatLngAble
 from app.lib.utils.DTOs import CalculationDTO
 from app.lib.utils.DTOs import RequestDTO

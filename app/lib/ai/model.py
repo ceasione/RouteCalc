@@ -1,6 +1,6 @@
 
-from app.lib.calc.vehicles import VEHICLES
-from app.lib.calc.depotpark import DEPOTPARK
+from app.lib.calc.loadables.vehicles import VEHICLES
+from app.lib.calc.loadables.depotpark import DEPOTPARK
 import app.lib.calc.calc_itself as calc_itself
 import sqlite3
 import json
@@ -13,8 +13,8 @@ from keras.api.optimizers import Adam
 from keras.api.models import load_model
 import seaborn as sns
 from app import settings
-from app.lib.calc.depotpark import Depot
-from app.lib.calc.vehicles import Vehicle
+from app.lib.calc.loadables.depotpark import Depot
+from app.lib.calc.loadables.vehicles import Vehicle
 
 
 class BatchGenerator(Sequence):

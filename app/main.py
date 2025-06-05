@@ -3,7 +3,7 @@ from flask import request
 import json
 from flask import Response
 from app.lib.utils import compositor
-from app.lib.calc import vehicles
+from app.lib.calc.loadables import vehicles
 from app.lib.apis import smsapi, telegramapi2
 from app.lib.utils.QueryLogger import QUERY_LOGGER
 from flask_cors import CORS

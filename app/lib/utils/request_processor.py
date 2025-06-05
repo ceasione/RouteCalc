@@ -2,7 +2,7 @@
 from typing import Tuple
 import flask
 from app.lib.utils import number_tools
-from app.lib.calc.vehicles import VEHICLES
+from app.lib.calc.loadables.vehicles import VEHICLES
 from app.lib.utils.DTOs import RequestDTO
 from app.lib.calc.place import Place
 
