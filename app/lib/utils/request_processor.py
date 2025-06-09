@@ -73,7 +73,7 @@ def transport(raw: dict, dto: RequestDTO):
 def phone_number(raw: dict, dto: RequestDTO):
     _phone_number = raw['phone_number']
 
-    if _phone_number is not None:
+    if _phone_number:
         dto.phone_num = number_tools.validate_phone_ukr(_phone_number)
 
 
