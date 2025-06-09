@@ -1,6 +1,7 @@
 from app.lib.calc.place import Place
 from app.lib.calc.loadables.vehicles import Vehicle
 from dataclasses import dataclass
+from typing import Optional
 
 
 @dataclass
@@ -41,7 +42,7 @@ class RequestDTO:
     origin: Place = None
     destination: Place = None
     vehicle: Vehicle = None
-    phone_num: str = None
+    phone_num: Optional[str] = None
     locale: str = None
     url: str = None
     ip: str = None
