@@ -26,7 +26,7 @@ class ZeroDistanceResultsError(RuntimeError):
     pass
 
 
-class DistanceMeters:
+class DistanceResolvers:
 
     @staticmethod
     def _produce_distances_from_places(places_from: Iterable[LatLngAble],
@@ -46,12 +46,12 @@ class DistanceMeters:
         return product
 
     @staticmethod
-    def _resolve_distances_using_cache(dists: Iterable[Distance]) -> Tuple[List[Distance], List[Distance]]:
+    def _resolve_distances_using_cache(dists: Iterable[Distance], cache_) -> Tuple[List[Distance], List[Distance]]:
         resolved = []
         unresolved = []
 
         for dist in dists:
-            meters: float = CACHE.cache_look(
+            meters: float = cache_.cache_look(
                 dist.place_from.lat,
                 dist.place_from.lng,
                 dist.place_to.lat,
@@ -65,29 +65,34 @@ class DistanceMeters:
         return resolved, unresolved
 
     @staticmethod
-    def _resolve_distances_using_api(dists: Iterable[Distance]) -> Tuple[List[Distance], List[Distance]]:
-        return GAPI.resolve_distances(dists)
+    def _resolve_distances_using_api(dists: Iterable[Distance], gapi_) -> Tuple[List[Distance], List[Distance]]:
+        return gapi_.resolve_distances(dists)
 
     @staticmethod
-    def matrix(places_from: Iterable[LatLngAble], places_to: Iterable[LatLngAble]) -> List[Distance]:
+    def matrix(places_from: Iterable[LatLngAble], places_to: Iterable[LatLngAble],
+               cache_=CACHE, gapi_=GAPI) -> List[Distance]:
         """
         Fetches distance between two Places with Google Matrix API or cache
         :param places_from: Iterable of origin Places
         :param places_to: Iterable of destination Places
+        :param cache_ Cache instance retrieving distances between
+        geographic coordinates (defaults to global CACHE)
+        :param gapi_ Google Matrix API instance retrieving distances
+        with requests (defaults to global GAPI)
         :return: List of resolved Distance objects (sorted ascending)
         that containing .distance property or None if there is no land way existed
         :raises: ZeroDistanceResultsError in case any of the methods (Cache, API)
         did not produce useful distance
         """
-        resolved, unresolved = [], DistanceMeters._produce_distances_from_places(places_from, places_to)
+        resolved, unresolved = [], DistanceResolvers._produce_distances_from_places(places_from, places_to)
 
-        accum, unresolved = DistanceMeters._resolve_distances_using_cache(unresolved)
+        accum, unresolved = DistanceResolvers._resolve_distances_using_cache(unresolved, cache_)
         resolved.extend(accum)
         logger.debug(f'Cache resolved, unresolved: {len(resolved)}, {len(unresolved)}')
 
-        accum, unresolved = DistanceMeters._resolve_distances_using_api(unresolved)
+        accum, unresolved = DistanceResolvers._resolve_distances_using_api(unresolved, gapi_)
         for dist in accum:
-            CACHE.cache_it(
+            cache_.cache_it(
                 dist.place_from.lat,
                 dist.place_from.lng,
                 dist.place_to.lat,
@@ -135,16 +140,15 @@ class DistanceMeters:
         :param places_to: (LatLngAble, ) Iterable of destinations
         :return: List of calculated Distance objects (sorted ascending)
         """
-        distances = DistanceMeters._produce_distances_from_places(places_from, places_to)
+        distances = DistanceResolvers._produce_distances_from_places(places_from, places_to)
 
         for dist in distances:
-            dist.distance = DistanceMeters._haversine_step(dist.place_from, dist.place_to)
+            dist.distance = DistanceResolvers._haversine_step(dist.place_from, dist.place_to)
         distances.sort()
         return distances
 
 
 class Predictors:
-    ml_model = ML_MODEL
 
     @staticmethod
     def _distance_ratio(dist: float) -> float:
@@ -185,7 +189,7 @@ class Predictors:
         return float(vehicle.price) * ratio
 
     @staticmethod
-    def ml(starting_depot: Depot, ending_depot: Depot, vehicle: Vehicle, _distance: float) -> float:
+    def ml(starting_depot: Depot, ending_depot: Depot, vehicle: Vehicle, _distance: float, ml_model=ML_MODEL) -> float:
         """
         Predicts price based on the ML model that was trained on the original method invented in 2021
         The model is dynamic and supposed to be finetuned from time to time, maybe in automatic manner
@@ -193,9 +197,10 @@ class Predictors:
         :param ending_depot: destination Depot
         :param vehicle: Vehicle
         :param _distance: float. Not used. It is needed just to match attributes.
+        :param ml_model: Optional parameter to replace model with mock
         :return: float, price per km on a given route and with given vehicle
         """
-        return Predictors.ml_model.predict(starting_depot.id, ending_depot.id, vehicle.id)
+        return ml_model.predict(starting_depot.id, ending_depot.id, vehicle.id)
 
 
 def plan_route(place_a: Place, place_b: Place, dptpark=DEPOT_PARK
@@ -207,43 +212,43 @@ def plan_route(place_a: Place, place_b: Place, dptpark=DEPOT_PARK
     :param dptpark: Depotpark or None for default
     :return: planned route
     """
-    meter = DistanceMeters.matrix
+    dist_resolver = DistanceResolvers.matrix
     try:
         # Acquiring distances from every filtered depots to our place, choosing the closest one
         in_country_depots = dptpark.filter_by(place_a.countrycode)
-        starting_depot = meter(in_country_depots, [place_a])[0].place_from
+        starting_depot = dist_resolver(in_country_depots, [place_a])[0].place_from
 
         # Acquiring distances from our place to every filtered depots, choosing the closest one
         in_country_depots = dptpark.filter_by(place_b.countrycode)
-        ending_depot = meter([place_b], in_country_depots)[0].place_to
+        ending_depot = dist_resolver([place_b], in_country_depots)[0].place_to
 
     except (NoDepots, IndexError):  # That means the meter did not return any reasonable distance
         # Acquiring distances from our place to all depots ve have, choosing the closest one
         all_depots = dptpark.filter_by(None)
-        starting_depot = meter(all_depots, [place_a])[0].place_from
-        ending_depot = meter([place_b], all_depots)[0].place_to
+        starting_depot = dist_resolver(all_depots, [place_a])[0].place_from
+        ending_depot = dist_resolver([place_b], all_depots)[0].place_to
     return starting_depot, place_a, place_b, ending_depot
 
 
 def calculate(route: Tuple[LatLngAble, LatLngAble, LatLngAble, LatLngAble],
               vehicle: Vehicle,
-              meter: Callable[[Iterable[LatLngAble], Iterable[LatLngAble]], List[Distance]],
+              dist_resolver: Callable[[Iterable[LatLngAble], Iterable[LatLngAble]], List[Distance]],
               predictor: Callable[[Depot, Depot, Vehicle, float], float]) -> Tuple[float, float, float]:
     """
     Calculator itself. Makes distance calculation using meter, predicts price per km for
     given vehicle using predictor. Also makes cost calculation (= distance * price)
     :param route: Tuple of 4 LatLngAble. A route vehicle shold pass to complete an order
     :param vehicle: Vehicle object
-    :param meter: One of the DistanceMeters methods. Calculates distance between LatLngAble's
+    :param dist_resolver: One of the DistanceResolvers methods. Calculates distance between LatLngAble's
     :param predictor: One of the Predictors methods. Calculates price for given route and vehicle
     :return: (float, float, float) -> distance in meters, price in UAH per km, cost
     """
     assert len(route) == 4
     starting_depot, ending_depot = cast(Depot, route[0]), cast(Depot, route[3])
     distance = \
-        meter([route[0]], [route[1]])[0].distance + \
-        meter([route[1]], [route[2]])[0].distance + \
-        meter([route[2]], [route[3]])[0].distance
+        dist_resolver([route[0]], [route[1]])[0].distance + \
+        dist_resolver([route[1]], [route[2]])[0].distance + \
+        dist_resolver([route[2]], [route[3]])[0].distance
     price = predictor(starting_depot, ending_depot, vehicle, distance)
     cost = distance / 1000 * price  # Convert dist from m to km first as price is per kilometer
     return distance, price, cost
@@ -261,7 +266,7 @@ def process_request(request: RequestDTO) -> CalculationDTO:
     route = plan_route(place_a, place_b)
     starting_depot, ending_depot = cast(Depot, route[0]), cast(Depot, route[3])
     visible_route = route[1:-1]
-    distance, price, cost = calculate(route, vehicle, DistanceMeters.matrix, Predictors.ml)
+    distance, price, cost = calculate(route, vehicle, DistanceResolvers.matrix, Predictors.ml)
     currency = Currency.get_preferred(starting_depot.currency, ending_depot.currency)
     logger.debug(f'distance, price, cost; currency: '
                  f'{distance}, {price}, {cost}; {currency.iso_code}: {currency.rate()}')
