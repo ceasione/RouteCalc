@@ -69,3 +69,33 @@ def vehicle_1():
     return Vehicle(**dct)
 
 
+@pytest.fixture
+def place_4():
+    return Place(49.227717, 31.852233, name='Сміла')
+
+
+@pytest.fixture
+def place_5():
+    return Place(50.5089112, 26.2566443, name='Здолбунів')
+
+
+@pytest.fixture
+def vehicle_2():
+    dct = {
+        'id': 1,
+        'name': 'Тент 5',
+        'name_ua': 'Тент 5',
+        'price': 32.0,
+        'order': 3,
+        'length': 7.0,
+        'width': 2.45,
+        'height': 2.5,
+        'weight_capacity': 5,
+        'space_capacity': 45,
+        'cargoes_possible': 'Любые грузы на паллетах, в бегах и мешках',
+        'cargoes_possible_ua': 'Будь-які вантажі на палетах, беги і мішки',
+        'picture': 'https://api.intersmartgroup.com/static/icons/gaz.svg',
+        'price_per_ton': False
+    }
+    return Vehicle(**dct)
+
