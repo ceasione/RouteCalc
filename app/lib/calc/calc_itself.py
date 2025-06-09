@@ -243,7 +243,6 @@ def calculate(route: Tuple[LatLngAble, LatLngAble, LatLngAble, LatLngAble],
     :param predictor: One of the Predictors methods. Calculates price for given route and vehicle
     :return: (float, float, float) -> distance in meters, price in UAH per km, cost
     """
-    assert len(route) == 4
     starting_depot, ending_depot = cast(Depot, route[0]), cast(Depot, route[3])
     distance = \
         dist_resolver([route[0]], [route[1]])[0].distance + \
