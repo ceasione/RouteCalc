@@ -11,3 +11,4 @@ matplotlib
 keras
 backoff
 python-dotenv
+pytest
