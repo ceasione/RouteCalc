@@ -3,6 +3,7 @@ import pytest
 from app.lib.calc.place import Place
 from app.lib.calc.loadables.depot import Depot
 from app.lib.calc.loadables.vehicles import Vehicle
+from app.lib.utils.DTOs import RequestDTO
 
 
 @pytest.fixture
@@ -99,3 +100,46 @@ def vehicle_2():
     }
     return Vehicle(**dct)
 
+
+@pytest.fixture
+def remote_addr():
+    return '127.0.0.1'
+
+
+@pytest.fixture
+def flask_request_calculate():
+    return {
+        'intent': 'acquire',
+
+        'from': {
+            'name_short': 'Сміла',
+            'name_long': 'Сміла, Смілянська міськрада, Черкаська область',
+            'lat': 49.227717,
+            'lng': 31.852233,
+            'countrycode': 'UA'},
+
+        'to': {
+            'name_short': 'Здолбунів',
+            'name_long': 'Здолбунів, Здолбунівський район, Рівненська область',
+            'lat': 50.5089112,
+            'lng': 26.2566443,
+            'countrycode': 'UA'},
+
+        'transport_id': 1,
+        'phone_number': '',
+        'locale': 'ru_UA',
+        'url': 'http://localhost:3000/'}
+
+
+@pytest.fixture
+def dto_request_calculate(place_4, place_5, vehicle_2):
+    return RequestDTO(
+        intent='acquire',
+        origin=place_4,
+        destination=place_5,
+        vehicle=vehicle_2,
+        phone_num=None,
+        locale='ru_UA',
+        url='http://localhost:3000/',
+        ip='127.0.0.1'
+    )

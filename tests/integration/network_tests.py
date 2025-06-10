@@ -11,31 +11,6 @@ def headers():
 
 
 @pytest.fixture
-def calculate_payload():
-    return {
-        'intent': 'acquire',
-
-        'from': {
-            'name_short': 'Сміла',
-            'name_long': 'Сміла, Смілянська міськрада, Черкаська область',
-            'lat': 49.227717,
-            'lng': 31.852233,
-            'countrycode': 'UA'},
-
-        'to': {
-            'name_short': 'Здолбунів',
-            'name_long': 'Здолбунів, Здолбунівський район, Рівненська область',
-            'lat': 50.5089112,
-            'lng': 26.2566443,
-            'countrycode': 'UA'},
-
-        'transport_id': 1,
-        'phone_number': '',
-        'locale': 'ru_UA',
-        'url': 'http://localhost:3000/'}
-
-
-@pytest.fixture
 def response_payload_assert():
     return {
         "status": "WORKLOAD",
@@ -67,10 +42,10 @@ def submit_payload():
 
 @pytest.mark.skip
 @pytest.mark.integration
-def test_calculate(calculate_payload, headers):
+def test_calculate(flask_request_calculate, headers):
 
     url = 'http://localhost:5000/calculate/'
-    data = json.dumps(calculate_payload, ensure_ascii=False)
+    data = json.dumps(flask_request, ensure_ascii=False)
     response = requests.post(url, data.encode('utf-8'), headers=headers).json()
     assert response.get('status') == 'WORKLOAD'
     workload = response.get('workload')
