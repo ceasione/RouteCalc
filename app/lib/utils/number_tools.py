@@ -1,5 +1,5 @@
 
-class WrongNumberError(ValueError):
+class WrongNumberError(Exception):
     ...
 
 
@@ -30,11 +30,11 @@ def validate_phone_ukr(phone_number):
     if phone_number == 'nosms':
         return None  # This was hardcoded in frontend side and means that phone_number = None
 
-    if len(phone_number) != 12:
-        raise ValueError(f'Phone number expected length is 12. Got {len(phone_number)}')
-
     if not phone_number.isdigit():
         raise ValueError('Phone number chars expected to be numbers')
+
+    if len(phone_number) != 12:
+        raise ValueError(f'Phone number expected length is 12. Got {len(phone_number)}')
 
     if phone_number[:5] not in ALLOWED_PREFIX:
         raise WrongNumberError(f'Invalid phone number prefix: {phone_number[:5]}')
