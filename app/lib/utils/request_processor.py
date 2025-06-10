@@ -1,5 +1,5 @@
 
-from typing import Tuple
+from typing import Tuple, Any
 import flask
 from app.lib.utils import number_tools
 from app.lib.calc.loadables.vehicles import VEHICLES
@@ -63,11 +63,10 @@ def destination(raw: dict, dto: RequestDTO):
 
 
 def transport(raw: dict, dto: RequestDTO):
-    transport_id = int(raw['transport_id'])
     try:
-        dto.vehicle = VEHICLES.get_by_id(transport_id)
-    except ValueError:
-        raise ValidationError(f'Unknown vehicle ID: {transport_id}')
+        dto.vehicle = VEHICLES.get_by_id(raw['transport_id'])
+    except ValueError as e:
+        raise ValidationError(f'Unknown vehicle ID: {raw["transport_id"]}')
 
 
 def phone_number(raw: dict, dto: RequestDTO):
@@ -86,7 +85,7 @@ def url(raw: dict, dto: RequestDTO):
     dto.url = _url
 
 
-def process(request_raw: flask.Request) -> RequestDTO:
+def process(request_raw: flask.Request or Any) -> RequestDTO:
     """
     Process and validate a flask.Request (typically received from the frontend) to create
     and populate a RequestDTO object that's convenient for further use
@@ -130,7 +129,7 @@ def process(request_raw: flask.Request) -> RequestDTO:
         except (TypeError, IndexError, KeyError, AttributeError, ValueError) as e:
             logger.error(f'Failed to validate stage: {stage.__name__}')
             logger.exception(e)
-            raise ValidationError(e)
+            raise ValidationError() from e
 
     dto.ip = ip
     return dto
