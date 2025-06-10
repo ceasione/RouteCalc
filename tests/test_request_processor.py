@@ -22,14 +22,14 @@ def test_process_normal(flask_request_calculate, remote_addr, dto_request_calcul
     assert dto_request == dto_request_calculate
 
 
-def test_process_bad_intent(flask_request_calculate, remote_addr, dto_request_calculate):
+def test_process_bad_intent(flask_request_calculate, remote_addr):
     flask_request = FakeFlaskRequest(flask_request_calculate, remote_addr)
     flask_request.data['intent'] = 'someintent'
     with pytest.raises(ValidationError):
         request_processor.process(flask_request)
 
 
-def test_process_bad_origin(flask_request_calculate, remote_addr, dto_request_calculate):
+def test_process_bad_origin(flask_request_calculate, remote_addr):
     flask_request = FakeFlaskRequest(flask_request_calculate, remote_addr)
 
     flask_request.data['from']['lat'] = 'text at float field'
@@ -49,7 +49,7 @@ def test_process_bad_origin(flask_request_calculate, remote_addr, dto_request_ca
         request_processor.process(flask_request)
 
 
-def test_process_bad_destination(flask_request_calculate, remote_addr, dto_request_calculate):
+def test_process_bad_destination(flask_request_calculate, remote_addr):
     flask_request = FakeFlaskRequest(flask_request_calculate, remote_addr)
 
     flask_request.data['to']['lat'] = 'text at float field'
