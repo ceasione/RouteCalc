@@ -45,7 +45,7 @@ def submit_payload():
 def test_calculate(flask_request_calculate, headers):
 
     url = 'http://localhost:5000/calculate/'
-    data = json.dumps(flask_request, ensure_ascii=False)
+    data = json.dumps(flask_request_calculate, ensure_ascii=False)
     response = requests.post(url, data.encode('utf-8'), headers=headers).json()
     assert response.get('status') == 'WORKLOAD'
     workload = response.get('workload')
