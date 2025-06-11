@@ -71,8 +71,8 @@ class Loadable(ABC):
         self._defined_status = False
 
     def load(self, path: Path = None):
-        with open(self.data_path if path is None else path, mode='r', encoding='utf-8') as f:
-            try:
+        try:
+            with open(self.data_path if path is None else path, mode='r', encoding='utf-8') as f:
                 struct = json.load(f)
         except (JSONDecodeError, OSError) as e:
             logger.error(f'Error opening file {self.data_path}')
