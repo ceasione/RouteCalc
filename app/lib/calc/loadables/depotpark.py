@@ -6,12 +6,7 @@ from pathlib import Path
 from typing import Type
 
 
-APIADR = settings.GOOGLE_APIADR
-APIKEY = settings.GOOGLE_APIKEY
-DB_LOCATION = settings.DEPOT_DB_LOC
-
-
-DEPOT_PATH = Path(settings.DEPOTPARK_NOSQL_LOC)
+DEPOT_PATH = Path(settings.DEPOTPARK_LOC)
 DEPOT_TAG = 'depotpark'
 
 
@@ -42,4 +37,4 @@ class DepotPark(Loadable):
         return some
 
 
-DEPOTPARK = DepotPark().load(Path('/home/oliver/Projects/ISG.com/RouteCalc_data/dbs/depotpark_nosql.json'))
+DEPOTPARK = DepotPark().load()

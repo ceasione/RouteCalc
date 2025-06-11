@@ -25,7 +25,7 @@ class QueryLogger:
     """
 
     def __init__(self):
-        self.DB_LOCATION = settings.LOG_DB_LOCATION
+        self.DB_LOCATION = settings.QUERYLOG_DB_LOC
         self.conn = None
         self.cursor = None
 

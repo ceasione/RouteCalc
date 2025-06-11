@@ -119,7 +119,7 @@ class BatchGenerator(Sequence):
 
 class PricePredictor:
 
-    def __init__(self, model=settings.PRICE_PREDICTOR_MODEL):
+    def __init__(self, model=settings.AI_MODEL_LOC):
         self.model_loc = model
         self.model = load_model(self.model_loc)
 

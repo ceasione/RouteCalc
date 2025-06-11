@@ -41,7 +41,7 @@ class Cache:
 
     def __init__(self):
 
-        self.CACHE_LOCATION = settings.CACHE_LOCATION
+        self.CACHE_LOCATION = settings.CACHE_LOC
         self.disk_connection = sqlite3.connect(self.CACHE_LOCATION, check_same_thread=False)
         self.memory_connection = None
         self.emergency_mode = False

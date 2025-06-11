@@ -1,3 +1,7 @@
+
+from app.lib.utils.logger import logger
+from app.lib.utils import storage
+storage.ensure_all()  # noqa: E402
 from flask import Flask
 from flask import request
 import json
@@ -15,7 +19,6 @@ from app.lib.utils import number_tools
 from app.lib.utils.number_tools import WrongNumberError
 from app.lib.calc.calc_itself import ZeroDistanceResultsError
 import dataclasses
-from app.lib.utils.logger import logger
 
 
 app = Flask(__name__)

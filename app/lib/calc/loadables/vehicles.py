@@ -2,12 +2,12 @@ import json
 from dataclasses import dataclass
 from dataclasses import asdict
 from pathlib import Path
-from app.settings import VEHICLES_LOC
+from app import settings
 from typing import Type
 from app.lib.calc.loadables.loadable import Itemable, Loadable
 
 
-VEHICLES_PATH = Path(VEHICLES_LOC)
+VEHICLES_PATH = Path(settings.VEHICLES_LOC)
 VEHICLES_TAG = 'vehicles'
 
 
@@ -79,9 +79,5 @@ class VehicleEncoder(json.JSONEncoder):
             return asdict(obj)
         return json.JSONEncoder.default(self, obj)
 
-
-if __name__ == '__main__':
-    test_path = Path('../../../../') / VEHICLES_LOC
-    vehicles = Vehicles().load(test_path)
 
 VEHICLES = Vehicles().load()
