@@ -5,7 +5,7 @@ from dataclasses import dataclass, asdict
 from typing import Type
 from app.lib.calc.loadables.loadable import Itemable, Loadable
 
-STATE_PATH = Path(settings.STATEPARK_NOSQL_LOC)
+STATE_PATH = Path(settings.STATEPARK_LOC)
 STATE_TAG = 'statepark'
 CURRENCY_PRIORITY = {'USD': 3, 'EUR': 2, 'UAH': 1}
 CURRENCY_RATES = {'UAH': 1.0, 'USD': 41.0, 'EUR': 45.0}
