@@ -4,8 +4,7 @@ from typing import List, Any, Optional, Type
 import json
 from json import JSONDecodeError
 from pathlib import Path
-
-import logging
+from app.lib.utils.logger import logger
 
 
 class Itemable(ABC):
@@ -75,12 +74,13 @@ class Loadable(ABC):
         with open(self.data_path if path is None else path, mode='r', encoding='utf-8') as f:
             try:
                 struct = json.load(f)
-            except (JSONDecodeError, OSError) as e:
-                logging.exception(e)
-                # Ability to regenerate storage. For future releases
-                raise e
+        except (JSONDecodeError, OSError) as e:
+            logger.error(f'Error opening file {self.data_path}')
+            logger.exception(e)
+            raise e
+
         self.items = [self.item_type(**item) for item in struct[self.item_tag]]
-        logging.info(f'Succesfully loaded {self.item_tag}')
+        logger.info(f'Succesfully loaded {self.item_tag}')
         return self
 
     def save(self, path: Path = None, force: bool = False):
@@ -90,6 +90,6 @@ class Loadable(ABC):
         filemode = 'w' if force else 'x'
         with open(self.data_path if path is None else path, mode=filemode, encoding='utf8') as f:
             f.write(json.dumps(struct, ensure_ascii=False, indent=2))
-        logging.info(f'Succesfully saved {self.item_tag}')
-        logging.info(f'Reloading {self.item_tag} from recently saved file')
+        logger.info(f'Succesfully saved {self.item_tag}')
+        logger.info(f'Reloading {self.item_tag} from recently saved file')
         return self.load(path)
