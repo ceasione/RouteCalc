@@ -1,0 +1,1642 @@
+{
+  "depotpark": [
+    {
+      "lat": 49.2477324,
+      "lng": 28.5117743,
+      "name": "Вінниця",
+      "state_iso": "UA",
+      "depot_id": 0,
+      "departure_ratio": 1.0,
+      "arrival_ratio": 1.0
+    },
+    {
+      "lat": 49.0472278,
+      "lng": 28.1018644,
+      "name": "Жмеринка",
+      "state_iso": "UA",
+      "depot_id": 1,
+      "departure_ratio": 1.0,
+      "arrival_ratio": 1.0
+    },
+    {
+      "lat": 50.7586849,
+      "lng": 25.3503527,
+      "name": "Луцьк",
+      "state_iso": "UA",
+      "depot_id": 2,
+      "departure_ratio": 0.95,
+      "arrival_ratio": 0.85
+    },
+    {
+      "lat": 51.2126936,
+      "lng": 24.7234919,
+      "name": "Ковель",
+      "state_iso": "UA",
+      "depot_id": 3,
+      "departure_ratio": 0.95,
+      "arrival_ratio": 0.85
+    },
+    {
+      "lat": 48.4837507,
+      "lng": 35.1035458,
+      "name": "Дніпро",
+      "state_iso": "UA",
+      "depot_id": 4,
+      "departure_ratio": 0.9,
+      "arrival_ratio": 1.0
+    },
+    {
+      "lat": 48.1172005,
+      "lng": 33.5421389,
+      "name": "Кривий Ріг",
+      "state_iso": "UA",
+      "depot_id": 5,
+      "departure_ratio": 0.9,
+      "arrival_ratio": 1.0
+    },
+    {
+      "lat": 47.8727901,
+      "lng": 33.3764639,
+      "name": "Кривий Ріг",
+      "state_iso": "UA",
+      "depot_id": 6,
+      "departure_ratio": 0.9,
+      "arrival_ratio": 1.0
+    },
+    {
+      "lat": 47.5815945,
+      "lng": 34.342938,
+      "name": "Нікополь",
+      "state_iso": "UA",
+      "depot_id": 7,
+      "departure_ratio": 1.0,
+      "arrival_ratio": 1.1
+    },
+    {
+      "lat": 50.3026525,
+      "lng": 28.6683552,
+      "name": "Житомир",
+      "state_iso": "UA",
+      "depot_id": 8,
+      "departure_ratio": 1.0,
+      "arrival_ratio": 1.0
+    },
+    {
+      "lat": 50.9705976,
+      "lng": 28.6440749,
+      "name": "Коростень",
+      "state_iso": "UA",
+      "depot_id": 9,
+      "departure_ratio": 1.0,
+      "arrival_ratio": 1.0
+    },
+    {
+      "lat": 49.9083543,
+      "lng": 28.6101825,
+      "name": "Бердичів",
+      "state_iso": "UA",
+      "depot_id": 10,
+      "departure_ratio": 1.0,
+      "arrival_ratio": 1.0
+    },
+    {
+      "lat": 48.5889625,
+      "lng": 22.2930823,
+      "name": "Ужгород",
+      "state_iso": "UA",
+      "depot_id": 11,
+      "departure_ratio": 0.85,
+      "arrival_ratio": 0.85
+    },
+    {
+      "lat": 48.4348197,
+      "lng": 22.7472272,
+      "name": "Мукачево",
+      "state_iso": "UA",
+      "depot_id": 12,
+      "departure_ratio": 0.85,
+      "arrival_ratio": 0.85
+    },
+    {
+      "lat": 47.8791748,
+      "lng": 35.1765208,
+      "name": "Запоріжжя",
+      "state_iso": "UA",
+      "depot_id": 13,
+      "departure_ratio": 1.0,
+      "arrival_ratio": 1.2
+    },
+    {
+      "lat": 48.8962256,
+      "lng": 24.7155191,
+      "name": "Івано-Франківськ",
+      "state_iso": "UA",
+      "depot_id": 14,
+      "departure_ratio": 1.0,
+      "arrival_ratio": 0.9
+    },
+    {
+      "lat": 50.4496788,
+      "lng": 30.6828889,
+      "name": "Київ",
+      "state_iso": "UA",
+      "depot_id": 15,
+      "departure_ratio": 0.9,
+      "arrival_ratio": 1.0
+    },
+    {
+      "lat": 50.4467675,
+      "lng": 30.4185933,
+      "name": "Київ",
+      "state_iso": "UA",
+      "depot_id": 16,
+      "departure_ratio": 0.9,
+      "arrival_ratio": 1.0
+    },
+    {
+      "lat": 50.557146,
+      "lng": 30.8521647,
+      "name": "Бровари",
+      "state_iso": "UA",
+      "depot_id": 17,
+      "departure_ratio": 1.0,
+      "arrival_ratio": 1.0
+    },
+    {
+      "lat": 49.7839529,
+      "lng": 30.1879866,
+      "name": "Біла Церква",
+      "state_iso": "UA",
+      "depot_id": 18,
+      "departure_ratio": 1.0,
+      "arrival_ratio": 1.0
+    },
+    {
+      "lat": 48.5201839,
+      "lng": 32.278083,
+      "name": "Кропивницький",
+      "state_iso": "UA",
+      "depot_id": 19,
+      "departure_ratio": 1.0,
+      "arrival_ratio": 1.05
+    },
+    {
+      "lat": 48.7127179,
+      "lng": 33.0664874,
+      "name": "Олександрія",
+      "state_iso": "UA",
+      "depot_id": 20,
+      "departure_ratio": 1.0,
+      "arrival_ratio": 1.0
+    },
+    {
+      "lat": 49.8175166,
+      "lng": 24.0602122,
+      "name": "Львів",
+      "state_iso": "UA",
+      "depot_id": 21,
+      "departure_ratio": 0.95,
+      "arrival_ratio": 0.95
+    },
+    {
+      "lat": 46.9466819,
+      "lng": 31.9552912,
+      "name": "Миколаїв",
+      "state_iso": "UA",
+      "depot_id": 22,
+      "departure_ratio": 1.2,
+      "arrival_ratio": 1.2
+    },
+    {
+      "lat": 47.6082744,
+      "lng": 31.3037151,
+      "name": "Вознесенськ",
+      "state_iso": "UA",
+      "depot_id": 23,
+      "departure_ratio": 1.2,
+      "arrival_ratio": 1.2
+    },
+    {
+      "lat": 46.4824242,
+      "lng": 30.7610396,
+      "name": "Одеса",
+      "state_iso": "UA",
+      "depot_id": 24,
+      "departure_ratio": 0.7,
+      "arrival_ratio": 1.2
+    },
+    {
+      "lat": 45.3577814,
+      "lng": 28.8056803,
+      "name": "Ізмаїл",
+      "state_iso": "UA",
+      "depot_id": 25,
+      "departure_ratio": 0.7,
+      "arrival_ratio": 1.2
+    },
+    {
+      "lat": 49.5791282,
+      "lng": 34.5949656,
+      "name": "Полтава",
+      "state_iso": "UA",
+      "depot_id": 26,
+      "departure_ratio": 1.0,
+      "arrival_ratio": 1.0
+    },
+    {
+      "lat": 49.1139237,
+      "lng": 33.4150095,
+      "name": "Кременчук",
+      "state_iso": "UA",
+      "depot_id": 27,
+      "departure_ratio": 1.0,
+      "arrival_ratio": 1.0
+    },
+    {
+      "lat": 50.0328774,
+      "lng": 32.9510742,
+      "name": "Лубни",
+      "state_iso": "UA",
+      "depot_id": 28,
+      "departure_ratio": 1.0,
+      "arrival_ratio": 1.0
+    },
+    {
+      "lat": 50.6454164,
+      "lng": 26.2704279,
+      "name": "Рівне",
+      "state_iso": "UA",
+      "depot_id": 29,
+      "departure_ratio": 0.95,
+      "arrival_ratio": 0.85
+    },
+    {
+      "lat": 50.4087662,
+      "lng": 25.7769674,
+      "name": "Дубно",
+      "state_iso": "UA",
+      "depot_id": 30,
+      "departure_ratio": 0.95,
+      "arrival_ratio": 0.85
+    },
+    {
+      "lat": 50.9240707,
+      "lng": 34.8113796,
+      "name": "Суми",
+      "state_iso": "UA",
+      "depot_id": 31,
+      "departure_ratio": 1.2,
+      "arrival_ratio": 1.2
+    },
+    {
+      "lat": 50.7541234,
+      "lng": 33.4807991,
+      "name": "Ромни",
+      "state_iso": "UA",
+      "depot_id": 32,
+      "departure_ratio": 1.0,
+      "arrival_ratio": 1.2
+    },
+    {
+      "lat": 49.5765011,
+      "lng": 25.5990985,
+      "name": "Тернопіль",
+      "state_iso": "UA",
+      "depot_id": 33,
+      "departure_ratio": 1.05,
+      "arrival_ratio": 1.0
+    },
+    {
+      "lat": 48.9968659,
+      "lng": 25.8608855,
+      "name": "Чортков",
+      "state_iso": "UA",
+      "depot_id": 34,
+      "departure_ratio": 0.9,
+      "arrival_ratio": 0.9
+    },
+    {
+      "lat": 49.9519883,
+      "lng": 36.169978,
+      "name": "Харків",
+      "state_iso": "UA",
+      "depot_id": 35,
+      "departure_ratio": 0.85,
+      "arrival_ratio": 1.2
+    },
+    {
+      "lat": 49.1760928,
+      "lng": 37.2911294,
+      "name": "Ізюм",
+      "state_iso": "UA",
+      "depot_id": 36,
+      "departure_ratio": 1.2,
+      "arrival_ratio": 1.2
+    },
+    {
+      "lat": 49.4104464,
+      "lng": 27.0202466,
+      "name": "Хмельницький",
+      "state_iso": "UA",
+      "depot_id": 37,
+      "departure_ratio": 1.0,
+      "arrival_ratio": 1.0
+    },
+    {
+      "lat": 50.1807216,
+      "lng": 27.0754421,
+      "name": "Шепетівка",
+      "state_iso": "UA",
+      "depot_id": 38,
+      "departure_ratio": 0.9,
+      "arrival_ratio": 0.95
+    },
+    {
+      "lat": 48.6905694,
+      "lng": 26.5966223,
+      "name": "Кам'янець-Подільський",
+      "state_iso": "UA",
+      "depot_id": 39,
+      "departure_ratio": 0.85,
+      "arrival_ratio": 1.0
+    },
+    {
+      "lat": 46.6591755,
+      "lng": 32.5746633,
+      "name": "Херсон",
+      "state_iso": "UA",
+      "depot_id": 40,
+      "departure_ratio": 1.2,
+      "arrival_ratio": 1.2
+    },
+    {
+      "lat": 49.3781683,
+      "lng": 32.0557625,
+      "name": "Черкаси",
+      "state_iso": "UA",
+      "depot_id": 41,
+      "departure_ratio": 1.1,
+      "arrival_ratio": 1.0
+    },
+    {
+      "lat": 48.7450586,
+      "lng": 30.2100905,
+      "name": "Умань",
+      "state_iso": "UA",
+      "depot_id": 42,
+      "departure_ratio": 1.0,
+      "arrival_ratio": 1.0
+    },
+    {
+      "lat": 49.6617369,
+      "lng": 32.0613698,
+      "name": "Золотоноша",
+      "state_iso": "UA",
+      "depot_id": 43,
+      "departure_ratio": 1.0,
+      "arrival_ratio": 1.0
+    },
+    {
+      "lat": 51.461816,
+      "lng": 31.2454925,
+      "name": "Чернігів",
+      "state_iso": "UA",
+      "depot_id": 44,
+      "departure_ratio": 1.0,
+      "arrival_ratio": 1.1
+    },
+    {
+      "lat": 50.5578571,
+      "lng": 32.38511,
+      "name": "Прилуки",
+      "state_iso": "UA",
+      "depot_id": 45,
+      "departure_ratio": 1.0,
+      "arrival_ratio": 1.0
+    },
+    {
+      "lat": 51.0171628,
+      "lng": 31.8638573,
+      "name": "Ніжин",
+      "state_iso": "UA",
+      "depot_id": 46,
+      "departure_ratio": 1.0,
+      "arrival_ratio": 1.0
+    },
+    {
+      "lat": 51.7683452,
+      "lng": 32.2515697,
+      "name": "Корюківка",
+      "state_iso": "UA",
+      "depot_id": 47,
+      "departure_ratio": 1.2,
+      "arrival_ratio": 1.2
+    },
+    {
+      "lat": 48.3306025,
+      "lng": 25.9390436,
+      "name": "Чернівці",
+      "state_iso": "UA",
+      "depot_id": 48,
+      "departure_ratio": 0.9,
+      "arrival_ratio": 1.2
+    },
+    {
+      "lat": 51.3387526,
+      "lng": 26.6026634,
+      "name": "Сарни",
+      "state_iso": "UA",
+      "depot_id": 49,
+      "departure_ratio": 0.85,
+      "arrival_ratio": 0.85
+    },
+    {
+      "lat": 48.7954704,
+      "lng": 29.3841935,
+      "name": "Гайсин",
+      "state_iso": "UA",
+      "depot_id": 50,
+      "departure_ratio": 1.0,
+      "arrival_ratio": 1.0
+    },
+    {
+      "lat": 50.6266933,
+      "lng": 27.6425265,
+      "name": "Звягель",
+      "state_iso": "UA",
+      "depot_id": 51,
+      "departure_ratio": 1.0,
+      "arrival_ratio": 1.0
+    },
+    {
+      "lat": 48.5282809,
+      "lng": 25.0907483,
+      "name": "Коломия",
+      "state_iso": "UA",
+      "depot_id": 52,
+      "departure_ratio": 0.95,
+      "arrival_ratio": 0.85
+    },
+    {
+      "lat": 49.4212501,
+      "lng": 24.5995285,
+      "name": "Рогатин",
+      "state_iso": "UA",
+      "depot_id": 53,
+      "departure_ratio": 0.95,
+      "arrival_ratio": 0.85
+    },
+    {
+      "lat": 50.2467703,
+      "lng": 31.8149387,
+      "name": "Яготин",
+      "state_iso": "UA",
+      "depot_id": 54,
+      "departure_ratio": 0.9,
+      "arrival_ratio": 1.0
+    },
+    {
+      "lat": 49.270618,
+      "lng": 23.8716906,
+      "name": "Стрий",
+      "state_iso": "UA",
+      "depot_id": 55,
+      "departure_ratio": 0.9,
+      "arrival_ratio": 0.85
+    },
+    {
+      "lat": 50.2910938,
+      "lng": 24.6341675,
+      "name": "Радехів",
+      "state_iso": "UA",
+      "depot_id": 56,
+      "departure_ratio": 0.9,
+      "arrival_ratio": 0.85
+    },
+    {
+      "lat": 48.0177576,
+      "lng": 30.8541633,
+      "name": "Первомайськ",
+      "state_iso": "UA",
+      "depot_id": 57,
+      "departure_ratio": 1.2,
+      "arrival_ratio": 1.2
+    },
+    {
+      "lat": 51.6777499,
+      "lng": 33.9098281,
+      "name": "Глухів",
+      "state_iso": "UA",
+      "depot_id": 58,
+      "departure_ratio": 1.1,
+      "arrival_ratio": 1.2
+    },
+    {
+      "lat": 49.3775898,
+      "lng": 35.4446926,
+      "name": "Красноград",
+      "state_iso": "UA",
+      "depot_id": 59,
+      "departure_ratio": 1.0,
+      "arrival_ratio": 1.2
+    },
+    {
+      "lat": 48.8924704,
+      "lng": 36.3150649,
+      "name": "Лозова",
+      "state_iso": "UA",
+      "depot_id": 60,
+      "departure_ratio": 1.2,
+      "arrival_ratio": 1.2
+    },
+    {
+      "lat": 49.0796932,
+      "lng": 30.9342995,
+      "name": "Звенигородка",
+      "state_iso": "UA",
+      "depot_id": 61,
+      "departure_ratio": 1.0,
+      "arrival_ratio": 1.0
+    },
+    {
+      "lat": 51.1778934,
+      "lng": 32.7951018,
+      "name": "Бахмач",
+      "state_iso": "UA",
+      "depot_id": 62,
+      "departure_ratio": 1.0,
+      "arrival_ratio": 1.1
+    },
+    {
+      "lat": 47.4813274,
+      "lng": 18.9654942,
+      "name": "Будапешт",
+      "state_iso": "HU",
+      "depot_id": 63,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 47.9425076,
+      "lng": 21.5361003,
+      "name": "Ньїредьгаза",
+      "state_iso": "HU",
+      "depot_id": 64,
+      "departure_ratio": 2.185,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 48.0892665,
+      "lng": 20.5109407,
+      "name": "Мішкольц",
+      "state_iso": "HU",
+      "depot_id": 65,
+      "departure_ratio": 2.185,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 46.0778527,
+      "lng": 18.0857723,
+      "name": "Печ",
+      "state_iso": "HU",
+      "depot_id": 66,
+      "departure_ratio": 1.262,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 53.4297871,
+      "lng": 14.459813,
+      "name": "Щецин",
+      "state_iso": "PL",
+      "depot_id": 67,
+      "departure_ratio": 1.602,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 54.4288788,
+      "lng": 18.4205889,
+      "name": "Гданськ",
+      "state_iso": "PL",
+      "depot_id": 68,
+      "departure_ratio": 1.602,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 52.4007215,
+      "lng": 16.7368394,
+      "name": "Познань",
+      "state_iso": "PL",
+      "depot_id": 69,
+      "departure_ratio": 1.505,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 51.1264641,
+      "lng": 16.8269713,
+      "name": "Вроцлав",
+      "state_iso": "PL",
+      "depot_id": 70,
+      "departure_ratio": 1.602,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 50.2139811,
+      "lng": 18.8431736,
+      "name": "Катовіце",
+      "state_iso": "PL",
+      "depot_id": 71,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 52.2330974,
+      "lng": 20.8966122,
+      "name": "Варшава",
+      "state_iso": "PL",
+      "depot_id": 72,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 51.2182839,
+      "lng": 22.3988565,
+      "name": "Люблін",
+      "state_iso": "PL",
+      "depot_id": 73,
+      "departure_ratio": 2.185,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 60.1100964,
+      "lng": 24.6890501,
+      "name": "Гельсінкі",
+      "state_iso": "FI",
+      "depot_id": 74,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 60.4319818,
+      "lng": 22.0594039,
+      "name": "Турку",
+      "state_iso": "FI",
+      "depot_id": 75,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 59.3039423,
+      "lng": 17.9213496,
+      "name": "Стокгольм",
+      "state_iso": "SE",
+      "depot_id": 76,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 57.7009307,
+      "lng": 11.5642033,
+      "name": "Ґетеборг",
+      "state_iso": "SE",
+      "depot_id": 77,
+      "departure_ratio": 1.602,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 55.5702521,
+      "lng": 12.8511658,
+      "name": "Мальме",
+      "state_iso": "SE",
+      "depot_id": 78,
+      "departure_ratio": 1.602,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 59.8939243,
+      "lng": 10.6203111,
+      "name": "Осло",
+      "state_iso": "NO",
+      "depot_id": 79,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 60.3651175,
+      "lng": 5.0995406,
+      "name": "Берген",
+      "state_iso": "NO",
+      "depot_id": 80,
+      "departure_ratio": 1.602,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 55.6713366,
+      "lng": 12.5114235,
+      "name": "Копенгаґен",
+      "state_iso": "DK",
+      "depot_id": 81,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 56.9718363,
+      "lng": 23.9642672,
+      "name": "Рига",
+      "state_iso": "LV",
+      "depot_id": 82,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 55.7049013,
+      "lng": 20.9927717,
+      "name": "Клайпеда",
+      "state_iso": "LT",
+      "depot_id": 83,
+      "departure_ratio": 1.505,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 54.890061,
+      "lng": 23.7624566,
+      "name": "Каунас",
+      "state_iso": "LT",
+      "depot_id": 84,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 54.7006341,
+      "lng": 24.9233969,
+      "name": "Вільнюс",
+      "state_iso": "LT",
+      "depot_id": 85,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 55.7305,
+      "lng": 24.251837,
+      "name": "Паневежис",
+      "state_iso": "LT",
+      "depot_id": 86,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 53.8810902,
+      "lng": 10.5965684,
+      "name": "Любек",
+      "state_iso": "DE",
+      "depot_id": 87,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 53.5585268,
+      "lng": 9.5981834,
+      "name": "Гамбург",
+      "state_iso": "DE",
+      "depot_id": 88,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 52.5068042,
+      "lng": 13.0950924,
+      "name": "Берлін",
+      "state_iso": "DE",
+      "depot_id": 89,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 51.0769336,
+      "lng": 13.6077778,
+      "name": "Дрезден",
+      "state_iso": "DE",
+      "depot_id": 90,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 51.238554,
+      "lng": 6.6495424,
+      "name": "Дюссельдорф",
+      "state_iso": "DE",
+      "depot_id": 91,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 50.1213155,
+      "lng": 8.4717557,
+      "name": "Франкфурт",
+      "state_iso": "DE",
+      "depot_id": 92,
+      "departure_ratio": 1.408,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 48.155022,
+      "lng": 11.3770271,
+      "name": "Мюнхен",
+      "state_iso": "DE",
+      "depot_id": 93,
+      "departure_ratio": 1.408,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 47.9874231,
+      "lng": 7.6316114,
+      "name": "Фрайбург",
+      "state_iso": "DE",
+      "depot_id": 94,
+      "departure_ratio": 1.408,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 52.3547607,
+      "lng": 4.7391529,
+      "name": "Амстердам",
+      "state_iso": "NL",
+      "depot_id": 95,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 51.9280632,
+      "lng": 4.4084274,
+      "name": "Роттердам",
+      "state_iso": "NL",
+      "depot_id": 96,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 52.0057122,
+      "lng": 5.7317911,
+      "name": "Арнем",
+      "state_iso": "NL",
+      "depot_id": 97,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 50.8552021,
+      "lng": 4.2930158,
+      "name": "Брюссель",
+      "state_iso": "BE",
+      "depot_id": 98,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 50.6246814,
+      "lng": 5.5168762,
+      "name": "Льєж",
+      "state_iso": "BE",
+      "depot_id": 99,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 51.2605815,
+      "lng": 4.1929691,
+      "name": "Антверпен",
+      "state_iso": "BE",
+      "depot_id": 100,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 51.2608836,
+      "lng": 3.0573022,
+      "name": "Брюгге",
+      "state_iso": "BE",
+      "depot_id": 101,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 51.528607,
+      "lng": -0.4312391,
+      "name": "Лондон",
+      "state_iso": "GB",
+      "depot_id": 102,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 52.4974437,
+      "lng": -2.028439,
+      "name": "Бірмінгем",
+      "state_iso": "GB",
+      "depot_id": 103,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 53.4723364,
+      "lng": -2.3882701,
+      "name": "Манчестер",
+      "state_iso": "GB",
+      "depot_id": 104,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 48.8589384,
+      "lng": 2.2646341,
+      "name": "Париж",
+      "state_iso": "FR",
+      "depot_id": 105,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 43.600798,
+      "lng": 1.3504413,
+      "name": "Тулуза",
+      "state_iso": "FR",
+      "depot_id": 106,
+      "departure_ratio": 1.505,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 45.7580409,
+      "lng": 4.752729,
+      "name": "Ліон",
+      "state_iso": "FR",
+      "depot_id": 107,
+      "departure_ratio": 1.457,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 43.280477,
+      "lng": 5.2158385,
+      "name": "Марсель",
+      "state_iso": "FR",
+      "depot_id": 108,
+      "departure_ratio": 1.457,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 43.7032898,
+      "lng": 7.1704108,
+      "name": "Ніцца",
+      "state_iso": "FR",
+      "depot_id": 109,
+      "departure_ratio": 1.457,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 41.3927673,
+      "lng": 2.0577878,
+      "name": "Барселона",
+      "state_iso": "ES",
+      "depot_id": 110,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 40.4380986,
+      "lng": -3.8443472,
+      "name": "Мадрид",
+      "state_iso": "ES",
+      "depot_id": 111,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 39.4079343,
+      "lng": -0.526322,
+      "name": "Валенсія",
+      "state_iso": "ES",
+      "depot_id": 112,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 38.3579009,
+      "lng": -0.5137239,
+      "name": "Аліканте",
+      "state_iso": "ES",
+      "depot_id": 113,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 38.7441844,
+      "lng": -9.2421373,
+      "name": "Лісабон",
+      "state_iso": "PT",
+      "depot_id": 114,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 41.1622468,
+      "lng": -8.6631533,
+      "name": "Порто",
+      "state_iso": "PT",
+      "depot_id": 115,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 46.9546812,
+      "lng": 7.3125347,
+      "name": "Берн",
+      "state_iso": "CH",
+      "depot_id": 116,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 47.3775284,
+      "lng": 8.4543345,
+      "name": "Цюрих",
+      "state_iso": "CH",
+      "depot_id": 117,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 46.204882,
+      "lng": 6.1018392,
+      "name": "Женева",
+      "state_iso": "CH",
+      "depot_id": 118,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 45.0735965,
+      "lng": 7.5931901,
+      "name": "Турін",
+      "state_iso": "IT",
+      "depot_id": 119,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 45.4628246,
+      "lng": 9.0953312,
+      "name": "Мілан",
+      "state_iso": "IT",
+      "depot_id": 120,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 44.4471043,
+      "lng": 8.7260225,
+      "name": "Генуя",
+      "state_iso": "IT",
+      "depot_id": 121,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 41.9102088,
+      "lng": 12.3711877,
+      "name": "Рим",
+      "state_iso": "IT",
+      "depot_id": 122,
+      "departure_ratio": 1.602,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 44.4992289,
+      "lng": 11.2492844,
+      "name": "Болонья",
+      "state_iso": "IT",
+      "depot_id": 123,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 45.4065947,
+      "lng": 11.8088444,
+      "name": "Падуя",
+      "state_iso": "IT",
+      "depot_id": 124,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 49.7417789,
+      "lng": 13.2895225,
+      "name": "Плзень",
+      "state_iso": "CZ",
+      "depot_id": 125,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 50.0597734,
+      "lng": 14.3008157,
+      "name": "Прага",
+      "state_iso": "CZ",
+      "depot_id": 126,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 49.2021772,
+      "lng": 16.4131521,
+      "name": "Брно",
+      "state_iso": "CZ",
+      "depot_id": 127,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 49.8198461,
+      "lng": 18.0725863,
+      "name": "Острава",
+      "state_iso": "CZ",
+      "depot_id": 128,
+      "departure_ratio": 1.505,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 48.2203441,
+      "lng": 16.2148338,
+      "name": "Відень",
+      "state_iso": "AT",
+      "depot_id": 129,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 47.0732813,
+      "lng": 15.3595618,
+      "name": "Грац",
+      "state_iso": "AT",
+      "depot_id": 130,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 48.2950278,
+      "lng": 14.1626597,
+      "name": "Лінц",
+      "state_iso": "AT",
+      "depot_id": 131,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 46.0662069,
+      "lng": 14.4496981,
+      "name": "Любляна",
+      "state_iso": "SI",
+      "depot_id": 132,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 46.5536284,
+      "lng": 15.5621488,
+      "name": "Марібор",
+      "state_iso": "SI",
+      "depot_id": 133,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 48.1358917,
+      "lng": 16.9511084,
+      "name": "Братислава",
+      "state_iso": "SK",
+      "depot_id": 134,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 48.3747278,
+      "lng": 17.4910673,
+      "name": "Трнава",
+      "state_iso": "SK",
+      "depot_id": 135,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 48.6975239,
+      "lng": 21.074384,
+      "name": "Кошице",
+      "state_iso": "SK",
+      "depot_id": 136,
+      "departure_ratio": 1.845,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 49.2202489,
+      "lng": 18.6659293,
+      "name": "Жиліна",
+      "state_iso": "SK",
+      "depot_id": 137,
+      "departure_ratio": 1.505,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 45.8428955,
+      "lng": 15.7995548,
+      "name": "Загреб",
+      "state_iso": "HR",
+      "depot_id": 138,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 45.3458358,
+      "lng": 14.3490454,
+      "name": "Рієка",
+      "state_iso": "HR",
+      "depot_id": 139,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 45.5471155,
+      "lng": 18.6063408,
+      "name": "Осієк",
+      "state_iso": "HR",
+      "depot_id": 140,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 43.5147073,
+      "lng": 16.4178876,
+      "name": "Спліт",
+      "state_iso": "HR",
+      "depot_id": 141,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 43.8938174,
+      "lng": 18.3005903,
+      "name": "Сараєво",
+      "state_iso": "BA",
+      "depot_id": 142,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 44.7786845,
+      "lng": 17.1237658,
+      "name": "Баня-Лука",
+      "state_iso": "BA",
+      "depot_id": 143,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 44.2025419,
+      "lng": 17.8505815,
+      "name": "Зеница",
+      "state_iso": "BA",
+      "depot_id": 144,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 44.5422296,
+      "lng": 18.5197859,
+      "name": "Тузла",
+      "state_iso": "BA",
+      "depot_id": 145,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 44.868554,
+      "lng": 18.7607094,
+      "name": "Брчко",
+      "state_iso": "BA",
+      "depot_id": 146,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 44.8153704,
+      "lng": 20.2577875,
+      "name": "Белград",
+      "state_iso": "RS",
+      "depot_id": 147,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 43.3162359,
+      "lng": 21.8521597,
+      "name": "Ниш",
+      "state_iso": "RS",
+      "depot_id": 148,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 43.8894019,
+      "lng": 20.320243,
+      "name": "Чачак",
+      "state_iso": "RS",
+      "depot_id": 149,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 42.7100269,
+      "lng": 20.8567438,
+      "name": "Пріштіна",
+      "state_iso": "RS",
+      "depot_id": 150,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 42.4321113,
+      "lng": 19.1734776,
+      "name": "Подгориця",
+      "state_iso": "ME",
+      "depot_id": 151,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 42.7733511,
+      "lng": 18.9069226,
+      "name": "Никшич",
+      "state_iso": "ME",
+      "depot_id": 152,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 41.3332418,
+      "lng": 19.7766235,
+      "name": "Тірана",
+      "state_iso": "AL",
+      "depot_id": 153,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 41.3314353,
+      "lng": 19.3839559,
+      "name": "Дуррес",
+      "state_iso": "AL",
+      "depot_id": 154,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 41.9991884,
+      "lng": 21.342489,
+      "name": "Скоп’є",
+      "state_iso": "MK",
+      "depot_id": 155,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 42.1145403,
+      "lng": 21.644528,
+      "name": "Куманово",
+      "state_iso": "MK",
+      "depot_id": 156,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 41.3439403,
+      "lng": 21.5276239,
+      "name": "Прілеп",
+      "state_iso": "MK",
+      "depot_id": 157,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 40.6212503,
+      "lng": 22.9048275,
+      "name": "Салоніки",
+      "state_iso": "GR",
+      "depot_id": 158,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 37.9908977,
+      "lng": 23.6971396,
+      "name": "Афіни",
+      "state_iso": "GR",
+      "depot_id": 159,
+      "departure_ratio": 1.602,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 37.9461625,
+      "lng": 23.626718,
+      "name": "Пірей",
+      "state_iso": "GR",
+      "depot_id": 160,
+      "departure_ratio": 1.602,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 38.2491204,
+      "lng": 21.6632043,
+      "name": "Патри",
+      "state_iso": "GR",
+      "depot_id": 161,
+      "departure_ratio": 1.602,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 45.7411547,
+      "lng": 21.1341887,
+      "name": "Тімішоара",
+      "state_iso": "RO",
+      "depot_id": 162,
+      "departure_ratio": 1.602,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 44.4379524,
+      "lng": 25.929828,
+      "name": "Бухарест",
+      "state_iso": "RO",
+      "depot_id": 163,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 44.1811705,
+      "lng": 28.4651967,
+      "name": "Констанца",
+      "state_iso": "RO",
+      "depot_id": 164,
+      "departure_ratio": 1.554,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 45.4377494,
+      "lng": 27.9650938,
+      "name": "Галац",
+      "state_iso": "RO",
+      "depot_id": 165,
+      "departure_ratio": 2.136,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 47.6639376,
+      "lng": 26.1792041,
+      "name": "Сучава",
+      "state_iso": "RO",
+      "depot_id": 166,
+      "departure_ratio": 2.136,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 46.999985,
+      "lng": 28.6933676,
+      "name": "Кишинів",
+      "state_iso": "MD",
+      "depot_id": 167,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 47.7670317,
+      "lng": 27.818978,
+      "name": "Бєльці",
+      "state_iso": "MD",
+      "depot_id": 168,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 42.6955664,
+      "lng": 23.1591367,
+      "name": "Софія",
+      "state_iso": "BG",
+      "depot_id": 169,
+      "departure_ratio": 1.505,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 43.2049731,
+      "lng": 27.7780987,
+      "name": "Варна",
+      "state_iso": "BG",
+      "depot_id": 170,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 42.1442187,
+      "lng": 24.658473,
+      "name": "Пловдив",
+      "state_iso": "BG",
+      "depot_id": 171,
+      "departure_ratio": 1.505,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 43.2149862,
+      "lng": 27.5674339,
+      "name": "Девня",
+      "state_iso": "BG",
+      "depot_id": 172,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 43.8217113,
+      "lng": 25.8773909,
+      "name": "Русе",
+      "state_iso": "BG",
+      "depot_id": 173,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 43.5753302,
+      "lng": 27.7707205,
+      "name": "Добрич",
+      "state_iso": "BG",
+      "depot_id": 174,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 41.0053702,
+      "lng": 28.6825281,
+      "name": "Стамбул",
+      "state_iso": "TR",
+      "depot_id": 175,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 40.9599078,
+      "lng": 27.4756292,
+      "name": "Текірдаг",
+      "state_iso": "TR",
+      "depot_id": 176,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 40.9049632,
+      "lng": 29.3817976,
+      "name": "Гебзе",
+      "state_iso": "TR",
+      "depot_id": 177,
+      "departure_ratio": null,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 39.9035233,
+      "lng": 32.5979541,
+      "name": "Анкара",
+      "state_iso": "TR",
+      "depot_id": 178,
+      "departure_ratio": 1.594,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 36.7428767,
+      "lng": 34.3640946,
+      "name": "Мерсін",
+      "state_iso": "TR",
+      "depot_id": 179,
+      "departure_ratio": 1.777,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 40.2215218,
+      "lng": 28.7204497,
+      "name": "Бурса",
+      "state_iso": "TR",
+      "depot_id": 180,
+      "departure_ratio": 1.43,
+      "arrival_ratio": null
+    },
+    {
+      "lat": 38.4178287,
+      "lng": 26.9149061,
+      "name": "Ізмір",
+      "state_iso": "TR",
+      "depot_id": 181,
+      "departure_ratio": 1.503,
+      "arrival_ratio": null
+    }
+  ]
+}

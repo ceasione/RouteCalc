@@ -1,0 +1,14 @@
+{
+  "currencies": {
+    "priority": {
+      "USD": 3,
+      "EUR": 2,
+      "UAH": 1
+    },
+    "rates": {
+      "USD": 41.0,
+      "EUR": 45.0,
+      "UAH": 1.0
+    }
+  }
+}
