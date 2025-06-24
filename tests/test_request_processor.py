@@ -15,6 +15,7 @@ class FakeFlaskRequest:
         return self.data
 
 
+@pytest.mark.unit
 def test_process_normal(flask_request_calculate, remote_addr, dto_request_calculate):
     flask_request = FakeFlaskRequest(flask_request_calculate, remote_addr)
 
@@ -22,6 +23,7 @@ def test_process_normal(flask_request_calculate, remote_addr, dto_request_calcul
     assert dto_request == dto_request_calculate
 
 
+@pytest.mark.unit
 def test_process_bad_intent(flask_request_calculate, remote_addr):
     flask_request = FakeFlaskRequest(flask_request_calculate, remote_addr)
     flask_request.data['intent'] = 'someintent'
@@ -29,6 +31,7 @@ def test_process_bad_intent(flask_request_calculate, remote_addr):
         request_processor.process(flask_request)
 
 
+@pytest.mark.unit
 def test_process_bad_origin(flask_request_calculate, remote_addr):
     flask_request = FakeFlaskRequest(flask_request_calculate, remote_addr)
 
@@ -49,6 +52,7 @@ def test_process_bad_origin(flask_request_calculate, remote_addr):
         request_processor.process(flask_request)
 
 
+@pytest.mark.unit
 def test_process_bad_destination(flask_request_calculate, remote_addr):
     flask_request = FakeFlaskRequest(flask_request_calculate, remote_addr)
 
@@ -69,6 +73,7 @@ def test_process_bad_destination(flask_request_calculate, remote_addr):
         request_processor.process(flask_request)
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize('id_', [0, 1, 2, 3, 4, 5, 6])
 def test_process_good_transport(flask_request_calculate, remote_addr, id_):
     flask_request = FakeFlaskRequest(flask_request_calculate, remote_addr)
@@ -76,6 +81,7 @@ def test_process_good_transport(flask_request_calculate, remote_addr, id_):
     request_processor.process(flask_request)
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize('id_', [-1, 2.5, 'test', None, 7, 8])
 def test_process_bad_transport(flask_request_calculate, remote_addr, id_):
     flask_request = FakeFlaskRequest(flask_request_calculate, remote_addr)
@@ -84,6 +90,7 @@ def test_process_bad_transport(flask_request_calculate, remote_addr, id_):
         request_processor.process(flask_request)
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize('num', [
     123, '123', '+380423456701', '38044123456', '38044123456789101112'
 ])
@@ -95,6 +102,7 @@ def test_process_bad_phone(flask_request_calculate, remote_addr, num):
         request_processor.process(flask_request)
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize('num', [
     '380441234567', '380321234567', '380621234567', '380381234567', '380624234567'
 ])
@@ -106,6 +114,7 @@ def test_process_wrong_phone(flask_request_calculate, remote_addr, num):
         request_processor.process(flask_request)
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize('num', [
     '380391234567', '380671234567', '380981234567', '380951234567', '380734234567', 'nosms'
 ])

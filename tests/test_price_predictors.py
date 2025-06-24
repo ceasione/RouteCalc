@@ -12,6 +12,7 @@ def mock_model():
 
 
 # -------- Tests: _distance_ratio --------
+@pytest.mark.unit
 @pytest.mark.parametrize("distance,expected_range", [
     (1000, (40.0, 50.0)),     # very short distance → high ratio
     (50000, (2.0, 3.0)),    # medium distance
@@ -23,6 +24,7 @@ def test_distance_ratio_behavior(distance, expected_range):
 
 
 # -------- Tests: conventional method --------
+@pytest.mark.unit
 def test_conventional_normal(depot_1, depot_2, vehicle_1):
     dist = 100_000  # 100km
     price = Predictors.conventional(depot_1, depot_2, vehicle_1, dist)
@@ -31,6 +33,7 @@ def test_conventional_normal(depot_1, depot_2, vehicle_1):
     assert price > 0
 
 
+@pytest.mark.unit
 def test_conventional_minimum_distance(depot_1, depot_2, vehicle_1):
     """Should use 50km cap when distance is too short"""
     dist = 10_000  # 10km, less than cap
@@ -40,6 +43,7 @@ def test_conventional_minimum_distance(depot_1, depot_2, vehicle_1):
 
 
 # -------- Tests: ML method --------
+@pytest.mark.unit
 def test_ml_prediction_uses_model(mock_model, depot_1, depot_2, vehicle_1):
     price = Predictors.ml(depot_1, depot_2, vehicle_1, _distance=123456, ml_model=mock_model)
     mock_model.predict.assert_called_once_with(depot_1.id, depot_2.id, vehicle_1.id)

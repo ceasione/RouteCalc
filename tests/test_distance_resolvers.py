@@ -13,6 +13,7 @@ def dummy_api(mocker):
     return mocker.Mock()
 
 
+@pytest.mark.unit
 def test_matrix_basic_resolution(place_1, place_2, dummy_cache, dummy_api):
     dummy_cache.cache_look.return_value = 490000
     dummy_api.resolve_distances.return_value = ([], [])  # Nothing left for API
@@ -25,6 +26,7 @@ def test_matrix_basic_resolution(place_1, place_2, dummy_cache, dummy_api):
     assert result[0].distance == 490000
 
 
+@pytest.mark.unit
 def test_matrix_resolves_with_api_fallback(place_1, place_2, dummy_cache, dummy_api):
     dummy_cache.cache_look.return_value = None
 
@@ -38,6 +40,7 @@ def test_matrix_resolves_with_api_fallback(place_1, place_2, dummy_cache, dummy_
     assert result[0].distance == 490000
 
 
+@pytest.mark.unit
 def test_matrix_raises_when_unresolved(place_1, place_2, dummy_cache, dummy_api):
     dummy_cache.cache_look.return_value = None
     dummy_api.resolve_distances.return_value = ([], [Distance(place_1, place_2)])
@@ -49,18 +52,21 @@ def test_matrix_raises_when_unresolved(place_1, place_2, dummy_cache, dummy_api)
 # --- Edge Case Tests ---
 
 
+@pytest.mark.unit
 def test_matrix_empty_inputs(dummy_cache, dummy_api):
     dummy_api.resolve_distances.return_value = ([], [])
     with pytest.raises(ZeroDistanceResultsError):
         result = DistanceResolvers.matrix([], [], cache_=dummy_cache, gapi_=dummy_api)
 
 
+@pytest.mark.unit
 def test_matrix_identical_place_is_skipped(place_1, dummy_cache, dummy_api):
     # Even though it's "A" to "A", it should be ignored in _produce_distances_from_places
     result = DistanceResolvers._produce_distances_from_places([place_1], [place_1])
     assert result == []
 
 
+@pytest.mark.unit
 def test_matrix_duplicate_inputs_are_handled(place_1, place_2, dummy_cache, dummy_api):
     dummy_cache.cache_look.return_value = 500
     dummy_api.resolve_distances.return_value = ([], [])

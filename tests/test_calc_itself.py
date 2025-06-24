@@ -61,6 +61,7 @@ def depot_park(depot):
     return mock_park
 
 
+@pytest.mark.unit
 def test_plan_route_success(place_a, place_b, depot_park):
     mock_dist = Mock()
     mock_dist.place_from = depot_park.filter_by("UA")[0]
@@ -75,6 +76,7 @@ def test_plan_route_success(place_a, place_b, depot_park):
     assert result[0] == depot_park.filter_by("UA")[0]
 
 
+@pytest.mark.unit
 def test_calculate_basic(place_a, place_b, depot, vehicle):
     mock_distance = Mock()
     mock_distance.distance = 100000  # 100 km
@@ -94,6 +96,7 @@ def test_calculate_basic(place_a, place_b, depot, vehicle):
     assert cost == 6000.0
 
 
+@pytest.mark.unit
 def test_process_request_basic(monkeypatch, place_a, place_b, depot, vehicle):
     request = RequestDTO(origin=place_a, destination=place_b, vehicle=vehicle, locale="uk_UA")
 
