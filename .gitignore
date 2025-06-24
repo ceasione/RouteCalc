@@ -8,3 +8,4 @@ app/lib/utils/__pycache__/
 .vscode/
 release/
 .env
+storage/
