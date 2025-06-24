@@ -4,7 +4,7 @@ import requests
 from app.lib.calc.distance import Distance
 from typing import Iterable, Tuple, List, Set
 from app.lib.calc.place import LatLngAble, Place
-import backoff
+from json import JSONDecodeError
 from app.lib.utils.logger import logger
 
 
@@ -52,21 +52,34 @@ class API:
                             place_to=Place(lat=destinations[j].lat, lng=destinations[j].lng),
                             distance=element['distance']['value']
                         ))
-        except (IndexError, KeyError):
-            logger.exception('Failed to process Google Matrix API response')
-            pass
+        except (IndexError, KeyError) as e:
+            logger.exception(f'Failed to process Google Matrix API response: {api_response}')
+            raise GoogleApiRequestError(f'Failed to process API resp {e}')
         return extracted_distances
 
-    @backoff.on_exception(backoff.expo,
-                          requests.exceptions.RequestException,
-                          max_time=15)
     def _make_api_request(self, origins_params: str, dest_params: str) -> dict:
 
         url_params = {'origins': origins_params,
                       'destinations': dest_params,
                       'mode': 'driving',
                       'key': self.apikey}
-        return requests.get(self.apiadr, url_params).json()
+
+        try:
+            raw_response = requests.get(self.apiadr, url_params)
+            dct_response = raw_response.json()
+            if dct_response.get('status') == 'OK':
+                return dct_response
+            else:
+                logger.error(f'Unexpected GAPI response status: {dct_response.get("status")}')
+                raise GoogleApiRequestError(f'Status: {dct_response.get("status")}, '
+                                            f'message: {dct_response.get("error_message")}')
+
+        except JSONDecodeError as e:
+            logger.exception(e)
+            raise GoogleApiRequestError(f'Error making request to GAPI {e}')
+        except requests.exceptions.RequestException as e:
+            logger.exception(e)
+            raise GoogleApiRequestError(f'Error making request to GAPI {e}')
 
     @staticmethod
     def _make_places_url_param(places: Iterable[LatLngAble]) -> str:
