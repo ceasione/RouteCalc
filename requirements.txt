@@ -13,3 +13,4 @@ tensorflow==2.19.0
 python-dotenv==1.1.0
 pytest==8.4.0
 pytest-mock==3.14.1
+uWSGI==2.0.30
