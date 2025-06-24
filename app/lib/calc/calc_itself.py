@@ -3,7 +3,8 @@ import math
 from typing import Callable, Tuple, Iterable, List
 from typing import cast
 from app.lib.ai.model import ML_MODEL
-from app.lib.apis import googleapi
+from app.lib.apis import googleapi as googleapi
+from app.lib.apis.googleapi import GoogleApiRequestError
 from app.lib.calc.place import Place, LatLngAble
 from app.lib.calc.distance import Distance
 from app.lib.calc.loadables import depotpark
@@ -66,7 +67,17 @@ class DistanceResolvers:
 
     @staticmethod
     def _resolve_distances_using_api(dists: Iterable[Distance], gapi_) -> Tuple[List[Distance], List[Distance]]:
-        return gapi_.resolve_distances(dists)
+        """
+        Implements protocol of resolving distances with Google API
+        :param dists: Iterable of unresolved Distance objects
+        :param gapi_: Google API object
+        :return: resolved and unresolved dists
+        """
+        try:
+            return gapi_.resolve_distances(dists)
+        except GoogleApiRequestError as e:
+            logger.exception(e)
+            return [], [*dists]
 
     @staticmethod
     def matrix(places_from: Iterable[LatLngAble], places_to: Iterable[LatLngAble],
@@ -98,8 +109,10 @@ class DistanceResolvers:
                 dist.place_to.lat,
                 dist.place_to.lng,
                 dist.distance)
-        resolved.extend(accum)
-        logger.debug(f'Matrix API resolved, unresolved: {len(resolved)}, {len(unresolved)}')
+
+        if len(accum) > 0:
+            resolved.extend(accum)
+            logger.debug(f'Matrix API resolved, unresolved: {len(resolved)}, {len(unresolved)}')
 
         if len(unresolved) > 0:
             logger.warning(f'Distance matrix API failed to resolve some Distances: '

@@ -8,6 +8,12 @@ import backoff
 from app.lib.utils.logger import logger
 
 
+class GoogleApiRequestError(Exception):
+    """
+    Raises when any of errors occurs during request or response processing
+    """
+
+
 class API:
 
     def __init__(self):
