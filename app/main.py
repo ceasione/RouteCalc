@@ -19,8 +19,10 @@ from app.lib.utils import number_tools
 from app.lib.utils.number_tools import WrongNumberError
 from app.lib.calc.calc_itself import ZeroDistanceResultsError
 import dataclasses
+import app.settings as settings
 
 
+logger.info(f'Running on dev machine: {settings.DEV_MACHINE}')
 app = Flask(__name__)
 CORS = CORS(app)
 

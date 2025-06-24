@@ -20,7 +20,7 @@ def send_sms(number, text):
         'message': text,
         'src_addr': ALPHANAME
     }
-    if not settings.isDeveloperPC:
+    if not settings.DEV_MACHINE:
         response = requests.post(url, json=payload, headers=HEADERS)
         if response.status_code != 200:
             telegramapi2.send_developer(

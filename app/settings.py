@@ -1,16 +1,22 @@
 
 import os
-import socket
 from dotenv import load_dotenv
+from pathlib import Path
 
-load_dotenv()
 
-GOOGLE_APIADR = os.getenv('GOOGLE_APIADR')
-DEV_HOSTNAME = os.getenv('DEV_HOSTNAME')
-isDeveloperPC = True if DEV_HOSTNAME == 'ltone' else False
+env_file_path = Path('storage/.env')
+if not env_file_path.exists():
+    raise RuntimeError('File .env does not exist. Cannot proceed')
+load_dotenv(env_file_path, verbose=True)
+
+
+DEV_MACHINE = True if os.getenv('DEV_MACHINE') == 'true' else False
+LOGLEVEL = os.getenv('LOGLEVEL', 'INFO')
+
+GOOGLE_APIADR = os.getenv('GOOGLE_APIADR', 'https://maps.googleapis.com/maps/api/distancematrix/json')
 GOOGLE_APIKEY_PROD = os.getenv('GOOGLE_APIKEY_PROD')
 GOOGLE_APIKEY_DEV = os.getenv('GOOGLE_APIKEY_DEV')
-GOOGLE_APIKEY = GOOGLE_APIKEY_DEV if socket.gethostname() == DEV_HOSTNAME else GOOGLE_APIKEY_PROD
+GOOGLE_APIKEY = GOOGLE_APIKEY_DEV if DEV_MACHINE else GOOGLE_APIKEY_PROD
 
 DEPOTPARK_LOC = os.getenv('DEPOTPARK_LOC', 'storage/depotpark.json')
 STATEPARK_LOC = os.getenv('STATEPARK_LOC', 'storage/statepark.json')
@@ -45,5 +51,3 @@ TELEGRAM_DIRECT_CHAT_ID = os.getenv('TELEGRAM_DIRECT_CHAT_ID')
 TELEGRAM_SILENT_CHAT_ID = os.getenv('TELEGRAM_SILENT_CHAT_ID')
 TELEGRAM_LOUD_CHAT_ID = os.getenv('TELEGRAM_LOUD_CHAT_ID')
 TELEGRAM_DEVELOPER_CHAT_ID = os.getenv('TELEGRAM_DEVELOPER_CHAT_ID')
-
-LOGLEVEL = os.getenv('LOGLEVEL', 'INFO')
