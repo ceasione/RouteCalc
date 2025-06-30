@@ -35,13 +35,13 @@ jobs:
         -v /tmp:/tmp/rcsocket \
         --env DEV_MACHINE=true \
         --env LOGLEVEL=DEBUG \
-        --env GOOGLE_APIKEY_DEV=$GOOGLE_APIKEY_DEV \
-        --env SMS_APIKEY=$SMS_APIKEY \
-        --env TELEGRAM_BOT_APIKEY=$TELEGRAM_BOT_APIKEY\
-        --env TELEGRAM_DIRECT_CHAT_ID=$TELEGRAM_DIRECT_CHAT_ID \
-        --env TELEGRAM_SILENT_CHAT_ID=$TELEGRAM_SILENT_CHAT_ID \
-        --env TELEGRAM_LOUD_CHAT_ID=$TELEGRAM_LOUD_CHAT_ID \
-        --env TELEGRAM_DEVELOPER_CHAT_ID=$TELEGRAM_DEVELOPER_CHAT_ID \
+        --env GOOGLE_APIKEY_DEV="$GOOGLE_APIKEY_DEV" \
+        --env SMS_APIKEY="$SMS_APIKEY" \
+        --env TELEGRAM_BOT_APIKEY="$TELEGRAM_BOT_APIKEY" \
+        --env TELEGRAM_DIRECT_CHAT_ID="$TELEGRAM_DIRECT_CHAT_ID" \
+        --env TELEGRAM_SILENT_CHAT_ID="$TELEGRAM_SILENT_CHAT_ID" \
+        --env TELEGRAM_LOUD_CHAT_ID="$TELEGRAM_LOUD_CHAT_ID" \
+        --env TELEGRAM_DEVELOPER_CHAT_ID="$TELEGRAM_DEVELOPER_CHAT_ID" \
         routecalc:$DATE_TIME python3 -m app.main
         
         docker exec rctest pytest -m unit
