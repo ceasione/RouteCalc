@@ -15,11 +15,13 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag ceasione/routecalc:$(date +%s)
+      run: docker build . --file Dockerfile --tag routecalc:$(date +%s)
 
     - name: Run tests
       run: |
-        docker run -d --rm \
+        docker run -d --rm --name rctest \
+        -v temp_volume:/RouteCalc/storage \
+        -v /tmp:/tmp/rcsocket \
         --env DEV_MACHINE=true \
         --env LOGLEVEL=DEBUG \
         --env GOOGLE_APIKEY_DEV=${{ secrets.GOOGLE_APIKEY_DEV }} \
@@ -30,7 +32,13 @@ jobs:
         --env TELEGRAM_SILENT_CHAT_ID=${{ secrets.TELEGRAM_SILENT_CHAT_ID }} \
         --env TELEGRAM_LOUD_CHAT_ID=${{ secrets.TELEGRAM_LOUD_CHAT_ID }} \
         --env TELEGRAM_DEVELOPER_CHAT_ID=${{ secrets.TELEGRAM_DEVELOPER_CHAT_ID }} \
-        ceasione/routecalc:$(date +%s)
+        routecalc:$(date +%s) python3 -m app.main
+        
+        docker exec rctest pytest -m unit
+        docker exec rctest pytest -m integration
+        docker exec rctest pytest -m network
+        docker stop rctest
+
     - name: DockerHub Login
       run: echo ''
     - name: DockerHub Tag
