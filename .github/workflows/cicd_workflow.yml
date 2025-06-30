@@ -32,7 +32,10 @@ jobs:
         --env TELEGRAM_DEVELOPER_CHAT_ID=${{ secrets.TELEGRAM_DEVELOPER_CHAT_ID }} \
         ceasione/routecalc:$(date +%s)
     - name: DockerHub Login
+      run: echo ''
     - name: DockerHub Tag
+      run: echo ''
     - name: DockerHub Push
+      run: echo ''
     - name: Server Deploy
-    
+      run: echo ''
