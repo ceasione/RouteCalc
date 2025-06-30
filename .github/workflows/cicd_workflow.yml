@@ -8,17 +8,17 @@ on:
 
 jobs:
 
-  build:
+  build-test-deploy:
 
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
     - name: Set DATE_TIME env
-      run: echo "DATE_TIME=$(date +%s)" >> $GITHUB_ENV
+      run: echo "DATE_TIME=$(date +'%Y-%m-%d_%H-%M')" >> $GITHUB_ENV
 
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag routecalc:$DATE_TIME
+      run: docker build . --file Dockerfile --tag ceasione/routecalc:$DATE_TIME
 
     - name: Run tests
       env:
@@ -48,10 +48,18 @@ jobs:
         docker stop rctest
 
     - name: DockerHub Login
-      run: echo ''
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
     - name: DockerHub Tag
-      run: echo ''
+      run: docker tag ceasione/routecalc:$DATE_TIME ceasione/routecalc:latest
+
     - name: DockerHub Push
-      run: echo ''
+      run: | 
+        docker push ceasione/routecalc:$DATE_TIME
+        docker push ceasione/routecalc:latest
+
     - name: Server Deploy
       run: echo ''
