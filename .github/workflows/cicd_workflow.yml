@@ -1,0 +1,38 @@
+name: Route Calc CI/CD
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag ceasione/routecalc:$(date +%s)
+
+    - name: Run tests
+      run: |
+        docker run -d -rm \
+        --env DEV_MACHINE=true \
+        --env LOGLEVEL=DEBUG \
+        --env GOOGLE_APIKEY_DEV=${{ secrets.GOOGLE_APIKEY_DEV }} \
+        --env SMS_APIKEY=${{ secrets.SMS_APIKEY }} \
+        --env SMS_ALPHANAME=${{ secrets.SMS_ALPHANAME }} \
+        --env TELEGRAM_BOT_APIKEY=${{ secrets.TELEGRAM_BOT_APIKEY }} \
+        --env TELEGRAM_DIRECT_CHAT_ID=${{ secrets.TELEGRAM_DIRECT_CHAT_ID }} \
+        --env TELEGRAM_SILENT_CHAT_ID=${{ secrets.TELEGRAM_SILENT_CHAT_ID }} \
+        --env TELEGRAM_LOUD_CHAT_ID=${{ secrets.TELEGRAM_LOUD_CHAT_ID }} \
+        --env TELEGRAM_DEVELOPER_CHAT_ID=${{ secrets.TELEGRAM_DEVELOPER_CHAT_ID }} \
+        ceasione/routecalc:$(date +%s)
+    - name: DockerHub Login
+    - name: DockerHub Tag
+    - name: DockerHub Push
+    - name: Server Deploy
+    
