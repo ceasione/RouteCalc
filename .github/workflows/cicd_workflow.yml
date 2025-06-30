@@ -44,9 +44,7 @@ jobs:
         --env TELEGRAM_DEVELOPER_CHAT_ID="$TELEGRAM_DEVELOPER_CHAT_ID" \
         routecalc:$DATE_TIME python3 -m app.main
         
-        docker exec rctest pytest -m unit
-        docker exec rctest pytest -m integration
-        docker exec rctest pytest -m network
+        docker exec rctest pytest
         docker stop rctest
 
     - name: DockerHub Login
