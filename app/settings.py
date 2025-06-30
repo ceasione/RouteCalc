@@ -4,10 +4,7 @@ from dotenv import load_dotenv
 from pathlib import Path
 
 
-env_file_path = Path('storage/.env')
-if not env_file_path.exists():
-    raise RuntimeError('File .env does not exist. Cannot proceed')
-load_dotenv(env_file_path, verbose=True)
+load_dotenv(Path('storage/.env'), verbose=True)
 
 
 DEV_MACHINE = True if os.getenv('DEV_MACHINE') == 'true' else False
