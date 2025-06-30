@@ -39,7 +39,7 @@ BLACKLIST_RESERVE_LOC = os.getenv('BLACKLIST_RESERVE_LOC', 'initial_storage/blac
 
 SMS_APIADR = os.getenv('SMS_APIADR', 'https://im.smsclub.mobi/sms/send')
 SMS_APIKEY = os.getenv('SMS_APIKEY')
-SMS_ALPHANAME = os.getenv('SMS_ALPHANAME')
+SMS_ALPHANAME = os.getenv('SMS_ALPHANAME', 'Inter Smart')
 SMS_TEXT_REDIAL_PHONE = os.getenv('SMS_TEXT_REDIAL_PHONE', '+380687070075')
 SMS_BLACKLIST = list()
 
