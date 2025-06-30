@@ -1,13 +1,19 @@
 
-# docker build --progress=plain -t routecalc .
-
+# docker build --progress=plain -t ceasione/routecalc .
 
 # Deploy locally
-# sudo docker run -it -v /home/oliver/RTDATA:/RouteCalc/storage -v /tmp:/tmp/rcsocket routecalc
-# sudo docker run -d -v /home/oliver/RTDATA:/RouteCalc/storage -v /tmp:/tmp/rcsocket routecalc
+# sudo docker run --restart unless-stopped -d \
+# --name routecalc_active \
+# -v /home/oliver/RTDATA:/RouteCalc/storage \
+# -v /tmp:/tmp/rcsocket \
+# ceasione/routecalc:latest
 
 # Deploy at server
-# docker run --restart unless-stopped -d -v /srv/flask-uwsgi/RC_STORAGE:/RouteCalc/storage -v /tmp:/tmp/rcsocket ceasione/routecalc:6.0
+# sudo docker run --restart unless-stopped -d \
+# --name routecalc_active \
+# -v /srv/flask-uwsgi/RC_STORAGE:/RouteCalc/storage \
+# -v /tmp:/tmp/rcsocket \
+# ceasione/routecalc:latest
 
 # Testing
 # sudo docker run -d -v /home/oliver/RTDATA:/RouteCalc/storage -v /tmp:/tmp/rcsocket --name rctest routecalc tail -f /dev/null
@@ -20,6 +26,7 @@
 
 # docker ps -a / docker rm <id>
 # docker images / docker rmi <id>
+# docker system prune
 
 
 FROM python:3.10-slim
