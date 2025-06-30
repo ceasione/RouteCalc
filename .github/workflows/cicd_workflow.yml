@@ -19,7 +19,7 @@ jobs:
 
     - name: Run tests
       run: |
-        docker run -d -rm \
+        docker run -d --rm \
         --env DEV_MACHINE=true \
         --env LOGLEVEL=DEBUG \
         --env GOOGLE_APIKEY_DEV=${{ secrets.GOOGLE_APIKEY_DEV }} \
