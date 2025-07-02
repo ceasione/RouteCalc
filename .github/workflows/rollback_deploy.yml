@@ -13,11 +13,11 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVKEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-        ssh-keyscan -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_IP }} >> ~/.ssh/known_hosts
+          ssh-keyscan -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_IP }} >> ~/.ssh/known_hosts
 
       - name: Rollback
         run: |
-          ssh -i ~/.ssh/id_ed25519 ${{ secrets.SSH_USER }}@${{ secrets.SSH_IP }} << 'EOF'
+          ssh -p ${{ secrets.SSH_PORT }} -i ~/.ssh/id_ed25519 ${{ secrets.SSH_USER }}@${{ secrets.SSH_IP }} << 'EOF'
             docker rm -f routecalc_active || true
             docker rmi ceasione/routecalc:latest || true
             docker tag ceasione/routecalc:rollback ceasione/routecalc:latest

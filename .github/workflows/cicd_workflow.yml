@@ -70,7 +70,7 @@ jobs:
 
     - name: Server Deploy
       run: |
-        ssh -i ~/.ssh/id_ed25519 ${{ secrets.SSH_USER }}@${{ secrets.SSH_IP }} << 'EOF'
+        ssh -p ${{ secrets.SSH_PORT }} -i ~/.ssh/id_ed25519 ${{ secrets.SSH_USER }}@${{ secrets.SSH_IP }} << 'EOF'
           docker rmi ceasione/routecalc:rollback || true
           docker tag ceasione/routecalc:latest ceasione/routecalc:rollback
           docker rmi ceasione/routecalc:latest
