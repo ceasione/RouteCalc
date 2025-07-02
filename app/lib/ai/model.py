@@ -8,10 +8,10 @@ from random import SystemRandom
 import numpy
 from keras.api.utils import Sequence
 from keras import layers, models, Input
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from keras.api.optimizers import Adam
 from keras.api.models import load_model
-import seaborn as sns
+# import seaborn as sns
 from app import settings
 from app.lib.calc.loadables.depotpark import Depot
 from app.lib.calc.loadables.vehicles import Vehicle
@@ -138,20 +138,20 @@ class PricePredictor:
         optimizer = Adam(learning_rate=0.01)
         self.model.compile(optimizer=optimizer, loss='mae')
 
-    def __test(self):
-        weights, _ = self.model.layers[0].get_weights()
-        plt.figure(figsize=(10, 6))
-        sns.heatmap(weights, cmap='coolwarm')
-        plt.title("Weights heatmap")
-        plt.xlabel("Output Neurons")
-        plt.ylabel("Input Features")
-        plt.show()
-
-        for i in range(100):
-            x_analytical, y_analytical = BatchGenerator().get_one_case()
-            y_predicted = self.model.predict(x_analytical)
-            print(y_predicted)
-            print(y_analytical)
+    # def __test(self):
+    #     weights, _ = self.model.layers[0].get_weights()
+    #     plt.figure(figsize=(10, 6))
+    #     sns.heatmap(weights, cmap='coolwarm')
+    #     plt.title("Weights heatmap")
+    #     plt.xlabel("Output Neurons")
+    #     plt.ylabel("Input Features")
+    #     plt.show()
+    #
+    #     for i in range(100):
+    #         x_analytical, y_analytical = BatchGenerator().get_one_case()
+    #         y_predicted = self.model.predict(x_analytical)
+    #         print(y_predicted)
+    #         print(y_analytical)
 
     @classmethod
     def vectorize_input(cls, _from, _to, _veh):
@@ -187,14 +187,14 @@ class PricePredictor:
     def train(self, x_batch, y_batch):
         history = self.model.fit(BatchGenerator(), epochs=40)
 
-        def plot(_history, title='Loss func'):
-            plt.plot(_history.history['loss'], label='Loss')
-            plt.title(title)
-            plt.xlabel('Epoch')
-            plt.ylabel('Loss (MSE)')
-            plt.legend()
-            plt.grid(True)
-            plt.show()
+        # def plot(_history, title='Loss func'):
+        #     plt.plot(_history.history['loss'], label='Loss')
+        #     plt.title(title)
+        #     plt.xlabel('Epoch')
+        #     plt.ylabel('Loss (MSE)')
+        #     plt.legend()
+        #     plt.grid(True)
+        #     plt.show()
 
         # plot(history)
         self.model.save(self.model_loc)
