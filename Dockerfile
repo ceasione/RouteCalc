@@ -44,6 +44,6 @@ WORKDIR /RouteCalc
 
 RUN pip3 install --upgrade pip
 
-RUN pip3 install --no-cache-dir -r /RouteCalc/requirements.txt
+RUN pip3 install --no-cache-dir -r /RouteCalc/requirements-prod.txt
 
 CMD ["uwsgi", "--ini", "/RouteCalc/uwsgi.ini"]
