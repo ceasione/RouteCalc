@@ -1,0 +1,30 @@
+name: Rollback previous deploy
+
+on:
+  workflow_dispatch:
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup prod SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVKEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan ${{ secrets.SSH_IP }} >> ~/.ssh/known_hosts
+
+      - name: Rollback
+        run: |
+          ssh -i ~/.ssh/id_ed25519 ${{ secrets.SSH_USER }}@${{ secrets.SSH_IP }} << 'EOF'
+            docker rm -f routecalc_active || true
+            docker rmi ceasione/routecalc:latest || true
+            docker tag ceasione/routecalc:rollback ceasione/routecalc:latest
+          
+            docker run --restart unless-stopped -d \
+              --name routecalc_active \
+              -v /srv/flask-uwsgi/RC_STORAGE:/RouteCalc/storage \
+              -v /tmp:/tmp/rcsocket \
+              ceasione/routecalc:latest
+          EOF
