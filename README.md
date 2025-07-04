@@ -2,9 +2,9 @@
 
 ## Overview
 
-The **Intersmartgroup API** is designed to work seamlessly with the [Intersmartgroup website](https://intersmartgroup.com/). It includes two primary features:
-1. **Freight cost calculator** – Calculates the cost of transportation based on origin, destination, route, and traffic load.
-2. **Real-time tracking** – Allows for tracking of active freight shipments.
+The **Intersmartgroup API** is designed to work seamlessly with the [intersmartgroup.com website](https://intersmartgroup.com/). It includes two primary features:
+1. **Route planner** - Plan a route vehicle should pass to complete an order. Taking in account our depotpark limited capabilities. (Can be tweaked on your depotpark size)
+2. **Freight cost calculator** – Calculates the cost of transportation based on origin, destination, route, and traffic load.
 
 This API is written in **Python** using **Flask**, and integrates with several external services:
 - **Google Places API** – For location data.
@@ -12,22 +12,21 @@ This API is written in **Python** using **Flask**, and integrates with several e
 - **Google Matrix API** – For route and distance calculations.
 - **SMS API** – For sending SMS notifications.
 
-The backend is also powered by **Python Telegram Bot**, allowing fleet managers to interact with the system via Telegram. The API is deployed on a **uWSGI** production server with robust security measures in place.
+The adminpage is powered by **Python Telegram Bot**, allowing fleet managers to interact with the system via Telegram Bot. 
 
-The project leverages **machine learning** for cost calculation through the selection of a route congestion coefficient. This model is trained on a few parameters, and while it's not advanced, it provides meaningful results for the freight calculations.
+The API is deployed on a **uWSGI** production server with robust security measures in place.
 
-The API is currently in **production** and provides tangible business value by optimizing transportation costs for daily operations.
+The project leverages **machine learning** for cost calculation through the selection of a depot-to-depot route coefficient. This model consists of a few parameters (~3000), and while it's not advanced, it provides meaningful results for the given goal.
+
+The API is currently in **production** and provides tangible value for business by making transportation costs instant and clear.
 
 ## Features
 
 - **Freight Cost Calculator**:
-    - The user inputs origin and destination, and the API calculates the best route using public roads, estimates distance, and selects a congestion coefficient for competitive pricing.
+    - The user inputs origin and destination, and the API calculates the best route using public roads, estimates distance, and selects a depot-to-depot route coefficient for competitive pricing.
     - Returns a set of parameters for visualization on the website's frontend.
-    - Users can place an order directly via the website or through a Telegram bot.
-
-- **Real-Time Freight Tracking**:
-    - Allows fleet managers to track active shipments.
-    - Management of fleet data (CRUD operations) is possible through the Telegram bot.
+    - Notices fleet managers of every calculation (to finetune the model) and provide credentials for marketing team to reach the client. 
+    - Client can place an order directly via the website. Fleet managers will be extra notified.
 
 ## Architecture
 
@@ -40,16 +39,33 @@ The API is currently in **production** and provides tangible business value by o
 ## Usage
 
 To interact with the API, follow the steps below:
-
-1. **API Endpoints**:
+**API Endpoints**:
    - `POST /calculate`: Send origin and destination to calculate the freight cost.
-   - `GET /track`: Retrieve real-time tracking information of active shipments.
+     To make a calculationn do a POST rquest to that endpoint with certain json
+     ```
+        {'intent': 'acquire',
 
-2. **Telegram Bot**:
-   - Fleet managers and admins can use the bot for interacting with the active fleet and accessing freight data.
+         'from': {
+             'name_short': 'any_string',
+             'name_long': 'any_string',
+             'lat': 49.227717,
+             'lng': 31.852233,
+             'countrycode': 'UA'},
 
-3. **Google API Integration**:
-   - Google Places, Geocoding, and Matrix APIs are used to optimize route calculations and location data.
+         'to': {
+             'name_short': 'any_string',
+             'name_long': 'any_string',
+             'lat': 50.5089112,
+             'lng': 26.2566443,
+             'countrycode': 'UA'},
+
+         'transport_id': 1,  # One of the -> GET /get-available-vehicles
+         'phone_number': '',
+         'locale': 'uk_UA',
+         'url': 'referrer'}
+        ```
+   - `GET /get-available-vehicles`: Retrieve list of available transport types.
+   
 
 ## Installation
 
@@ -71,7 +87,7 @@ To set up the project locally, follow these steps:
    
 4. Run the application:
    ```bash
-   python app.py
+   python3 -m app.main
 
 ## Contributing
 
