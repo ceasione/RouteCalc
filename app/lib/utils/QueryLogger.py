@@ -29,10 +29,17 @@ class QueryLogger:
         self.conn = None
         self.cursor = None
 
+    def _ensure_calculation_exists(self):
+        with open(SQL_PATH/'create_table_calculation.sql', encoding='utf8') as f:
+            script = f.read()
+        self.cursor.executescript(script)
+        self.conn.commit()
+
     def __enter__(self):
         self.conn = sqlite3.connect(self.DB_LOCATION)
         self.conn.row_factory = sqlite3.Row
         self.cursor = self.conn.cursor()
+        self._ensure_calculation_exists()
         return self
 
     def __exit__(self, exc_type, exc_value, tb):
@@ -65,6 +72,7 @@ class QueryLogger:
     def log_calculation(self, phone_number: str, query: str, response: str) -> None:
         """
         Logs a query and response to the database
+        Logs to old 'queries' table
         :param phone_number: (str) phone number formatted as '380501234567'
         :param query: (str) The input query to store
         :param response: (str) The system's response to the query
