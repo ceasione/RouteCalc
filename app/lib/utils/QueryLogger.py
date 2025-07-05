@@ -1,9 +1,16 @@
-from app import settings
-import sqlite3
+import os
+import hashlib
 from datetime import datetime
-import app.lib.apis.telegramapi2 as tgapi2
+from pathlib import Path
 import traceback
+import sqlite3
+from app import settings
+import app.lib.apis.telegramapi2 as tgapi2
 from app.lib.utils.logger import logger
+from app.lib.utils.DTOs import RequestDTO, CalculationDTO
+
+
+SQL_PATH = Path.cwd()/Path('app/lib/utils/sql')
 
 
 class QueryLogger:
