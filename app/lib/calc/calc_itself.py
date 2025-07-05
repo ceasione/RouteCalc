@@ -290,16 +290,21 @@ def process_request(request: RequestDTO) -> CalculationDTO:
                           place_chain=compositor.generate_place_chain(*visible_route),
                           chain_map_link=compositor.generate_map_url(*visible_route),
                           distance=str(round(float(distance)/1000, 1)),
+                          distance_unstr=round(float(distance)/1000, 1),
                           transport_id=vehicle.id,
                           transport_name=vehicle.name if request.locale == 'ru_UA' else vehicle.name_ua,
                           transport_capacity=int(vehicle.weight_capacity),
                           price=compositor.format_cost(compositor.round_cost(
                               cost/currency.rate())),
+                          price_unstr=compositor.round_cost(cost/currency.rate()),
                           currency=str(currency),
                           currency_rate=currency.rate(),
                           price_per_ton=compositor.format_cost(compositor.round_cost(
                               cost / currency.rate() / float(vehicle.weight_capacity))),
+                          price_per_ton_unstr=compositor.round_cost(
+                              cost / currency.rate() / float(vehicle.weight_capacity)),
                           price_per_km=str(round(price/currency.rate(), 2)),
+                          price_per_km_unstr=round(price/currency.rate(), 2),
                           is_price_per_ton=vehicle.price_per_ton,
                           pfactor_vehicle=str(vehicle.price),
                           pfactor_departure=str(starting_depot.departure_ratio),

@@ -15,12 +15,16 @@ class CalculationDTO:
     place_chain: str
     chain_map_link: str
     distance: str
+    distance_unstr: float
     transport_id: int
     transport_name: str
     transport_capacity: int
     price: str
+    price_unstr: float
     price_per_ton: str
+    price_per_ton_unstr: float
     price_per_km: str
+    price_per_km_unstr: float
     is_price_per_ton: bool
     currency: str
     currency_rate: float
