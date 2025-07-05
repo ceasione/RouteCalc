@@ -139,9 +139,10 @@ def calculate():
 
     # Step 4: Log request and calculation
     with QUERY_LOGGER as qlogger:
-        qlogger.log_calculation(phone_number=request_dto.phone_num,
-                                query=json.dumps(request_dto.to_dict(), ensure_ascii=False),
-                                response=json.dumps([tg_msg, 'nosms'], ensure_ascii=False))
+        qlogger.log_request_response(phone_number=request_dto.phone_num,
+                                     query=json.dumps(request_dto.to_dict(), ensure_ascii=False),
+                                     response=json.dumps([tg_msg, 'nosms'], ensure_ascii=False))
+        qlogger.log_calcultaion(request_dto, calculation_dto)
     logger.debug('Query Logger has succesfully logged calculation')
 
     # Step 5: Check if IP blacklisted
@@ -191,9 +192,9 @@ def submit_new():
 
     # Step 3: Log request and calculation
     with QUERY_LOGGER as qlogger:
-        qlogger.log_calculation(phone_number=num,
-                                query=json.dumps(dataclasses.asdict(dto), ensure_ascii=False),
-                                response=json.dumps([tg_msg, sms_msg], ensure_ascii=False))
+        qlogger.log_request_response(phone_number=num,
+                                     query=json.dumps(dataclasses.asdict(dto), ensure_ascii=False),
+                                     response=json.dumps([tg_msg, sms_msg], ensure_ascii=False))
 
     # Step 4: Check for blacklist and make notifications
     if not BLACKLIST.check(num, ip):
