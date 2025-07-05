@@ -86,7 +86,7 @@ class QueryLogger:
         :return: None
         """
         if not self.conn or not self.cursor:
-            raise RuntimeError("QueryLogger must be used within a context manager")
+            raise RuntimeError('QueryLogger must be used within a context manager')
         try:
             self.cursor.execute(self.INSERT_QUERY, (self._today(),
                                 self._now(),
