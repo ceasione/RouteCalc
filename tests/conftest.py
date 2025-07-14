@@ -132,7 +132,7 @@ def flask_request_calculate():
 
 
 @pytest.fixture
-def dto_request_calculate(place_4, place_5, vehicle_2):
+def fixture_request_dto(place_4, place_5, vehicle_2):
     return RequestDTO(
         intent='acquire',
         origin=place_4,
