@@ -16,11 +16,11 @@ class FakeFlaskRequest:
 
 
 @pytest.mark.unit
-def test_process_normal(flask_request_calculate, remote_addr, dto_request_calculate):
+def test_process_normal(flask_request_calculate, remote_addr, fixture_request_dto):
     flask_request = FakeFlaskRequest(flask_request_calculate, remote_addr)
 
     dto_request = request_processor.process(flask_request)
-    assert dto_request == dto_request_calculate
+    assert dto_request == fixture_request_dto
 
 
 @pytest.mark.unit
