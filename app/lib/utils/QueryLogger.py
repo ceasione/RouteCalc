@@ -35,13 +35,13 @@ class QueryLogger:
         self.cursor = None
 
     def _ensure_queries_exists(self):
-        with open(SQL_PATH/'create_table_queries.sql', encoding='utf8') as f:
+        with open(SQL_PATH/'queries_create_table.sql', encoding='utf8') as f:
             script = f.read()
         self.cursor.executescript(script)
         self.conn.commit()
 
     def _ensure_calculation_exists(self):
-        with open(SQL_PATH/'create_table_calculation.sql', encoding='utf8') as f:
+        with open(SQL_PATH/'calculation_create_table.sql', encoding='utf8') as f:
             script = f.read()
         self.cursor.executescript(script)
         self.conn.commit()
@@ -116,7 +116,7 @@ class QueryLogger:
             raise RuntimeError('QueryLogger must be used within a context manager')
         digest = self._generate_random_digest()
         try:
-            with open(SQL_PATH/'insert_into_calculation.sql', encoding='utf-8') as f:
+            with open(SQL_PATH/'calculation_insert_into.sql', encoding='utf-8') as f:
                 script = f.read()
 
             values = {
@@ -191,7 +191,7 @@ class QueryLogger:
         if not self.conn or not self.cursor:
             raise RuntimeError('QueryLogger must be used within a context manager')
 
-        with open(SQL_PATH/'select_request_from_calculations.sql', encoding='utf-8') as f:
+        with open(SQL_PATH/'calculation_select_r_from.sql', encoding='utf-8') as f:
             script = f.read()
         self.cursor.execute(script, {'lookup_id': digest})
         row = self.cursor.fetchone()
@@ -233,7 +233,7 @@ class QueryLogger:
         if not self.conn or not self.cursor:
             raise RuntimeError('QueryLogger must be used within a context manager')
 
-        with open(SQL_PATH/'select_calculation_from_calculations.sql', encoding='utf-8') as f:
+        with open(SQL_PATH/'calculation_select_c_from.sql', encoding='utf-8') as f:
             script = f.read()
         self.cursor.execute(script, {'lookup_id': digest})
         row = self.cursor.fetchone()
