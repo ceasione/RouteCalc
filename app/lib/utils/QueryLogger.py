@@ -271,11 +271,3 @@ class QueryLogger:
 
 
 QUERY_LOGGER = QueryLogger(db_loc=settings.QUERYLOG_DB_LOC)
-
-
-if __name__ == '__main__':
-    QLOG_TEST = QueryLogger()
-    with QLOG_TEST as qlogger:
-        rtdto = qlogger.get_request_dto('9bec7b2319603473311a3d502adb212a6b9e45da')
-        calcdto = qlogger.get_calculation_dto('b815b00992b968853879b2045b1846d4938d7308')
-    pass
