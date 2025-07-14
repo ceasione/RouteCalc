@@ -2,6 +2,11 @@ CREATE TABLE IF NOT EXISTS calculation (
     -- Primary Key
     calculation_id CHAR(40) PRIMARY KEY,  -- SHA-1-like hex digest (40 chars)
 
+    -- Common
+    created_at TEXT NOT NULL,
+    edited_at TEXT,
+    tg_msg_id TEXT,
+
     -- RequestDTO fields
     request_intent TEXT NOT NULL,
     request_orig_lat REAL,

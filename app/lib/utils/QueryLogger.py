@@ -3,14 +3,21 @@ import hashlib
 from datetime import datetime
 from pathlib import Path
 import traceback
+from typing import Optional
 import sqlite3
 from app import settings
 import app.lib.apis.telegramapi2 as tgapi2
 from app.lib.utils.logger import logger
+from app.lib.utils import compositor
 from app.lib.utils.DTOs import RequestDTO, CalculationDTO
+from app.lib.calc.place import Place
+from app.lib.calc.loadables.vehicles import VEHICLES
 
 
 SQL_PATH = Path.cwd()/Path('app/lib/utils/sql')
+STRF_DATE = '%Y-%m-%d'
+STRF_TIME = '%H-%M-%S'
+STRF_DATETIME = '%Y-%m-%d %H-%M-%S'
 
 
 class QueryLogger:
@@ -20,21 +27,18 @@ class QueryLogger:
     from Calc for auditing or debugging purposes.
 
     Intended usage via context manager.
-
-    Schema:
-    CREATE TABLE "queries" (
-        "date"      TEXT,
-        "time"      TEXT,
-        "number"    TEXT,
-        "query"     TEXT,
-        "response"	TEXT
-    );
     """
 
-    def __init__(self):
-        self.DB_LOCATION = settings.QUERYLOG_DB_LOC
+    def __init__(self, db_loc: str = ':memory:'):
+        self.DB_LOCATION = db_loc
         self.conn = None
         self.cursor = None
+
+    def _ensure_queries_exists(self):
+        with open(SQL_PATH/'create_table_queries.sql', encoding='utf8') as f:
+            script = f.read()
+        self.cursor.executescript(script)
+        self.conn.commit()
 
     def _ensure_calculation_exists(self):
         with open(SQL_PATH/'create_table_calculation.sql', encoding='utf8') as f:
@@ -56,20 +60,16 @@ class QueryLogger:
         self.cursor = None
 
     @staticmethod
-    def _today() -> str:
-        """
-        We are agreed that under this database Date are stored as a text in form of this specific pattern
-        :return: datetime.now().strftime('%Y-%m-%d')
-        """
-        return datetime.now().strftime('%Y-%m-%d')
+    def _format_date(dt: datetime) -> str:
+        return dt.strftime(STRF_DATE)
 
     @staticmethod
-    def _now() -> str:
-        """
-        The same as above
-        :return: datetime.now().strftime('%H:%M:%S')
-        """
-        return datetime.now().strftime('%H:%M:%S')
+    def _format_time(dt: datetime) -> str:
+        return dt.strftime(STRF_TIME)
+
+    @staticmethod
+    def _format_datetime(dt: datetime) -> str:
+        return dt.strftime(STRF_DATETIME)
 
     INSERT_QUERY = """
         INSERT INTO queries( "date", "time", "number", "query", "response")
@@ -85,11 +85,12 @@ class QueryLogger:
         :param response: (str) The system's response to the query
         :return: None
         """
+        now = datetime.now()
         if not self.conn or not self.cursor:
             raise RuntimeError('QueryLogger must be used within a context manager')
         try:
-            self.cursor.execute(self.INSERT_QUERY, (self._today(),
-                                self._now(),
+            self.cursor.execute(self.INSERT_QUERY, (self._format_date(now),
+                                self._format_time(now),
                                 phone_number,
                                 query,
                                 response))
@@ -120,6 +121,10 @@ class QueryLogger:
 
             values = {
                 'calculation_id': digest,
+
+                'created_at': self._format_datetime(datetime.now()),
+                'edited_at': None,
+                'tg_msg_id': None,
 
                 # RequestDTO
                 'request_intent': request_dto.intent,
@@ -177,5 +182,100 @@ class QueryLogger:
             tgapi2.send_developer('sqlite3.DatabaseError at QueryLogger', e)
             raise RuntimeError('Cannot produce digest due to DB error') from e
 
+    def get_request_dto(self, digest: str) -> Optional[RequestDTO]:
+        """
+        Constructs a new RequestDTO object from database using digest to lookup or return
+        :param digest: 40 char string
+        :return: RequestDTO instance or None
+        """
+        if not self.conn or not self.cursor:
+            raise RuntimeError('QueryLogger must be used within a context manager')
 
-QUERY_LOGGER = QueryLogger()
+        with open(SQL_PATH/'select_request_from_calculations.sql', encoding='utf-8') as f:
+            script = f.read()
+        self.cursor.execute(script, {'lookup_id': digest})
+        row = self.cursor.fetchone()
+        if row is None:
+            return None
+        origin = Place(
+            lat=row['request_orig_lat'],
+            lng=row['request_orig_lng'],
+            name=row['request_orig_name'],
+            name_long=row['request_orig_name_long'],
+            countrycode=row['request_orig_countrycode'],
+        )
+
+        destination = Place(
+            lat=row['request_dest_lat'],
+            lng=row['request_dest_lng'],
+            name=row['request_dest_name'],
+            name_long=row['request_dest_name_long'],
+            countrycode=row['request_dest_countrycode'],
+        )
+
+        return RequestDTO(
+            intent=row['request_intent'],
+            origin=origin,
+            destination=destination,
+            vehicle=VEHICLES.get_by_id(row['request_vehicle']),
+            phone_num=row['request_phone_num'],
+            locale=row['request_locale'],
+            url=row['request_url'],
+            ip=row['request_ip'],
+        )
+
+    def get_calculation_dto(self, digest: str) -> Optional[CalculationDTO]:
+        """
+        Constructs a new CalculationDTO object from database using digest to lookup or return None
+        :param digest: 40 char string
+        :return: RequestDTO instance or None
+        """
+        if not self.conn or not self.cursor:
+            raise RuntimeError('QueryLogger must be used within a context manager')
+
+        with open(SQL_PATH/'select_calculation_from_calculations.sql', encoding='utf-8') as f:
+            script = f.read()
+        self.cursor.execute(script, {'lookup_id': digest})
+        row = self.cursor.fetchone()
+        if row is None:
+            return None
+
+        return CalculationDTO(
+            place_a_name=row["calculation_place_a_name"],
+            place_a_name_long=row["calculation_place_a_name_long"],
+            place_b_name=row["calculation_place_b_name"],
+            place_b_name_long=row["calculation_place_b_name_long"],
+            map_link=row["calculation_map_link"],
+            place_chain=row["calculation_place_chain"],
+            chain_map_link=row["calculation_chain_map_link"],
+            distance=str(row["calculation_distance"]),
+            distance_unstr=row["calculation_distance"],
+            transport_id=row["calculation_transport_id"],
+            transport_name=row["calculation_transport_name"],
+            transport_capacity=int(row["calculation_transport_capacity"]),
+            price=compositor.format_cost(row["calculation_price"]),
+            price_unstr=row["calculation_price"],
+            currency=row["calculation_currency"],
+            currency_rate=row["calculation_currency_rate"],
+            price_per_ton=compositor.format_cost(row["calculation_price_per_ton"]),
+            price_per_ton_unstr=row["calculation_price_per_ton"],
+            price_per_km=compositor.format_cost(row["calculation_price_per_km"]),
+            price_per_km_unstr=row["calculation_price_per_km"],
+            is_price_per_ton=bool(row["calculation_is_price_per_ton"]),
+            pfactor_vehicle=row["calculation_pfactor_vehicle"],
+            pfactor_departure=row["calculation_pfactor_departure"],
+            pfactor_arrival=row["calculation_pfactor_arrival"],
+            pfactor_distance=row["calculation_pfactor_distance"],
+            locale=row["calculation_locale"],
+        )
+
+
+QUERY_LOGGER = QueryLogger(db_loc=settings.QUERYLOG_DB_LOC)
+
+
+if __name__ == '__main__':
+    QLOG_TEST = QueryLogger()
+    with QLOG_TEST as qlogger:
+        rtdto = qlogger.get_request_dto('9bec7b2319603473311a3d502adb212a6b9e45da')
+        calcdto = qlogger.get_calculation_dto('b815b00992b968853879b2045b1846d4938d7308')
+    pass

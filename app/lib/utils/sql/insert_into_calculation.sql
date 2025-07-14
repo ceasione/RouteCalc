@@ -1,6 +1,9 @@
 
 INSERT INTO calculation (
     calculation_id,
+    created_at,
+    edited_at,
+    tg_msg_id,
     request_intent,
     request_vehicle,
     request_phone_num,
@@ -46,6 +49,9 @@ INSERT INTO calculation (
 )
 VALUES (
     :calculation_id,
+    :created_at,
+    :edited_at,
+    :tg_msg_id,
     :request_intent,
     :request_vehicle,
     :request_phone_num,
