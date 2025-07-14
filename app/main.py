@@ -142,7 +142,7 @@ def calculate():
         qlogger.log_request_response(phone_number=request_dto.phone_num,
                                      query=json.dumps(request_dto.to_dict(), ensure_ascii=False),
                                      response=json.dumps([tg_msg, 'nosms'], ensure_ascii=False))
-        qlogger.log_calcultaion(request_dto, calculation_dto)
+        digest = qlogger.log_calcultaion(request_dto, calculation_dto)
     logger.debug('Query Logger has succesfully logged calculation')
 
     # Step 5: Check if IP blacklisted
@@ -154,7 +154,10 @@ def calculate():
     logger.debug('Telegram message has been sent to silent chat')
 
     # Step 7: Response to frontend
-    return __gen_response(200, 'WORKLOAD', workload=dataclasses.asdict(calculation_dto))
+    return __gen_response(200, 'WORKLOAD', workload={
+        'calculation_id': digest,
+        'calculation_dto': dataclasses.asdict(calculation_dto)
+    })
 
 
 @app.route('/submit/', methods=['POST'])
