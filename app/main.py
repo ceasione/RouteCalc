@@ -131,21 +131,22 @@ def calculate():
     calculation_dto = calc_itself.process_request(request_dto)
     logger.debug('Calculation was succesfully performed. Got Calculation DTO')
 
-    # Step 3: Prepare TG message
+    # Step 3: Log request and calculation
+    with QUERY_LOGGER as qlogger:
+        qlogger.log_request_response(query=json.dumps(request_dto.to_dict(), ensure_ascii=False),
+                                     response=json.dumps([tg_msg, 'nosms'], ensure_ascii=False),
+                                     phone_number=request_dto.phone_num)
+        digest = qlogger.log_calcultaion(request_dto, calculation_dto)
+    logger.debug('Query Logger has succesfully logged calculation')
+
+    # Step 4: Prepare TG message
     tg_msg = compositor.compose_telegram_message_text(
         intent=request_dto.intent,
         calculation=calculation_dto,
         url=request_dto.url,
         ip=request_dto.ip,
+        calculation_id=digest,
         phone_num=request_dto.phone_num)
-
-    # Step 4: Log request and calculation
-    with QUERY_LOGGER as qlogger:
-        qlogger.log_request_response(phone_number=request_dto.phone_num,
-                                     query=json.dumps(request_dto.to_dict(), ensure_ascii=False),
-                                     response=json.dumps([tg_msg, 'nosms'], ensure_ascii=False))
-        digest = qlogger.log_calcultaion(request_dto, calculation_dto)
-    logger.debug('Query Logger has succesfully logged calculation')
 
     # Step 5: Check if IP blacklisted
     if BLACKLIST.check(request_dto.ip):
