@@ -1,4 +1,6 @@
 
+from abc import ABC, abstractmethod
+from app.lib.utils.logger import logger
 from queue import Queue
 from app import settings
 import telegram
@@ -20,15 +22,17 @@ class Telegramv3Interface:
     """
     def __init__(self,
                  botfatherkey: str,
-                 webhook_url: str):
+                 webhook_url: str,
+                 chat_subscription: str):
 
         self.bot = telegram.Bot(token=botfatherkey)
         self.dispatcher = telegram.ext.Dispatcher(
             bot=self.bot, update_queue=Queue(), use_context=True
         )
         self.dispatcher.add_handler(telegram.ext.MessageHandler(
-            telegram.ext.Filters.text, self._incoming_message_handler)
+            telegram.ext.Filters.text, self._incoming_text_message_handler)
         )
+        self.chat_subscription = chat_subscription  # A chat messages from which are being monitored
         self._own_secret = self._gen_secret()
         self.bot.set_webhook(url=webhook_url, secret_token=self._own_secret)
 
@@ -39,11 +43,41 @@ class Telegramv3Interface:
     def get_own_secret(self):
         return self._own_secret
 
-    def _incoming_message_handler(
+    class AbstractHandler(ABC):
+        def __init__(self):
+            self._next_handler = None
+            self.chat_subscription = tg_interface_manager.get_interface().chat_subscription
+
+        def set_next(self, handler):
+            self._next_handler = handler
+            return handler  # Enables method chaining
+
+        @abstractmethod
+        def handle(self, request):
+            pass
+
+    class RepliedTextualMessage(AbstractHandler):
+        """
+        This handles only messages from subscribed chats that are relpies to other messages
+        """
+        def handle(self, update: telegram.Update):
+            on_subscription = str(update.effective_chat.id) == self.chat_subscription
+            is_reply_message = update.effective_message.reply_to_message is not None
+            if on_subscription and is_reply_message:
+                logger.debug(f'RepliedTextualMessage is going to handle this update')
+            elif self._next_handler:
+                logger.debug(f'RepliedTextualMessage passing update to next handler')
+                self._next_handler.handle(update)
+            else:
+                logger.debug("No handler could handle the request.")
+
+    def _incoming_text_message_handler(
             self,
             update: telegram.Update,
             context: telegram.ext.CallbackContext) -> None:
-        ...
+
+        chain_of_responsibility = self.RepliedTextualMessage()
+        chain_of_responsibility.handle(update)
 
     def _send_message(self, chat_id, text, parse_mode=None):
         return self.bot.send_message(
@@ -71,7 +105,8 @@ class TGInterfaceManager:
         if not self._interface:
             self._interface = Telegramv3Interface(
                 botfatherkey=KEY,
-                webhook_url=BASE+TAIL
+                webhook_url=BASE+TAIL,
+                chat_subscription=settings.TELEGRAMV3_SILENT_CHAT_ID
             )
         return self._interface
 

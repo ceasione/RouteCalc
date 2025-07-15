@@ -281,8 +281,9 @@ if __name__ == '__main__':
     # Set up tg webhook
     tg_interface_manager.set_interface(
         Telegramv3Interface(
-            settings.TELEGRAMV3_BOT_APIKEY,
-            webhook_url=hook_url
+            botfatherkey=settings.TELEGRAMV3_BOT_APIKEY,
+            webhook_url=hook_url,
+            chat_subscription=settings.TELEGRAMV3_DEVELOPER_CHAT_ID
         )
     )
 
