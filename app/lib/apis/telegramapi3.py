@@ -55,12 +55,11 @@ class Telegramv3Interface:
     def process_webhook(self, json):
         update = Update.de_json(json, self.bot)
         self.dispatcher.process_update(update)
-        ...
 
 
+KEY = settings.TELEGRAMV3_BOT_APIKEY
 BASE = settings.TELEGRAMV3_BASE_APIURL
 TAIL = settings.TELEGRAMV3_WEBHOOK_ADDRESS
-KEY = settings.TELEGRAMV3_BOT_APIKEY
 
 
 class TGInterfaceManager:
@@ -80,11 +79,4 @@ class TGInterfaceManager:
         self._interface = tg_interface
 
 
-if __name__ == '__main__':
-    from pyngrok import ngrok
-    tg_interface3 = Telegramv3Interface(
-        botfatherkey=KEY,
-        webhook_url=BASE+TAIL)
-
-    pass
-
+tg_interface_manager = TGInterfaceManager()
