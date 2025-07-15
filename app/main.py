@@ -8,7 +8,8 @@ import json
 from flask import Response
 from app.lib.utils import compositor
 from app.lib.calc.loadables import vehicles
-from app.lib.apis import smsapi, telegramapi2
+from app.lib.apis import smsapi, telegramapi3
+from app.lib.apis.telegramapi3 import tg_interface_manager, Telegramv3Interface
 from app.lib.utils.QueryLogger import QUERY_LOGGER
 from flask_cors import CORS
 from app.lib.utils.blacklist import BLACKLIST
@@ -20,6 +21,7 @@ from app.lib.utils.number_tools import WrongNumberError
 from app.lib.calc.calc_itself import ZeroDistanceResultsError
 import dataclasses
 import app.settings as settings
+from typing import Optional
 
 
 logger.info(f'Running on dev machine: {settings.DEV_MACHINE}')
@@ -27,7 +29,7 @@ app = Flask(__name__)
 CORS = CORS(app)
 
 
-def __gen_response(http_status: int, json_status: str, details: str = '', workload: dict = None) -> Response:
+def __gen_response(http_status: int, json_status: str, details: str = '', workload: Optional[dict] = None) -> Response:
 
     """
     Additional layer for generating a standardized JSON HTTP response.
@@ -150,7 +152,7 @@ def calculate():
         tg_msg = '*BLACKLISTED*\n\n'+tg_msg
 
     # Step 6: Notify managers via Telegram Bot
-    telegramapi2.send_silent(tg_msg)
+    tg_interface_manager.get_interface().send_silent(tg_msg)
     logger.debug('Telegram message has been sent to silent chat')
 
     # Step 7: Response to frontend
@@ -202,20 +204,31 @@ def submit_new():
     # Step 4: Check for blacklist and make notifications
     if not BLACKLIST.check(num, ip):
         # Not blacklisted -> Send TG message to managers and SMS to client
-        telegramapi2.send_loud(tg_msg)
+        tg_interface_manager.get_interface().send_loud(tg_msg)
         smsapi.send_sms(num, sms_msg)
     else:
         # Blacklisted -> Send modified TG message to managers only -> Spreading blacklist by mapping num and ip
         BLACKLIST.spread(num, ip)
-        telegramapi2.send_loud('*BLACKLISTED*\n\n'+tg_msg)
+        tg_interface_manager.get_interface().send_loud('*BLACKLISTED*\n\n'+tg_msg)
 
     # Step 5: Return resopnse to frontend
     return __gen_response(200, 'CALLBACK_SCHEDULED')
 
 
+@app.route(settings.TELEGRAMV3_WEBHOOK_ADDRESS, methods=['POST'])
+def catch_tg_webhook():
+    iface = tg_interface_manager.get_interface()
+    own_secret = iface.get_own_secret()
+    got_secret = request.headers.get("X-Telegram-Bot-Api-Secret-Token")
+    if got_secret != own_secret:
+        return "Forbidden", 403
+    iface.process_webhook(request.get_json())
+    return 'OK', 200
+
+
 @app.errorhandler(ZeroDistanceResultsError)
 def handle_zero_distance_error(e: Exception) -> Response:
-    telegramapi2.send_developer(
+    tg_interface_manager.get_interface().send_developer(
         f'No available route can be built\n\n'
         f'Exception = {str(e)}', e)
     return __gen_response(404, 'ZeroDistanceResultsError', details=str(e))
@@ -243,13 +256,13 @@ def handle_preprocessing_errs2(_e: Exception) -> Response:
 
 @app.errorhandler(RuntimeError)
 def handle_runtime_error(e: Exception) -> Response:
-    telegramapi2.send_developer(f'Errorhandler error caught', e)
+    tg_interface_manager.get_interface().send_developer(f'Errorhandler error caught', e)
     return __gen_response(500, 'ERROR', details='Internal server error')
 
 
 @app.errorhandler(Exception)
 def handle_broad(e: Exception) -> Response:
-    telegramapi2.send_developer(
+    tg_interface_manager.get_interface().send_developer(
         f'Broad calc error\n\n'
         f'Exception = {str(e)}', e)
     return __gen_response(500, 'ERROR', details='Internal server error')
@@ -261,8 +274,39 @@ def page_not_found(_e: Exception):
 
 
 def create_app():
+    hook_url = settings.TELEGRAMV3_BASE_APIURL + settings.TELEGRAMV3_WEBHOOK_ADDRESS
+    tg_interface_manager.set_interface(
+        Telegramv3Interface(
+            botfatherkey=settings.TELEGRAMV3_BOT_APIKEY,
+            webhook_url=hook_url,
+            chat_subscription=int(settings.TELEGRAMV3_SILENT_CHAT_ID),
+            silent_chat=int(settings.TELEGRAMV3_SILENT_CHAT_ID),
+            loud_chat=int(settings.TELEGRAMV3_LOUD_CHAT_ID),
+            dev_chat=int(settings.TELEGRAMV3_DEVELOPER_CHAT_ID)
+        )
+    )
     return app
 
 
 if __name__ == '__main__':
+    # Set up ngrok
+    from pyngrok import ngrok
+    tunnel = ngrok.connect('http://localhost:5000')
+    if tunnel.public_url is None:
+        raise RuntimeError('Ngrok tunnel public URL is None')
+    tunnel_hook_url = tunnel.public_url + settings.TELEGRAMV3_WEBHOOK_ADDRESS
+
+    # Set up tg webhook
+    tg_interface_manager.set_interface(
+        Telegramv3Interface(
+            botfatherkey=settings.TELEGRAMV3_BOT_APIKEY,
+            webhook_url=tunnel_hook_url,
+            chat_subscription=int(settings.TELEGRAMV3_DEVELOPER_CHAT_ID),
+            silent_chat=int(settings.TELEGRAMV3_DEVELOPER_CHAT_ID),
+            loud_chat=int(settings.TELEGRAMV3_DEVELOPER_CHAT_ID),
+            dev_chat=int(settings.TELEGRAMV3_DEVELOPER_CHAT_ID)
+        )
+    )
+
+    # Run Flask
     app.run(debug=True, use_reloader=False)

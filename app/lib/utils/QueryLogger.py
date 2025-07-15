@@ -2,6 +2,7 @@ import os
 import hashlib
 from datetime import datetime
 from pathlib import Path
+import app.lib.apis.telegramapi3 as tgapi3
 import traceback
 from typing import Optional
 import sqlite3
@@ -97,7 +98,7 @@ class QueryLogger:
             self.conn.commit()
         except sqlite3.DatabaseError as e:
             logger.error(f'sqlite3.DatabaseError at QueryLogger\n{traceback.format_exc()}')
-            tgapi2.send_developer('sqlite3.DatabaseError at QueryLogger', e)
+            tgapi3.tg_interface_manager.get_interface().send_developer('sqlite3.DatabaseError at QueryLogger', e)
 
     @staticmethod
     def _generate_random_digest() -> str:
