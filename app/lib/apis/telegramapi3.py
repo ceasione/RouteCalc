@@ -1,29 +1,32 @@
 
 from abc import ABC, abstractmethod
+from typing import Optional
 from app.lib.utils.logger import logger
+from datetime import datetime
+import traceback
 from queue import Queue
 from app import settings
 import telegram
 from telegram import Update, ext
 import secrets
 
-
-APIKEY = settings.TELEGRAMV3_BOT_APIKEY
 # SILENT_CHAT_ID = settings.TELEGRAM_SILENT_CHAT_ID
 # LOUD_CHAT_ID = settings.TELEGRAM_LOUD_CHAT_ID
-DEVELOPER_CHAT_ID = settings.TELEGRAMV3_DEVELOPER_CHAT_ID
 
 
 class Telegramv3Interface:
     """
-    This class instantinates an Telegram Bot webhook, and registers handlers
+    This class instantinates a Telegram Bot webhook, and registers handlers
     to process updates.
     Provides interface to send messages.
     """
     def __init__(self,
                  botfatherkey: str,
                  webhook_url: str,
-                 chat_subscription: str):
+                 chat_subscription: int,
+                 silent_chat: int,
+                 loud_chat: int,
+                 dev_chat: int):
 
         self.bot = telegram.Bot(token=botfatherkey)
         self.dispatcher = telegram.ext.Dispatcher(
@@ -32,7 +35,12 @@ class Telegramv3Interface:
         self.dispatcher.add_handler(telegram.ext.MessageHandler(
             telegram.ext.Filters.text, self._incoming_text_message_handler)
         )
+
         self.chat_subscription = chat_subscription  # A chat messages from which are being monitored
+        self.silent_chat = silent_chat
+        self.loud_chat = loud_chat
+        self.dev_chat = dev_chat
+
         self._own_secret = self._gen_secret()
         self.bot.set_webhook(url=webhook_url, secret_token=self._own_secret)
 
@@ -61,7 +69,7 @@ class Telegramv3Interface:
         This handles only messages from subscribed chats that are relpies to other messages
         """
         def handle(self, update: telegram.Update):
-            on_subscription = str(update.effective_chat.id) == self.chat_subscription
+            on_subscription = update.effective_chat.id == self.chat_subscription
             is_reply_message = update.effective_message.reply_to_message is not None
             if on_subscription and is_reply_message:
                 logger.debug(f'RepliedTextualMessage is going to handle this update')
@@ -79,16 +87,59 @@ class Telegramv3Interface:
         chain_of_responsibility = self.RepliedTextualMessage()
         chain_of_responsibility.handle(update)
 
-    def _send_message(self, chat_id, text, parse_mode=None):
-        return self.bot.send_message(
+    def _send_message(self, chat_id: int, text: str, parse_mode: Optional[str] = 'MARKDOWN'):
+        msg_id = self.bot.send_message(
             chat_id=chat_id,
             text=text,
             parse_mode=parse_mode
         )
+        return msg_id
 
     def process_webhook(self, json):
         update = Update.de_json(json, self.bot)
         self.dispatcher.process_update(update)
+
+    def send_silent(self, msg: str) -> int:
+        """
+        Sends msg to silent chat and return message id
+        :param msg: Message in markdown
+        :return: sent message id
+        """
+        return self._send_message(self.silent_chat, msg)
+
+    def send_loud(self, msg: str):
+        """
+        Sends msg to loud chat and return message id
+        :param msg: Message in markdown
+        :return: sent message id
+        """
+        return self._send_message(self.loud_chat, msg)
+
+    def send_developer(self, msg: str, cause: Exception = None):
+        try:
+            timestamp = datetime.now().isoformat()
+
+            txt_cause = 'No exception provided'
+            trace = 'No exception provided'
+            if cause is not None:
+                txt_cause = str(cause)
+                trace = str().join(traceback.format_exception(
+                    type(cause), cause, cause.__traceback__
+                    )
+                )
+            message = f"{timestamp}:\n\n" \
+                      f"Message: {msg}\n\n" \
+                      f"Cause: {txt_cause}\n\n" \
+                      f"Traceback: '{trace}'\n"
+            self._send_message(self.dev_chat, message, parse_mode=None)
+            logger.error(f"DEV TG report has been sent: {msg}\n\n"
+                         f"Cause: {txt_cause}\n\n"
+                         f"Traceback: {trace}")
+        except Exception as e:
+            logger.error(f"Failed to send dev tg report\n\n"
+                         f"{str(e)}\n\n"
+                         f"{traceback.format_exc()}\n\n"
+                         f"{msg}")
 
 
 KEY = settings.TELEGRAMV3_BOT_APIKEY
@@ -104,13 +155,16 @@ class TGInterfaceManager:
     def get_interface(self):
         if not self._interface:
             self._interface = Telegramv3Interface(
-                botfatherkey=KEY,
+                botfatherkey=settings.TELEGRAMV3_BOT_APIKEY,
                 webhook_url=BASE+TAIL,
-                chat_subscription=settings.TELEGRAMV3_SILENT_CHAT_ID
+                chat_subscription=settings.TELEGRAMV3_SILENT_CHAT_ID,
+                silent_chat=settings.TELEGRAMV3_SILENT_CHAT_ID,
+                loud_chat=settings.TELEGRAMV3_LOUD_CHAT_ID,
+                dev_chat=settings.TELEGRAMV3_DEVELOPER_CHAT_ID
             )
         return self._interface
 
-    def set_interface (self, tg_interface: Telegramv3Interface):
+    def set_interface(self, tg_interface: Telegramv3Interface):
         self._interface = tg_interface
 
 
