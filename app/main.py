@@ -9,7 +9,7 @@ from flask import Response
 from app.lib.utils import compositor
 from app.lib.calc.loadables import vehicles
 from app.lib.apis import smsapi, telegramapi3
-from app.lib.apis.telegramapi3 import tg_interface_manager
+from app.lib.apis.telegramapi3 import tg_interface_manager, Telegramv3Interface
 from app.lib.utils.QueryLogger import QUERY_LOGGER
 from flask_cors import CORS
 from app.lib.utils.blacklist import BLACKLIST
