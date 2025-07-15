@@ -209,6 +209,16 @@ def submit_new():
     return __gen_response(200, 'CALLBACK_SCHEDULED')
 
 
+@app.route(settings.TELEGRAM_WEBHOOK_ADDRESS, methods=['POST'])
+def catch_tg_webhook():
+    own_secret = None
+    got_secret = request.headers.get("X-Telegram-Bot-Api-Secret-Token")
+    if got_secret != own_secret:
+        return "Forbidden", 403
+
+    request.get_json()  # -> to telegram interface
+
+
 @app.errorhandler(ZeroDistanceResultsError)
 def handle_zero_distance_error(e: Exception) -> Response:
     telegramapi2.send_developer(
