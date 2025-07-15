@@ -77,7 +77,12 @@ class QueryLogger:
         VALUES (?, ?, ?, ?, ?)
     """
 
-    def log_request_response(self, phone_number: str, query: str, response: str) -> None:
+    def log_request_response(
+        self, 
+        query: str, 
+        response: str, 
+        phone_number: Optional[str]
+    ) -> None:
         """
         Logs a query and response to the database
         Logs to old 'queries' table
