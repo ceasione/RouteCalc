@@ -273,4 +273,18 @@ def create_app():
 
 
 if __name__ == '__main__':
+    # Set up ngrok
+    from pyngrok import ngrok
+    tunnel = ngrok.connect('http://localhost:5000')
+    hook_url = tunnel.public_url + settings.TELEGRAMV3_WEBHOOK_ADDRESS
+
+    # Set up tg webhook
+    tg_interface_manager.set_interface(
+        Telegramv3Interface(
+            settings.TELEGRAMV3_BOT_APIKEY,
+            webhook_url=hook_url
+        )
+    )
+
+    # Run Flask
     app.run(debug=True, use_reloader=False)
