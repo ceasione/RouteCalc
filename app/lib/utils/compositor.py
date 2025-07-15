@@ -73,6 +73,7 @@ def compose_telegram_message_text(
     calculation: CalculationDTO,
     url: str, 
     ip: str, 
+    calculation_id: str,
     phone_num: Optional[str] = None) -> str:
     """
     Compose a Telegram message based on CalculationDTO and some other data
@@ -80,6 +81,7 @@ def compose_telegram_message_text(
     :param calculation: (CalculationDTO) dataclass object containing data.
     :param url: (str) Source page URL
     :param ip: (str) Client IP address
+    :param calculation_id: (str) Calculation ID - calculation digest
     :param phone_num: (str, optional) number of the client
     :return: (str) A formatted Telegram message.
 
@@ -117,7 +119,7 @@ def compose_telegram_message_text(
 
     fstring = f'''
         {intent_text}
-        Lang: {"ru" if calculation.locale == 'ru_UA' else "ua"}
+        Lang: {"ru" if calculation.locale == 'ru_UA' else "ua"}, [id]({calculation_id})
         Page URL: `{url}`
         
         IP: [{ip}](http://ip-api.com/line/{ip})
@@ -137,7 +139,6 @@ def compose_telegram_message_text(
           Arrival: {calculation.pfactor_arrival}
           Distance: {calculation.pfactor_distance}
           Currency: {calculation.currency_rate}
-          
         {phone}
     '''
     return dedent(fstring).strip()
