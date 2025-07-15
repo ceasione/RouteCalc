@@ -209,7 +209,7 @@ def submit_new():
     return __gen_response(200, 'CALLBACK_SCHEDULED')
 
 
-@app.route(settings.TELEGRAM_WEBHOOK_ADDRESS, methods=['POST'])
+@app.route(settings.TELEGRAMV3_WEBHOOK_ADDRESS, methods=['POST'])
 def catch_tg_webhook():
     own_secret = None
     got_secret = request.headers.get("X-Telegram-Bot-Api-Secret-Token")
