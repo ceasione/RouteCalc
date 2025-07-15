@@ -1,6 +1,6 @@
 from app import settings
 import requests
-from app.lib.apis import telegramapi2
+from app.lib.apis import telegramapi3
 from app.lib.utils.logger import logger
 
 
@@ -23,7 +23,7 @@ def send_sms(number, text):
     if not settings.DEV_MACHINE:
         response = requests.post(url, json=payload, headers=HEADERS)
         if response.status_code != 200:
-            telegramapi2.send_developer(
+            telegramapi3.tg_interface_manager.get_interface().send_developer(
                 f'Error sending SMS\n'
                 f'Status code: {response.status_code}\n'
                 f'Response: {response.text}')

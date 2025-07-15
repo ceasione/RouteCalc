@@ -1,7 +1,7 @@
 
 import sqlite3
 from app import settings
-import app.lib.apis.telegramapi2 as tgapi2
+import app.lib.apis.telegramapi3 as tgapi3
 from typing import Optional
 from app.lib.utils.logger import logger
 
@@ -106,7 +106,7 @@ class Cache:
             self.conn.commit()
         except sqlite3.Error as e:
             logger.exception('Error adding item to Cache')
-            tgapi2.send_developer('Error adding item to Cache', e)
+            tgapi3.tg_interface_manager.get_interface().send_developer('Error adding item to Cache', e)
 
 
 CACHE = Cache()

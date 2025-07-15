@@ -1,7 +1,7 @@
 from app import settings
 import sqlite3
 from datetime import datetime
-import app.lib.apis.telegramapi2 as tgapi2
+import app.lib.apis.telegramapi3 as tgapi3
 import traceback
 from app.lib.utils.logger import logger
 
@@ -81,7 +81,7 @@ class QueryLogger:
             self.conn.commit()
         except sqlite3.DatabaseError as e:
             logger.error(f'sqlite3.DatabaseError at QueryLogger\n{traceback.format_exc()}')
-            tgapi2.send_developer('sqlite3.DatabaseError at QueryLogger', e)
+            tgapi3.tg_interface_manager.get_interface().send_developer('sqlite3.DatabaseError at QueryLogger', e)
 
 
 QUERY_LOGGER = QueryLogger()
