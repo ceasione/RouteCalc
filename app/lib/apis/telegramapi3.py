@@ -7,7 +7,8 @@ import traceback
 from queue import Queue
 from app import settings
 import telegram
-from telegram import Update, ext
+from telegram import Update
+from telegram.ext import Dispatcher, MessageHandler, Filters, CallbackContext
 import secrets
 
 
@@ -56,11 +57,11 @@ class Telegramv3Interface:
                  dev_chat: int):
 
         self.bot = telegram.Bot(token=botfatherkey)
-        self.dispatcher = telegram.ext.Dispatcher(
+        self.dispatcher = Dispatcher(
             bot=self.bot, update_queue=Queue(), use_context=True
         )
-        self.dispatcher.add_handler(telegram.ext.MessageHandler(
-            telegram.ext.Filters.text, self._incoming_text_message_handler)
+        self.dispatcher.add_handler(MessageHandler(
+            Filters.text, self._incoming_text_message_handler)
         )
 
         self.chat_subscription = chat_subscription  # A chat messages from which are being monitored
@@ -79,9 +80,9 @@ class Telegramv3Interface:
         return self._own_secret
 
     class AbstractHandler(ABC):
-        def __init__(self):
+        def __init__(self, chat_subscription: int):
             self._next_handler = None
-            self.chat_subscription = tg_interface_manager.get_interface().chat_subscription
+            self.chat_subscription = chat_subscription
 
         def set_next(self, handler):
             self._next_handler = handler
@@ -95,9 +96,18 @@ class Telegramv3Interface:
         """
         This handles only messages from subscribed chats that are relpies to other messages
         """
-        def handle(self, update: telegram.Update):
-            on_subscription = update.effective_chat.id == self.chat_subscription
-            is_reply_message = update.effective_message.reply_to_message is not None
+
+        def __init__(self, chat_subscription: int):
+            super().__init__(chat_subscription)
+
+        def handle(self, update: Update):
+            on_subscription = (update.effective_chat is not None and 
+                               update.effective_chat.id == self.chat_subscription
+            )
+            is_reply_message = (
+                update.effective_message is not None and
+                update.effective_message.reply_to_message is not None
+            )
             if on_subscription and is_reply_message:
                 logger.debug(f'RepliedTextualMessage is going to handle this update')
             elif self._next_handler:
@@ -108,19 +118,19 @@ class Telegramv3Interface:
 
     def _incoming_text_message_handler(
             self,
-            update: telegram.Update,
-            context: telegram.ext.CallbackContext) -> None:
+            update: Update,
+            context: CallbackContext) -> None:
 
-        chain_of_responsibility = self.RepliedTextualMessage()
+        chain_of_responsibility = self.RepliedTextualMessage(self.chat_subscription)
         chain_of_responsibility.handle(update)
 
     def _send_message(self, chat_id: int, text: str, parse_mode: Optional[str] = 'MARKDOWN'):
-        msg_id = self.bot.send_message(
+        msg = self.bot.send_message(
             chat_id=chat_id,
             text=text,
             parse_mode=parse_mode
         )
-        return msg_id
+        return msg.message_id
 
     def process_webhook(self, json):
         update = Update.de_json(json, self.bot)
@@ -142,7 +152,7 @@ class Telegramv3Interface:
         """
         return self._send_message(self.loud_chat, msg)
 
-    def send_developer(self, msg: str, cause: Exception = None):
+    def send_developer(self, msg: str, cause: Optional[Exception] = None):
         try:
             timestamp = datetime.now().isoformat()
 
@@ -184,10 +194,10 @@ class TGInterfaceManager:
             self._interface = Telegramv3Interface(
                 botfatherkey=settings.TELEGRAMV3_BOT_APIKEY,
                 webhook_url=BASE+TAIL,
-                chat_subscription=settings.TELEGRAMV3_SILENT_CHAT_ID,
-                silent_chat=settings.TELEGRAMV3_SILENT_CHAT_ID,
-                loud_chat=settings.TELEGRAMV3_LOUD_CHAT_ID,
-                dev_chat=settings.TELEGRAMV3_DEVELOPER_CHAT_ID
+                chat_subscription=int(settings.TELEGRAMV3_SILENT_CHAT_ID),
+                silent_chat=int(settings.TELEGRAMV3_SILENT_CHAT_ID),
+                loud_chat=int(settings.TELEGRAMV3_LOUD_CHAT_ID),
+                dev_chat=int(settings.TELEGRAMV3_DEVELOPER_CHAT_ID)
             )
         return self._interface
 
