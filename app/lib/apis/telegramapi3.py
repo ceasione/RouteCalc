@@ -10,15 +10,42 @@ import telegram
 from telegram import Update, ext
 import secrets
 
-# SILENT_CHAT_ID = settings.TELEGRAM_SILENT_CHAT_ID
-# LOUD_CHAT_ID = settings.TELEGRAM_LOUD_CHAT_ID
-
 
 class Telegramv3Interface:
     """
-    This class instantinates a Telegram Bot webhook, and registers handlers
-    to process updates.
-    Provides interface to send messages.
+    Telegramv3Interface initializes and manages a Telegram bot using webhook integration.
+
+    This class:
+    - Sets up a webhook-based Telegram bot using the provided bot token and webhook URL.
+    - Defines a message dispatching system using the `telegram.ext.Dispatcher`.
+    - Implements a handler chain for processing incoming text messages, currently including a handler
+      for replies to existing messages within a specific subscribed chat.
+    - Provides methods to send messages to designated chats (silent, loud, and developer).
+    - Can report errors and exceptions to a developer chat, including full tracebacks.
+
+    Parameters:
+        botfatherkey (str): Telegram bot API token.
+        webhook_url (str): Public webhook URL to receive updates from Telegram.
+        chat_subscription (int): Chat ID from which replies are monitored.
+        silent_chat (int): Chat ID used for quiet messages.
+        loud_chat (int): Chat ID used for alerting messages.
+        dev_chat (int): Chat ID where error reports or debug messages are sent.
+
+    Main Methods:
+        - process_webhook(json): Process incoming webhook update from Telegram.
+        - send_silent(msg): Send a markdown message to the silent chat.
+        - send_loud(msg): Send a markdown message to the loud chat.
+        - send_developer(msg, cause): Send error/debug messages with optional exception trace.
+        - get_own_secret(): Returns the secret used for webhook verification.
+
+    Nested Classes:
+        - AbstractHandler: An abstract base for implementing the Chain of Responsibility.
+        - RepliedTextualMessage: A concrete handler that processes reply messages from a subscribed chat.
+
+    Private Methods:
+        - _send_message(): Internal utility to send a Telegram message.
+        - _incoming_text_message_handler(): Entry point for the dispatcher to handle text messages.
+        - _gen_secret(): Generates a secure secret token for webhook verification.
     """
     def __init__(self,
                  botfatherkey: str,
@@ -152,7 +179,7 @@ class TGInterfaceManager:
     def __init__(self):
         self._interface = None
 
-    def get_interface(self):
+    def get_interface(self) -> Telegramv3Interface:
         if not self._interface:
             self._interface = Telegramv3Interface(
                 botfatherkey=settings.TELEGRAMV3_BOT_APIKEY,
