@@ -274,10 +274,10 @@ def create_app():
         Telegramv3Interface(
             botfatherkey=settings.TELEGRAMV3_BOT_APIKEY,
             webhook_url=hook_url,
-            chat_subscription=settings.TELEGRAMV3_SILENT_CHAT_ID,
-            silent_chat=settings.TELEGRAMV3_SILENT_CHAT_ID,
-            loud_chat=settings.TELEGRAMV3_LOUD_CHAT_ID,
-            dev_chat=settings.TELEGRAMV3_DEVELOPER_CHAT_ID
+            chat_subscription=int(settings.TELEGRAMV3_SILENT_CHAT_ID),
+            silent_chat=int(settings.TELEGRAMV3_SILENT_CHAT_ID),
+            loud_chat=int(settings.TELEGRAMV3_LOUD_CHAT_ID),
+            dev_chat=int(settings.TELEGRAMV3_DEVELOPER_CHAT_ID)
         )
     )
     return app
@@ -294,10 +294,10 @@ if __name__ == '__main__':
         Telegramv3Interface(
             botfatherkey=settings.TELEGRAMV3_BOT_APIKEY,
             webhook_url=tunnel_hook_url,
-            chat_subscription=settings.TELEGRAMV3_DEVELOPER_CHAT_ID,
-            silent_chat=settings.TELEGRAMV3_DEVELOPER_CHAT_ID,
-            loud_chat=settings.TELEGRAMV3_DEVELOPER_CHAT_ID,
-            dev_chat=settings.TELEGRAMV3_DEVELOPER_CHAT_ID
+            chat_subscription=int(settings.TELEGRAMV3_DEVELOPER_CHAT_ID),
+            silent_chat=int(settings.TELEGRAMV3_DEVELOPER_CHAT_ID),
+            loud_chat=int(settings.TELEGRAMV3_DEVELOPER_CHAT_ID),
+            dev_chat=int(settings.TELEGRAMV3_DEVELOPER_CHAT_ID)
         )
     )
 
