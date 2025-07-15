@@ -29,12 +29,15 @@ class Telegramv3Interface:
         self.dispatcher.add_handler(telegram.ext.MessageHandler(
             telegram.ext.Filters.text, self._incoming_message_handler)
         )
-        self.own_secret = self._gen_secret()
-        self.bot.set_webhook(url=webhook_url, secret_token=self.own_secret)
+        self._own_secret = self._gen_secret()
+        self.bot.set_webhook(url=webhook_url, secret_token=self._own_secret)
 
     @staticmethod
     def _gen_secret() -> str:
         return secrets.token_urlsafe(32)
+
+    def get_own_secret(self):
+        return self._own_secret
 
     def _incoming_message_handler(
             self,
@@ -60,7 +63,7 @@ TAIL = settings.TELEGRAMV3_WEBHOOK_ADDRESS
 KEY = settings.TELEGRAMV3_BOT_APIKEY
 
 
-class InterfaceManager:
+class TGInterfaceManager:
 
     def __init__(self):
         self._interface = None
@@ -73,8 +76,8 @@ class InterfaceManager:
             )
         return self._interface
 
-
-interface_manager = InterfaceManager()
+    def set_interface (self, tg_interface: Telegramv3Interface):
+        self._interface = tg_interface
 
 
 if __name__ == '__main__':

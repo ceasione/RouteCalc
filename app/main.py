@@ -9,6 +9,7 @@ from flask import Response
 from app.lib.utils import compositor
 from app.lib.calc.loadables import vehicles
 from app.lib.apis import smsapi, telegramapi2
+from app.lib.apis.telegramapi3 import Telegramv3Interface, tg_interface_manager
 from app.lib.utils.QueryLogger import QUERY_LOGGER
 from flask_cors import CORS
 from app.lib.utils.blacklist import BLACKLIST
@@ -211,12 +212,13 @@ def submit_new():
 
 @app.route(settings.TELEGRAMV3_WEBHOOK_ADDRESS, methods=['POST'])
 def catch_tg_webhook():
-    own_secret = None
+    iface = tg_interface_manager.get_interface()
+    own_secret = iface.get_own_secret()
     got_secret = request.headers.get("X-Telegram-Bot-Api-Secret-Token")
     if got_secret != own_secret:
         return "Forbidden", 403
-
-    request.get_json()  # -> to telegram interface
+    iface.process_webhook(request.get_json())
+    return 'OK', 200
 
 
 @app.errorhandler(ZeroDistanceResultsError)
