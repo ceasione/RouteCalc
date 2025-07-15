@@ -287,6 +287,8 @@ if __name__ == '__main__':
     # Set up ngrok
     from pyngrok import ngrok
     tunnel = ngrok.connect('http://localhost:5000')
+    if tunnel.public_url is None:
+        raise RuntimeError('Ngrok tunnel public URL is None')
     tunnel_hook_url = tunnel.public_url + settings.TELEGRAMV3_WEBHOOK_ADDRESS
 
     # Set up tg webhook
