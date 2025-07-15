@@ -4,6 +4,7 @@ from app.lib.utils.DTOs import CalculationDTO
 from textwrap import dedent
 from app.lib.calc.place import Place
 from app.lib.calc.place import LatLngAble
+from typing import Optional
 
 SMS_TEXT_REDIAL_PHONE = settings.SMS_TEXT_REDIAL_PHONE
 
@@ -67,8 +68,12 @@ def generate_place_chain(*places: Place) -> str:
     return ' - '.join(place.name for place in places)
 
 
-def compose_telegram_message_text(intent: str, calculation: CalculationDTO,
-                                  url: str, ip: str, phone_num: str = None) -> str:
+def compose_telegram_message_text(
+    intent: str, 
+    calculation: CalculationDTO,
+    url: str, 
+    ip: str, 
+    phone_num: Optional[str] = None) -> str:
     """
     Compose a Telegram message based on CalculationDTO and some other data
     :param intent: (str) Intent of the original request ('calc', 'callback' or 'acquire')
