@@ -127,15 +127,15 @@ def calculate():
     request_dto = request_processor.process(request)
     logger.debug('Acquired request has been processed. Got Request DTO')
 
-    # Step 2: Perform the calculationn
+    # Step 2: Perform the calculation
     calculation_dto = calc_itself.process_request(request_dto)
     logger.debug('Calculation was succesfully performed. Got Calculation DTO')
 
-    # Step 3: Log request and calculation
+    # Step 3: Log calculation
     with QUERY_LOGGER as qlogger:
-        qlogger.log_request_response(query=json.dumps(request_dto.to_dict(), ensure_ascii=False),
-                                     response=json.dumps([tg_msg, 'nosms'], ensure_ascii=False),
-                                     phone_number=request_dto.phone_num)
+        # qlogger.log_request_response(query=json.dumps(request_dto.to_dict(), ensure_ascii=False),
+        #                              response=json.dumps([tg_msg, 'nosms'], ensure_ascii=False),
+        #                              phone_number=request_dto.phone_num)
         digest = qlogger.log_calcultaion(request_dto, calculation_dto)
     logger.debug('Query Logger has succesfully logged calculation')
 
@@ -153,10 +153,14 @@ def calculate():
         tg_msg = '*BLACKLISTED*\n\n'+tg_msg
 
     # Step 6: Notify managers via Telegram Bot
-    tg_interface_manager.get_interface().send_silent(tg_msg)
+    chat_id, message_id = tg_interface_manager.get_interface().send_silent(tg_msg)
     logger.debug('Telegram message has been sent to silent chat')
 
-    # Step 7: Response to frontend
+    # Step 7: Log tg_message
+    with QUERY_LOGGER as qlogger:
+        qlogger.log_tg_message(chat_id, message_id, tg_msg)
+
+    # Step 8: Response to frontend
     return __gen_response(200, 'WORKLOAD', workload={
         'calculation_id': digest,
         'calculation_dto': dataclasses.asdict(calculation_dto)

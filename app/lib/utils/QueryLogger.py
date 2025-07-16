@@ -47,11 +47,21 @@ class QueryLogger:
         self.cursor.executescript(script)
         self.conn.commit()
 
+    def _ensure_tg_message_exists(self):
+        with open(SQL_PATH/'tg_message_create_table.sql', encoding='utf8') as f:
+            script = f.read()
+        self.cursor.executescript(script)
+        self.conn.commit()
+
+
     def __enter__(self):
         self.conn = sqlite3.connect(self.DB_LOCATION)
         self.conn.row_factory = sqlite3.Row
         self.cursor = self.conn.cursor()
+        self.cursor.execute("PRAGMA foreign_keys = ON;")
+        self._ensure_queries_exists()
         self._ensure_calculation_exists()
+        self._ensure_tg_message_exists()
         return self
 
     def __exit__(self, exc_type, exc_value, tb):
@@ -275,5 +285,56 @@ class QueryLogger:
             locale=row["calculation_locale"],
         )
 
+    def log_tg_message(self,
+                       chat_id: int,
+                       message_id: int,
+                       calculation_id: str,
+                       msg_body: str) -> None:
+        """
+        Store a message to the database. Returns None if inserting OK.
+        :param chat_id: int, Telegram chat ID.
+        :param message_id: int, Telegram message ID.
+        :param calculation_id: str, 40 char sha1 hex digest, foreign key
+        :param msg_body: str, Message text
+        :return: None if inserting OK
+        :raises: RuntimeError if inserting failed
+        """
+        try:
+            with open(SQL_PATH / 'tg_message_insert_into.sql', encoding='utf-8') as f:
+                sql = f.read()
+            self.cursor.execute(sql, {
+                'chat_id': chat_id,
+                'message_id' : message_id,
+                'calculation_id' : calculation_id,
+                'message_body': msg_body,
+            })
+            self.conn.commit()
+            return None
+        except sqlite3.DatabaseError as e:
+            logger.error(f'sqlite3.DatabaseError at QueryLogger\n{traceback.format_exc()}')
+            tgapi3.tg_interface_manager.get_interface().send_developer('sqlite3.DatabaseError at QueryLogger', e)
+            raise RuntimeError('Cannot write to the database') from e
+
+    def get_tg_message(self, chat_id: int, message_id: int) -> Optional[tuple[str, str]]:
+        """
+        Retrieve a message from the database by chat_id and message_id.
+        :param chat_id: int, Telegram chat ID.
+        :param message_id: int, Telegram message ID.
+        :return: Tuple (calculation_id, message_body) if found, else None.
+        :raises: RuntimeError if query fails
+        """
+        try:
+            with open(SQL_PATH / 'tg_message_select_one.sql', encoding='utf-8') as f:
+                sql = f.read()
+            self.cursor.execute(sql, {
+                'chat_id': chat_id,
+                'message_id': message_id
+            })
+            result = self.cursor.fetchone()
+            return result['calculation_id'], result['message_body'] if result else None
+        except sqlite3.DatabaseError as e:
+            logger.error(f'sqlite3.DatabaseError at QueryLogger\n{traceback.format_exc()}')
+            tgapi3.tg_interface_manager.get_interface().send_developer('sqlite3.DatabaseError at QueryLogger', e)
+            raise RuntimeError('Cannot read from the database') from e
 
 QUERY_LOGGER = QueryLogger(db_loc=settings.QUERYLOG_DB_LOC)
