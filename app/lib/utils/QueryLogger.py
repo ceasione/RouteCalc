@@ -7,7 +7,6 @@ import traceback
 from typing import Optional
 import sqlite3
 from app import settings
-import app.lib.apis.telegramapi2 as tgapi2
 from app.lib.utils.logger import logger
 from app.lib.utils import compositor
 from app.lib.utils.DTOs import RequestDTO, CalculationDTO
@@ -195,7 +194,7 @@ class QueryLogger:
             return digest
         except sqlite3.DatabaseError as e:
             logger.error(f'sqlite3.DatabaseError at QueryLogger\n{traceback.format_exc()}')
-            tgapi2.send_developer('sqlite3.DatabaseError at QueryLogger', e)
+            tgapi3.tg_interface_manager.get_interface().send_developer('sqlite3.DatabaseError at QueryLogger', e)
             raise RuntimeError('Cannot produce digest due to DB error') from e
 
     def get_request_dto(self, digest: str) -> Optional[RequestDTO]:
