@@ -1,6 +1,6 @@
 
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Optional, Tuple
 from app.lib.utils.logger import logger
 from datetime import datetime
 import traceback
@@ -129,7 +129,7 @@ class Telegramv3Interface:
                       chat_id: int,
                       text: str,
                       parse_mode: Optional[str] = 'MARKDOWN'
-                      ) -> Optional[(int, int)]:
+                      ) -> Optional[Tuple[int, int]]:
         """
         Send a message to given chat using Markdown by default.
         Return a tuple with chat_id, message_id or None if the message was not sent.
@@ -155,7 +155,7 @@ class Telegramv3Interface:
         update = Update.de_json(json, self.bot)
         self.dispatcher.process_update(update)
 
-    def send_silent(self, msg: str) -> Optional[(int, int)]:
+    def send_silent(self, msg: str) -> Optional[Tuple[int, int]]:
         """
         Sends msg to silent chat and return message id
         :param msg: Message in markdown
@@ -163,7 +163,7 @@ class Telegramv3Interface:
         """
         return self._send_message(self.silent_chat, msg)
 
-    def send_loud(self, msg: str) -> Optional[(int, int)]:
+    def send_loud(self, msg: str) -> Optional[Tuple[int, int]]:
         """
         Sends msg to loud chat and return message id
         :param msg: Message in markdown
@@ -178,7 +178,7 @@ class Telegramv3Interface:
                 type(cause), cause, cause.__traceback__))
 
     def send_developer(self, msg: str, cause: Optional[Exception] = None) \
-            -> Optional[(int, int)]:
+            -> Optional[Tuple[int, int]]:
 
         timestamp = datetime.now().isoformat()
         trace = 'No Exception was provided'
