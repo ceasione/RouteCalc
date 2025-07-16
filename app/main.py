@@ -158,7 +158,7 @@ def calculate():
 
     # Step 7: Log tg_message
     with QUERY_LOGGER as qlogger:
-        qlogger.log_tg_message(chat_id, message_id, tg_msg)
+        qlogger.log_tg_message(chat_id, message_id, digest, tg_msg)
 
     # Step 8: Response to frontend
     return __gen_response(200, 'WORKLOAD', workload={
