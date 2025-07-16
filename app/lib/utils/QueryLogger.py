@@ -52,6 +52,11 @@ class QueryLogger:
         self.cursor.executescript(script)
         self.conn.commit()
 
+    def _ensure_sample_exists(self):
+        with open(SQL_PATH/'sample_create_table.sql', encoding='utf8') as f:
+            script = f.read()
+        self.cursor.executescript(script)
+        self.conn.commit()
 
     def __enter__(self):
         self.conn = sqlite3.connect(self.DB_LOCATION)
@@ -61,6 +66,7 @@ class QueryLogger:
         self._ensure_queries_exists()
         self._ensure_calculation_exists()
         self._ensure_tg_message_exists()
+        self._ensure_sample_exists()
         return self
 
     def __exit__(self, exc_type, exc_value, tb):
@@ -335,5 +341,23 @@ class QueryLogger:
             logger.error(f'sqlite3.DatabaseError at QueryLogger\n{traceback.format_exc()}')
             tgapi3.tg_interface_manager.get_interface().send_developer('sqlite3.DatabaseError at QueryLogger', e)
             raise RuntimeError('Cannot read from the database') from e
+
+    def sample_upsert(self, calculation_id: str, desired_value: float) -> None:
+        """
+        Inserts a sample to the database. Returns None if inserting OK.
+        As calculation_id has UNIQUE constraint, method will update existing sample
+        if it already exists.
+        :param calculation_id: str, 40 char sha1 hex digest, foreign key
+        :param desired_value: float, the model expected output value
+        :return: returns None if inserting OK
+        """
+        with open(SQL_PATH/'calculation_select_c_from.sql', encoding='utf-8') as f:
+            script = f.read()
+        self.cursor.execute(script, {
+            'calculation_id': calculation_id,
+            'desired_value': desired_value,
+        })
+        self.conn.commit()
+
 
 QUERY_LOGGER = QueryLogger(db_loc=settings.QUERYLOG_DB_LOC)
