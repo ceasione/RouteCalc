@@ -7,7 +7,7 @@ import traceback
 from queue import Queue
 from app import settings
 import telegram
-from telegram import Update
+from telegram import Update, TelegramError
 from telegram.ext import Dispatcher, MessageHandler, Filters, CallbackContext
 import secrets
 
@@ -110,6 +110,7 @@ class Telegramv3Interface:
             )
             if on_subscription and is_reply_message:
                 logger.debug(f'RepliedTextualMessage is going to handle this update')
+                # ---> Handler here <---
             elif self._next_handler:
                 logger.debug(f'RepliedTextualMessage passing update to next handler')
                 self._next_handler.handle(update)
@@ -124,19 +125,37 @@ class Telegramv3Interface:
         chain_of_responsibility = self.RepliedTextualMessage(self.chat_subscription)
         chain_of_responsibility.handle(update)
 
-    def _send_message(self, chat_id: int, text: str, parse_mode: Optional[str] = 'MARKDOWN'):
-        msg = self.bot.send_message(
-            chat_id=chat_id,
-            text=text,
-            parse_mode=parse_mode
-        )
-        return msg.message_id
+    def _send_message(self,
+                      chat_id: int,
+                      text: str,
+                      parse_mode: Optional[str] = 'MARKDOWN'
+                      ) -> Optional[(int, int)]:
+        """
+        Send a message to given chat using Markdown by default.
+        Return a tuple with chat_id, message_id or None if the message was not sent.
+        :param chat_id: int, Telegram chat ID.
+        :param text: str, Message text.
+        :param parse_mode: Send Markdown or HTML. See the constants in :class:`telegram.ParseMode`
+        for the available modes.
+        :return: tuple with chat_id, message_id or None
+        """
+        try:
+            msg = self.bot.send_message(
+                chat_id=chat_id,
+                text=text,
+                parse_mode=parse_mode,
+                disable_web_page_preview=True
+            )
+            if isinstance(msg, telegram.Message):
+                return chat_id, msg.message_id
+        except TelegramError:
+            logger.error('Message was not sent to Telegram chat')
 
     def process_webhook(self, json):
         update = Update.de_json(json, self.bot)
         self.dispatcher.process_update(update)
 
-    def send_silent(self, msg: str) -> int:
+    def send_silent(self, msg: str) -> Optional[(int, int)]:
         """
         Sends msg to silent chat and return message id
         :param msg: Message in markdown
@@ -144,7 +163,7 @@ class Telegramv3Interface:
         """
         return self._send_message(self.silent_chat, msg)
 
-    def send_loud(self, msg: str):
+    def send_loud(self, msg: str) -> Optional[(int, int)]:
         """
         Sends msg to loud chat and return message id
         :param msg: Message in markdown
@@ -152,39 +171,41 @@ class Telegramv3Interface:
         """
         return self._send_message(self.loud_chat, msg)
 
-    def send_developer(self, msg: str, cause: Optional[Exception] = None):
-        try:
-            timestamp = datetime.now().isoformat()
+    @staticmethod
+    def _make_trace(cause: Exception) -> str:
+        return ''.join(
+            traceback.format_exception(
+                type(cause), cause, cause.__traceback__))
 
-            txt_cause = 'No exception provided'
-            trace = 'No exception provided'
-            if cause is not None:
-                txt_cause = str(cause)
-                trace = str().join(traceback.format_exception(
-                    type(cause), cause, cause.__traceback__
-                    )
-                )
-            message = f"{timestamp}:\n\n" \
-                      f"Message: {msg}\n\n" \
-                      f"Cause: {txt_cause}\n\n" \
-                      f"Traceback: '{trace}'\n"
-            self._send_message(self.dev_chat, message, parse_mode=None)
-            logger.error(f"DEV TG report has been sent: {msg}\n\n"
-                         f"Cause: {txt_cause}\n\n"
-                         f"Traceback: {trace}")
-        except Exception as e:
-            logger.error(f"Failed to send dev tg report\n\n"
-                         f"{str(e)}\n\n"
-                         f"{traceback.format_exc()}\n\n"
-                         f"{msg}")
+    def send_developer(self, msg: str, cause: Optional[Exception] = None) \
+            -> Optional[(int, int)]:
+
+        timestamp = datetime.now().isoformat()
+        trace = 'No Exception was provided'
+        if cause:
+            trace = self._make_trace(cause)
+
+        text = f"{timestamp}:\n\n" \
+                  f"Message: {msg}\n\n" \
+                  f"Cause: {str(cause)}\n\n" \
+                  f"Traceback: '{trace}'\n"
+        chat_id, message_id = self._send_message(self.dev_chat, text, parse_mode=None)
+        logger.error(f"DEV TG report has been sent: {msg}\n\n"
+                     f"Cause: {str(cause)}\n\n"
+                     f"Traceback: {trace}\n\n"
+                     f"Chat ID: {chat_id}"
+                     f"Message ID: {message_id}\n\n")
+        return chat_id, message_id
 
 
-KEY = settings.TELEGRAMV3_BOT_APIKEY
-BASE = settings.TELEGRAMV3_BASE_APIURL
-TAIL = settings.TELEGRAMV3_WEBHOOK_ADDRESS
+
+
 
 
 class TGInterfaceManager:
+    KEY = settings.TELEGRAMV3_BOT_APIKEY
+    BASE = settings.TELEGRAMV3_BASE_APIURL
+    TAIL = settings.TELEGRAMV3_WEBHOOK_ADDRESS
 
     def __init__(self):
         self._interface = None
@@ -193,7 +214,7 @@ class TGInterfaceManager:
         if not self._interface:
             self._interface = Telegramv3Interface(
                 botfatherkey=settings.TELEGRAMV3_BOT_APIKEY,
-                webhook_url=BASE+TAIL,
+                webhook_url=self.BASE + self.TAIL,
                 chat_subscription=int(settings.TELEGRAMV3_SILENT_CHAT_ID),
                 silent_chat=int(settings.TELEGRAMV3_SILENT_CHAT_ID),
                 loud_chat=int(settings.TELEGRAMV3_LOUD_CHAT_ID),
