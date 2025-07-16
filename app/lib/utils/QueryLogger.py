@@ -55,9 +55,9 @@ class QueryLogger:
 
     def __enter__(self):
         self.conn = sqlite3.connect(self.DB_LOCATION)
+        self.conn.execute("PRAGMA foreign_keys = ON;")
         self.conn.row_factory = sqlite3.Row
         self.cursor = self.conn.cursor()
-        self.cursor.execute("PRAGMA foreign_keys = ON;")
         self._ensure_queries_exists()
         self._ensure_calculation_exists()
         self._ensure_tg_message_exists()
