@@ -198,10 +198,6 @@ class Telegramv3Interface:
         return chat_id, message_id
 
 
-
-
-
-
 class TGInterfaceManager:
     KEY = settings.TELEGRAMV3_BOT_APIKEY
     BASE = settings.TELEGRAMV3_BASE_APIURL
