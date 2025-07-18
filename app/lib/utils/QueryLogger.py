@@ -357,7 +357,7 @@ class QueryLogger:
         :param desired_value: float, the model expected output value
         :return: returns None if inserting OK
         """
-        with open(SQL_PATH/'calculation_select_c_from.sql', encoding='utf-8') as f:
+        with open(SQL_PATH/'sample_upsert.sql', encoding='utf-8') as f:
             script = f.read()
         self.cursor.execute(script, {
             'calculation_id': calculation_id,
