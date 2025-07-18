@@ -1,5 +1,6 @@
 
-from app.lib.ai.model import PricePredictor, BatchGenerator
+from typing import List
+from app.lib.ai.model import PricePredictor, FinetuneBatch
 from app.lib.utils.QueryLogger import QueryLogger
 
 
