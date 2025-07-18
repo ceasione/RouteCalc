@@ -1,14 +1,20 @@
 
+from app.lib.utils.logger import logger
 from typing import List
 from app.lib.ai.model import PricePredictor, FinetuneBatch
 from app.lib.utils.QueryLogger import QueryLogger
+from app.lib.calc.loadables.vehicles import Vehicles, VEHICLES
 
 
 class Trainer:
 
-    def __init__(self, model: PricePredictor, database: QueryLogger):
+    def __init__(self,
+                 model: PricePredictor,
+                 database: QueryLogger,
+                 vehicles: Vehicles = VEHICLES):
         self.model = model
         self.database = database
+        self.vehicles = vehicles
 
     def _gather_samples(self) -> List[FinetuneBatch.Sample]:
         samples = []
@@ -53,7 +59,12 @@ class Trainer:
             # price with that in available calculation_dto one
             # So we calculate ratio, then taking per_km_price and
             # changing it on the same amount
-            current_dependent_price = dto.price_unstr
+            if dto.is_price_per_ton:
+                current_dependent_price = dto.price_unstr / self.vehicles.get_by_id(
+                    dto.transport_id
+                ).weight_capacity
+            else:
+                current_dependent_price = dto.price_unstr
             ratio = desired_dependent_price / current_dependent_price
             current_price_per_km = dto.real_price
             desired_price_per_km = current_price_per_km * ratio
