@@ -4,7 +4,7 @@ from datetime import datetime
 from pathlib import Path
 import app.lib.apis.telegramapi3 as tgapi3
 import traceback
-from typing import Optional
+from typing import Optional, Tuple, Iterator
 import sqlite3
 from app import settings
 from app.lib.utils.logger import logger
