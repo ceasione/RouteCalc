@@ -365,5 +365,16 @@ class QueryLogger:
         })
         self.conn.commit()
 
+    def select_samples(self) -> Iterator[Tuple[int, int, int, float]]:
+        with open(SQL_PATH / 'sample_select_finetune_batch.sql', encoding='utf-8') as f:
+            sql = f.read()
+        self.cursor.execute(sql)
+
+        for row in self.cursor.fetchall():
+            yield int(row['calculation_starting_depot_id']), \
+                  int(row['calculation_ending_depot_id']), \
+                  int(row['calculation_transport_id']), \
+                  float(row['desired_value'])
+
 
 QUERY_LOGGER = QueryLogger(db_loc=settings.QUERYLOG_DB_LOC)
