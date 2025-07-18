@@ -46,7 +46,10 @@ def calculation_dto():
         pfactor_departure="none",
         pfactor_arrival="none",
         pfactor_distance="road",
-        locale="uk_UA"
+        locale="uk_UA",
+        real_price=54.52,
+        starting_depot_id=12,
+        ending_depot_id=76,
     )
 
 
@@ -131,7 +134,10 @@ def test_get_calculation_dto(mock_connect, mock_format_cost, calculation_dto):
         "calculation_pfactor_departure": calculation_dto.pfactor_departure,
         "calculation_pfactor_arrival": calculation_dto.pfactor_arrival,
         "calculation_pfactor_distance": calculation_dto.pfactor_distance,
-        "calculation_locale": calculation_dto.locale
+        "calculation_locale": calculation_dto.locale,
+        "calculation_real_price": calculation_dto.real_price,
+        "calculation_starting_depot_id": calculation_dto.starting_depot_id,
+        "calculation_ending_depot_id": calculation_dto.ending_depot_id
     }
 
     mock_cursor = MagicMock()

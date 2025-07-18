@@ -36,7 +36,7 @@ class Trainer:
             # changing it on the same amount
             current_dependent_price = dto.price_unstr
             ratio = desired_dependent_price / current_dependent_price
-            current_price_per_km = dto.price_per_km_unstr
+            current_price_per_km = dto.real_price
             desired_price_per_km = current_price_per_km * ratio
 
             db.sample_upsert(calculation_id, desired_price_per_km)

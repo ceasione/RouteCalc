@@ -47,7 +47,10 @@ CREATE TABLE IF NOT EXISTS calculation (
     calculation_pfactor_departure TEXT,
     calculation_pfactor_arrival TEXT,
     calculation_pfactor_distance TEXT,
-    calculation_locale CHAR(5)
+    calculation_locale CHAR(5),
+    calculation_real_price REAL NOT NULL,
+    calculation_starting_depot_id INTEGER NOT NULL,
+    calculation_ending_depot_id INTEGER NOT NULL
 );
 
 -- Redundant with PRIMARY KEY, but added for visual clarity

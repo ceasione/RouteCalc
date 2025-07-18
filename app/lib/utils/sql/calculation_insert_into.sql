@@ -45,7 +45,10 @@ INSERT INTO calculation (
     calculation_pfactor_departure,
     calculation_pfactor_arrival,
     calculation_pfactor_distance,
-    calculation_locale
+    calculation_locale,
+    calculation_real_price,
+    calculation_starting_depot_id,
+    calculation_ending_depot_id
 )
 VALUES (
     :calculation_id,
@@ -93,5 +96,8 @@ VALUES (
     :calculation_pfactor_departure,
     :calculation_pfactor_arrival,
     :calculation_pfactor_distance,
-    :calculation_locale
+    :calculation_locale,
+    :calculation_real_price,
+    :calculation_starting_depot_id,
+    :calculation_ending_depot_id
 );

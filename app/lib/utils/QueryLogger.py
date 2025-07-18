@@ -193,6 +193,9 @@ class QueryLogger:
                 'calculation_pfactor_arrival': calculation_dto.pfactor_arrival,
                 'calculation_pfactor_distance': calculation_dto.pfactor_distance,
                 'calculation_locale': calculation_dto.locale,
+                'calculation_real_price': calculation_dto.real_price,
+                'calculation_starting_depot_id': calculation_dto.starting_depot_id,
+                'calculation_ending_depot_id': calculation_dto.ending_depot_id
             }
 
             self.cursor.execute(script, values)
@@ -288,6 +291,9 @@ class QueryLogger:
             pfactor_arrival=row["calculation_pfactor_arrival"],
             pfactor_distance=row["calculation_pfactor_distance"],
             locale=row["calculation_locale"],
+            real_price=row["calculation_real_price"],
+            starting_depot_id=row["calculation_starting_depot_id"],
+            ending_depot_id=row["calculation_ending_depot_id"],
         )
 
     def log_tg_message(self,

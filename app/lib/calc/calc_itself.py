@@ -310,4 +310,8 @@ def process_request(request: RequestDTO) -> CalculationDTO:
                           pfactor_departure=str(starting_depot.departure_ratio),
                           pfactor_arrival=str(ending_depot.arrival_ratio),
                           pfactor_distance=str(0.0),
-                          locale=request.locale)
+                          locale=request.locale,
+                          real_price=price,
+                          starting_depot_id=starting_depot.id,
+                          ending_depot_id=ending_depot.id
+                          )

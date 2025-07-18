@@ -33,6 +33,9 @@ class CalculationDTO:
     pfactor_arrival: str
     pfactor_distance: str
     locale: str
+    real_price: float
+    starting_depot_id: int
+    ending_depot_id: int
 
     @classmethod
     def from_dict(cls, dct):
