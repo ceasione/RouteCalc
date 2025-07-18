@@ -279,17 +279,6 @@ def page_not_found(_e: Exception):
 
 
 def create_app():
-    hook_url = settings.TELEGRAMV3_BASE_APIURL + settings.TELEGRAMV3_WEBHOOK_ADDRESS
-    tg_interface_manager.set_interface(
-        Telegramv3Interface(
-            botfatherkey=settings.TELEGRAMV3_BOT_APIKEY,
-            webhook_url=hook_url,
-            chat_subscription=int(settings.TELEGRAMV3_SILENT_CHAT_ID),
-            silent_chat=int(settings.TELEGRAMV3_SILENT_CHAT_ID),
-            loud_chat=int(settings.TELEGRAMV3_LOUD_CHAT_ID),
-            dev_chat=int(settings.TELEGRAMV3_DEVELOPER_CHAT_ID)
-        )
-    )
     return app
 
 
