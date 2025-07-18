@@ -25,20 +25,14 @@ class Trainer:
         return samples
 
     def train(self):
-        # 1. Gather samples
 
-        # 2. Make a Batch
         batch = FinetuneBatch.make_finetune_batch(self._gather_samples())
 
-        # 3. Guess affordable loss value
-        affordable_loss_value = 1.0  # A point to guess later
+        loss = self.model.train(batch)[0]
 
-        # 4. Loop
-        #     4.1. Exit if loss is less that affordable
-        #     4.2. Fit model a little
-        loss = 9999.0
-        while loss > affordable_loss_value:
-            loss = self.model.train(batch)
+        logger.debug(f'Loss function: {loss}')
+
+        # TODO Save model weights
 
     def add_sample(self, calculation_id: str, desired_dependent_price: float) -> None:
         """

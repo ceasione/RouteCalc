@@ -7,6 +7,7 @@ from keras.api.utils import PyDataset
 from keras import layers, models, Input
 from keras.api.optimizers import Adam
 from keras.api.models import load_model
+from tensorflow.keras.callbacks import EarlyStopping
 from app import settings
 from app.lib.calc.loadables.depotpark import Depot
 from app.lib.calc.loadables.vehicles import Vehicle
@@ -125,7 +126,19 @@ class PricePredictor:
         return array
 
     def train(self, dataset: PyDataset):
-        history = self.model.fit(dataset, epochs=1, verbose=1)
+
+        early_stop = EarlyStopping(
+            monitor='loss',
+            patience=5,
+            min_delta=0.01,
+            restore_best_weights=True)
+
+        history = self.model.fit(
+            dataset,
+            epochs=100,
+            verbose=1,
+            callbacks=[early_stop]
+        )
 
         # def plot(_history, title='Loss func'):
         #     plt.plot(_history.history['loss'], label='Loss')
