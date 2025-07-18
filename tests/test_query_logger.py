@@ -63,7 +63,7 @@ def test_log_calculation(mock_digest, mock_connect, request_dto, calculation_dto
 
     logger = QueryLogger()
     with logger:
-        digest = logger.log_calcultaion(request_dto, calculation_dto)
+        digest = logger.log_calculation(request_dto, calculation_dto)
 
     mock_cursor.execute.assert_called_once()
     assert mock_conn.commit.call_count == 4

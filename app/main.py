@@ -136,7 +136,7 @@ def calculate():
         # qlogger.log_request_response(query=json.dumps(request_dto.to_dict(), ensure_ascii=False),
         #                              response=json.dumps([tg_msg, 'nosms'], ensure_ascii=False),
         #                              phone_number=request_dto.phone_num)
-        digest = qlogger.log_calcultaion(request_dto, calculation_dto)
+        digest = qlogger.log_calculation(request_dto, calculation_dto)
     logger.debug('Query Logger has succesfully logged calculation')
 
     # Step 4: Prepare TG message

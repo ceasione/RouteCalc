@@ -125,7 +125,7 @@ class QueryLogger:
         random_bytes = os.urandom(20)  # 20 random bytes = 160 bits (SHA-1 size)
         return hashlib.sha1(random_bytes).hexdigest()
 
-    def log_calcultaion(self, request_dto: RequestDTO, calculation_dto: CalculationDTO) -> str:
+    def log_calculation(self, request_dto: RequestDTO, calculation_dto: CalculationDTO) -> str:
         """
         Inserts data from the request_dto and calculation_dto to NEW table 'calculation'
         Returns a unique digest by which a record can be extracted from the database
