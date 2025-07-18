@@ -12,7 +12,7 @@ def calculation_dto(fixture_request_dto):
 def test_db_read_write(fixture_request_dto, fixture_calculation_dto):
     qlogger = QueryLogger(':memory:')  # New in memory database instance
     with qlogger as ql:
-        digest = ql.log_calcultaion(request_dto=fixture_request_dto, calculation_dto=fixture_calculation_dto)
+        digest = ql.log_calculation(request_dto=fixture_request_dto, calculation_dto=fixture_calculation_dto)
         assert isinstance(digest, str)
         assert len(digest) == 40  # sha1 hexdigest()
         assert fixture_request_dto == ql.get_request_dto(digest)
