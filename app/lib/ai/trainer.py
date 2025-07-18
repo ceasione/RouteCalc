@@ -9,8 +9,19 @@ class Trainer:
         self.model = model
         self.database = database
 
-    def _gather_samples(self):
-        ...
+    def _gather_samples(self) -> List[FinetuneBatch.Sample]:
+        samples = []
+        with self.database as db:
+            for row in db.select_samples():
+                samples.append(
+                    FinetuneBatch.Sample(
+                        depot_from_id=row[0],
+                        depot_to_id=row[1],
+                        vehicle_id=row[2],
+                        desired_value=row[3],
+                    )
+                )
+        return samples
 
     def train(self):
         ...
