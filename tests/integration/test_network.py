@@ -48,10 +48,14 @@ def test_calculate(flask_request_calculate, headers):
     response = requests.post(url, data.encode('utf-8'), headers=headers).json()
     assert response.get('status') == 'WORKLOAD'
     workload = response.get('workload')
-    assert isinstance(workload.get('place_a_name'), str)
-    assert isinstance(workload.get('place_b_name'), str)
-    assert float(workload.get('distance')) > 0.0
-    assert float(workload.get('price').replace(' ', '')) > 0.0
+    calculation_id = workload.get('calculation_id')
+    assert isinstance(calculation_id, str)
+    assert len(calculation_id) == 40
+    calculation_dto = workload.get('calculation_dto')
+    assert isinstance(calculation_dto.get('place_a_name'), str)
+    assert isinstance(calculation_dto.get('place_b_name'), str)
+    assert float(calculation_dto.get('distance')) > 0.0
+    assert float(calculation_dto.get('price').replace(' ', '')) > 0.0
 
 
 @pytest.mark.network
