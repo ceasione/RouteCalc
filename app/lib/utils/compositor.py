@@ -68,80 +68,72 @@ def generate_place_chain(*places: Place) -> str:
     return ' - '.join(place.name for place in places)
 
 
-def compose_telegram_message_text(
-    intent: str, 
-    calculation: CalculationDTO,
-    url: str, 
-    ip: str, 
-    calculation_id: str,
-    phone_num: Optional[str] = None) -> str:
-    """
-    Compose a Telegram message based on CalculationDTO and some other data
-    :param intent: (str) Intent of the original request ('calc', 'callback' or 'acquire')
-    :param calculation: (CalculationDTO) dataclass object containing data.
-    :param url: (str) Source page URL
-    :param ip: (str) Client IP address
-    :param calculation_id: (str) Calculation ID - calculation digest
-    :param phone_num: (str, optional) number of the client
-    :return: (str) A formatted Telegram message.
+class TelegramMessageComposer:
 
-    Looks like this:
-        'Просчет без номера
-        Lang: ru
-        Page URL: https://intersmartgroup.com/
+    def __init__(
+        self,
+        intent: str,
+        url: str,
+        ip: str,
+        calculation: Optional[CalculationDTO] = None,
+        phone_num: Optional[str] = None,
+        blacklisted: bool = False,
+    ):
+        self.intent = intent
+        self.calculation = calculation
+        self.url = url
+        self.ip = ip
+        self.phone_num = phone_num
+        self.blacklisted = blacklisted
 
-        IP: 159.224.254.148 (http://ip-api.com/line/159.224.254.148)
+    def __str__(self):
 
-        Дніпро - Високе
+        if self.calculation is None:
+            raise ValueError('Calculation DTO is required to generate telegram msg')
 
-        Google Maps (https://www.google.com.ua/maps/dir/48.464717,35.046183/50.3302582,34.2722895/)
+        blacklisted = '*BLACKLISTED*' if self.blacklisted else ''
 
-        Расчет: Дніпро - Високе
-        Расстояние: 386.9 км
-        Google Maps (https://www.google.com.ua/maps/dir/48.464717,35.046183/50.3302582,34.2722895/)
+        intents = {
+            'calc': 'Просчет',
+            'callback': 'Клиент нажал Перезвонить',
+            'acquire': 'Просчет без номера'}
 
-        Авто: Тент 20
-        Цена: 19 800.00 UAH, (51.15 за км):
-          Vehicle: 45.0
-          Departure: 0.9
-          Arrival: 1.2
-          Distance: 1.255
-          Currency: 1.0'
-    """
-    intents = {'calc': 'Просчет', 'callback': 'Клиент нажал Перезвонить', 'acquire': 'Просчет без номера'}
-    intent_text = intents.get(intent, 'Неизвестный интент')
+        intent_text = intents.get(self.intent, 'Unknown intent')
 
-    price_value = calculation.price_per_ton if calculation.is_price_per_ton else calculation.price
-    price_tag = 'за тонну' if calculation.is_price_per_ton else ''
-    price = f'{price_value} {calculation.currency} {price_tag}'.strip()
+        if self.calculation.is_price_per_ton:
+            price_value = self.calculation.price_per_ton
+            price_tag = 'за тонну'
+        else:
+            price_value = self.calculation.price
+            price_tag = ''
 
-    phone = f'Телефон клиента: +{phone_num}' if phone_num else ''
+        price = f'{price_value} {self.calculation.currency} {price_tag}'.strip()
 
-    fstring = f'''
-        {intent_text}
-        Lang: {"ru" if calculation.locale == 'ru_UA' else "ua"}, [id]({calculation_id})
-        Page URL: `{url}`
-        
-        IP: [{ip}](http://ip-api.com/line/{ip})
-        
-        {calculation.place_a_name} - {calculation.place_b_name}
-        
-        [Google Maps]({calculation.map_link})
-        
-        Расчет: *{calculation.place_chain}*
-        Расстояние: {calculation.distance} км
-        [Google Maps]({calculation.chain_map_link})
-        
-        Авто: {calculation.transport_name}
-        Цена: {price}, ({calculation.price_per_km} за км):
-          Vehicle: {calculation.pfactor_vehicle}
-          Departure: {calculation.pfactor_departure}
-          Arrival: {calculation.pfactor_arrival}
-          Distance: {calculation.pfactor_distance}
-          Currency: {calculation.currency_rate}
-        {phone}
-    '''
-    return dedent(fstring).strip()
+        phone = f'Телефон клиента: +{self.phone_num}' if self.phone_num else ''
+
+        fstring = f'''
+            {blacklisted}
+            
+            {intent_text}
+            Lang: {"ru" if self.calculation.locale == 'ru_UA' else "ua"}
+            Page URL: `{self.url}`
+
+            IP: [{self.ip}](http://ip-api.com/line/{self.ip})
+
+            {self.calculation.place_a_name} - {self.calculation.place_b_name}
+
+            [Google Maps]({self.calculation.map_link})
+
+            Расчет: *{self.calculation.place_chain}*
+            Расстояние: {self.calculation.distance} км
+            [Google Maps]({self.calculation.chain_map_link})
+
+            Авто: {self.calculation.transport_name}
+            Цена: {price}, ({self.calculation.price_per_km} за км):
+            Currency: {self.calculation.currency_rate}
+            {phone}
+        '''
+        return dedent(fstring).strip()
 
 
 def round_cost(cost: float) -> float:

@@ -1,6 +1,7 @@
 
 from abc import ABC, abstractmethod
 from typing import Optional, Tuple
+from app.lib.utils.compositor import TelegramMessageComposer
 from app.lib.utils.logger import logger
 from datetime import datetime
 import traceback

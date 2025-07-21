@@ -7,6 +7,7 @@ from flask import request
 import json
 from flask import Response
 from app.lib.utils import compositor
+from app.lib.utils.compositor import TelegramMessageComposer
 from app.lib.calc.loadables import vehicles
 from app.lib.apis import smsapi, telegramapi3
 from app.lib.apis.telegramapi3 import tg_interface_manager, Telegramv3Interface
@@ -140,25 +141,26 @@ def calculate():
     logger.debug('Query Logger has succesfully logged calculation')
 
     # Step 4: Prepare TG message
-    tg_msg = compositor.compose_telegram_message_text(
+    tg_composer = TelegramMessageComposer(
         intent=request_dto.intent,
         calculation=calculation_dto,
         url=request_dto.url,
         ip=request_dto.ip,
-        calculation_id=digest,
-        phone_num=request_dto.phone_num)
+        phone_num=request_dto.phone_num,
+        blacklisted=False
+    )
 
     # Step 5: Check if IP blacklisted
     if BLACKLIST.check(request_dto.ip):
-        tg_msg = '*BLACKLISTED*\n\n'+tg_msg
+        tg_composer.blacklisted = True
 
     # Step 6: Notify managers via Telegram Bot
-    chat_id, message_id = tg_interface_manager.get_interface().send_silent(tg_msg)
+    chat_id, message_id = tg_interface_manager.get_interface().send_silent(str(tg_composer))
     logger.debug('Telegram message has been sent to silent chat')
 
     # Step 7: Log tg_message
     with QUERY_LOGGER as qlogger:
-        qlogger.log_tg_message(chat_id, message_id, digest, tg_msg)
+        qlogger.log_tg_message(chat_id, message_id, digest, tg_composer)
 
     # Step 8: Response to frontend
     return __gen_response(200, 'WORKLOAD', workload={
@@ -192,13 +194,15 @@ def submit_new():
     ip = request.remote_addr
 
     # Step 2 Prepare TG and SMS message
-    sms_msg = compositor.make_sms_text(dto)
-    tg_msg = compositor.compose_telegram_message_text(
+    sms_msg = compositor.make_sms_text(calculation_dto)
+
+    tg_composer = TelegramMessageComposer(
         intent='callback',
-        calculation=dto,
-        url=request.json['url'],
+        url=referrer,
         ip=ip,
-        phone_num=num)
+        calculation=calculation_dto,
+        phone_num=num
+    )
 
     # Step 3: Log request and calculation
     with QUERY_LOGGER as qlogger:
@@ -209,14 +213,19 @@ def submit_new():
     # Step 4: Check for blacklist and make notifications
     if not BLACKLIST.check(num, ip):
         # Not blacklisted -> Send TG message to managers and SMS to client
-        tg_interface_manager.get_interface().send_loud(tg_msg)
+        chat_id, message_id = tg_interface_manager.get_interface().send_loud(str(tg_composer))
         smsapi.send_sms(num, sms_msg)
     else:
         # Blacklisted -> Send modified TG message to managers only -> Spreading blacklist by mapping num and ip
         BLACKLIST.spread(num, ip)
-        tg_interface_manager.get_interface().send_loud('*BLACKLISTED*\n\n'+tg_msg)
+        tg_composer.blacklisted = True
+        chat_id, message_id = tg_interface_manager.get_interface().send_loud(str(tg_composer))
 
-    # Step 5: Return resopnse to frontend
+    # Step 4: Log tg_message
+    with QUERY_LOGGER as qlogger:
+        qlogger.log_tg_message(chat_id, message_id, calculation_id, tg_composer)
+
+    # Step 5: Return response to frontend
     return __gen_response(200, 'CALLBACK_SCHEDULED')
 
 

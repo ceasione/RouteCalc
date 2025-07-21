@@ -12,6 +12,7 @@ from app.lib.utils import compositor
 from app.lib.utils.DTOs import RequestDTO, CalculationDTO
 from app.lib.calc.place import Place
 from app.lib.calc.loadables.vehicles import VEHICLES
+from app.lib.utils.compositor import TelegramMessageComposer
 
 
 SQL_PATH = Path.cwd()/Path('app/lib/utils/sql')
@@ -300,13 +301,13 @@ class QueryLogger:
                        chat_id: int,
                        message_id: int,
                        calculation_id: str,
-                       msg_body: str) -> None:
+                       composer: TelegramMessageComposer) -> None:
         """
         Store a message to the database. Returns None if inserting OK.
         :param chat_id: int, Telegram chat ID.
         :param message_id: int, Telegram message ID.
         :param calculation_id: str, 40 char sha1 hex digest, foreign key
-        :param msg_body: str, Message text
+        :param composer: TelegramMessageComposer, message composer instance
         :return: None if inserting OK
         :raises: RuntimeError if inserting failed
         """
@@ -317,7 +318,12 @@ class QueryLogger:
                 'chat_id': chat_id,
                 'message_id' : message_id,
                 'calculation_id' : calculation_id,
-                'message_body': msg_body,
+                'message_body': str(composer),
+                'composer_intent': composer.intent,
+                'composer_url': composer.url,
+                'composer_ip': composer.ip,
+                'composer_phone': composer.phone_num,
+                'composer_blacklisted': composer.blacklisted,
             })
             self.conn.commit()
             return None
@@ -326,7 +332,7 @@ class QueryLogger:
             tgapi3.tg_interface_manager.get_interface().send_developer('sqlite3.DatabaseError at QueryLogger', e)
             raise RuntimeError('Cannot write to the database') from e
 
-    def get_tg_message(self, chat_id: int, message_id: int) -> Optional[tuple[str, str]]:
+    def get_tg_message(self, chat_id: int, message_id: int) -> Optional[tuple[str, TelegramMessageComposer]]:
         """
         Retrieve a message from the database by chat_id and message_id.
         :param chat_id: int, Telegram chat ID.
@@ -337,12 +343,28 @@ class QueryLogger:
         try:
             with open(SQL_PATH / 'tg_message_select_one.sql', encoding='utf-8') as f:
                 sql = f.read()
+
             self.cursor.execute(sql, {
                 'chat_id': chat_id,
                 'message_id': message_id
             })
             result = self.cursor.fetchone()
-            return result['calculation_id'], result['message_body'] if result else None
+
+            if result is None:
+                return None
+
+            calculation_id = result['calculation_id']
+            composer = TelegramMessageComposer(
+                intent=result['composer_intent'],
+                url=result['composer_url'],
+                ip=result['composer_ip'],
+                calculation=None,
+                phone_num=result['composer_phone'],
+                blacklisted=bool(result['composer_blacklisted'])
+            )
+
+            return calculation_id, composer
+
         except sqlite3.DatabaseError as e:
             logger.error(f'sqlite3.DatabaseError at QueryLogger\n{traceback.format_exc()}')
             tgapi3.tg_interface_manager.get_interface().send_developer('sqlite3.DatabaseError at QueryLogger', e)
