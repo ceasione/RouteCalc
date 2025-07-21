@@ -253,7 +253,7 @@ class QueryLogger:
         """
         Constructs a new CalculationDTO object from database using digest to lookup or return None
         :param digest: 40 char string
-        :return: RequestDTO instance or None
+        :return: CalculationDTO instance or None
         """
         if not self.conn or not self.cursor:
             raise RuntimeError('QueryLogger must be used within a context manager')
