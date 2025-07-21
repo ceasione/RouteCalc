@@ -11,6 +11,10 @@ import telegram
 from telegram import Update, TelegramError
 from telegram.ext import Dispatcher, MessageHandler, Filters, CallbackContext
 import secrets
+from app.lib.ai.model import PricePredictor, ML_MODEL
+from app.lib.ai.trainer import Trainer
+from app.lib.utils.QueryLogger import QueryLogger, QUERY_LOGGER
+from app.lib.calc import calc_itself
 
 
 class Telegramv3Interface:
@@ -55,7 +59,9 @@ class Telegramv3Interface:
                  chat_subscription: int,
                  silent_chat: int,
                  loud_chat: int,
-                 dev_chat: int):
+                 dev_chat: int,
+                 ml_model: PricePredictor = ML_MODEL,
+                 database: QueryLogger = QUERY_LOGGER):
 
         self.bot = telegram.Bot(token=botfatherkey)
         self.dispatcher = Dispatcher(
@@ -72,6 +78,8 @@ class Telegramv3Interface:
 
         self._own_secret = self._gen_secret()
         self.bot.set_webhook(url=webhook_url, secret_token=self._own_secret)
+        self.ml_model = ml_model
+        self.database = database
 
     @staticmethod
     def _gen_secret() -> str:
@@ -81,9 +89,9 @@ class Telegramv3Interface:
         return self._own_secret
 
     class AbstractHandler(ABC):
-        def __init__(self, chat_subscription: int):
+        def __init__(self, tg_interface: 'Telegramv3Interface'):
             self._next_handler = None
-            self.chat_subscription = chat_subscription
+            self.tg_if = tg_interface
 
         def set_next(self, handler):
             self._next_handler = handler
@@ -93,25 +101,82 @@ class Telegramv3Interface:
         def handle(self, request):
             pass
 
-    class RepliedTextualMessage(AbstractHandler):
+    class TrainOnPrice(AbstractHandler):
         """
-        This handles only messages from subscribed chats that are relpies to other messages
+        This handles only messages from subscribed chats that are
+        relpies to other messages and contains readable price
         """
 
-        def __init__(self, chat_subscription: int):
-            super().__init__(chat_subscription)
+        @staticmethod
+        def _parse_price(message: str) -> Optional[float]:
+            """
+            Parse string to a float or return None if Value Error
+            :param message: message to parse
+            :return: float or None
+            """
+            try:
+                return float(message)
+            except ValueError:
+                logger.info(f'Try to parse desired_price failed: {message}')
+                return None
+
+        def _get_message(self, chat_id: int, message_id: int
+        ) -> Optional[Tuple[str, TelegramMessageComposer]]:
+            with self.tg_if.database as db:
+                stored_message: Tuple[str, TelegramMessageComposer] = db.get_tg_message(chat_id, message_id)
+                # Tuple[str, str]: calculation_id, message_body
+
+            if not stored_message:
+                logger.info(f'No stored tg_message with chat_id={chat_id} and message_id={message_id}')
+                return None
+
+            if not isinstance(stored_message[0], str) or not len(stored_message[0]) == 40:
+                logger.info(f'tg_message doesn\'t contain any calculation_id (maybe system message)')
+                return None
+
+            return stored_message
 
         def handle(self, update: Update):
             on_subscription = (update.effective_chat is not None and 
-                               update.effective_chat.id == self.chat_subscription
+                               update.effective_chat.id == self.tg_if.chat_subscription
             )
-            is_reply_message = (
+            it_is_reply_message = (
                 update.effective_message is not None and
                 update.effective_message.reply_to_message is not None
             )
-            if on_subscription and is_reply_message:
-                logger.debug(f'RepliedTextualMessage is going to handle this update')
-                # ---> Handler here <---
+            price_is_readable = self._parse_price(update.effective_message.text) is not None
+
+            if on_subscription and it_is_reply_message and price_is_readable:
+                # 1. Try to parse Number of reply message
+                desired_price = self._parse_price(update.effective_message.text)
+
+                # 2. Get chat_id & message_id of the replied message
+                chat_id = update.effective_message.reply_to_message.chat_id
+                message_id = update.effective_message.reply_to_message.message_id
+
+                # --- 3. Get correspond calculation_id ---
+                calculation_id, message_composer = self._get_message(chat_id, message_id)
+
+                # --- 4. Create Trainer, add sample, trigger training ---
+                if calculation_id:
+                    trainer = Trainer(self.tg_if.ml_model, self.tg_if.database)
+                    trainer.add_sample(
+                        calculation_id=calculation_id,
+                        desired_dependent_price=desired_price
+                    )
+                    trainer.train()
+
+                    # 5. Modify original message
+                    with self.tg_if.database as db:
+                        request_dto = db.get_request_dto(calculation_id)
+                    calculation_dto = calc_itself.process_request(request_dto)
+                    message_composer.calculation = calculation_dto
+                    self.tg_if.edit_message(
+                        chat_id=chat_id,
+                        message_id=message_id,
+                        text=str(message_composer)
+                    )
+
             elif self._next_handler:
                 logger.debug(f'RepliedTextualMessage passing update to next handler')
                 self._next_handler.handle(update)
@@ -123,7 +188,7 @@ class Telegramv3Interface:
             update: Update,
             context: CallbackContext) -> None:
 
-        chain_of_responsibility = self.RepliedTextualMessage(self.chat_subscription)
+        chain_of_responsibility = self.TrainOnPrice(self)
         chain_of_responsibility.handle(update)
 
     def send_message(self,
