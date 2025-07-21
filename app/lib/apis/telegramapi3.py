@@ -126,17 +126,19 @@ class Telegramv3Interface:
         chain_of_responsibility = self.RepliedTextualMessage(self.chat_subscription)
         chain_of_responsibility.handle(update)
 
-    def _send_message(self,
-                      chat_id: int,
-                      text: str,
-                      parse_mode: Optional[str] = 'MARKDOWN'
-                      ) -> Optional[Tuple[int, int]]:
+    def send_message(self,
+                     chat_id: int,
+                     text: str,
+                     parse_mode: Optional[str] = 'MARKDOWN',
+                     reply_to_message_id: Optional[int] = None,
+                     ) -> Optional[Tuple[int, int]]:
         """
         Send a message to given chat using Markdown by default.
         Return a tuple with chat_id, message_id or None if the message was not sent.
         :param chat_id: int, Telegram chat ID.
         :param text: str, Message text.
         :param parse_mode: Send Markdown or HTML. See the constants in :class:`telegram.ParseMode`
+        :param reply_to_message_id: int, If you want to make a reply to the message.
         for the available modes.
         :return: tuple with chat_id, message_id or None
         """
@@ -145,12 +147,34 @@ class Telegramv3Interface:
                 chat_id=chat_id,
                 text=text,
                 parse_mode=parse_mode,
+                disable_web_page_preview=True,
+                reply_to_message_id=reply_to_message_id,
+            )
+            if isinstance(msg, telegram.Message):
+                return chat_id, msg.message_id
+        except TelegramError as e:
+            logger.error(f'Message was not sent to Telegram chat {str(e)}')
+        return None
+
+    def edit_message(self,
+                     chat_id: int,
+                     message_id: int,
+                     text: str,
+                     parse_mode='MARKDOWN'
+    ) -> Optional[Tuple[int, int]]:
+        try:
+            msg = self.bot.edit_message_text(
+                text=text,
+                chat_id=chat_id,
+                message_id=message_id,
+                parse_mode=parse_mode,
                 disable_web_page_preview=True
             )
             if isinstance(msg, telegram.Message):
                 return chat_id, msg.message_id
-        except TelegramError:
-            logger.error('Message was not sent to Telegram chat')
+        except TelegramError as e:
+            logger.error(f'Message was not sent to Telegram chat. {str(e)}')
+        return None
 
     def process_webhook(self, json):
         update = Update.de_json(json, self.bot)
@@ -162,7 +186,7 @@ class Telegramv3Interface:
         :param msg: Message in markdown
         :return: sent message id
         """
-        return self._send_message(self.silent_chat, msg)
+        return self.send_message(self.silent_chat, msg)
 
     def send_loud(self, msg: str) -> Optional[Tuple[int, int]]:
         """
@@ -170,7 +194,7 @@ class Telegramv3Interface:
         :param msg: Message in markdown
         :return: sent message id
         """
-        return self._send_message(self.loud_chat, msg)
+        return self.send_message(self.loud_chat, msg)
 
     @staticmethod
     def _make_trace(cause: Exception) -> str:
@@ -190,7 +214,7 @@ class Telegramv3Interface:
                   f"Message: {msg}\n\n" \
                   f"Cause: {str(cause)}\n\n" \
                   f"Traceback: '{trace}'\n"
-        chat_id, message_id = self._send_message(self.dev_chat, text, parse_mode=None)
+        chat_id, message_id = self.send_message(self.dev_chat, text, parse_mode=None)
         logger.error(f"DEV TG report has been sent: {msg}\n\n"
                      f"Cause: {str(cause)}\n\n"
                      f"Traceback: {trace}\n\n"
