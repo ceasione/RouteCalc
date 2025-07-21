@@ -4,6 +4,7 @@ from typing import List
 from app.lib.ai.model import PricePredictor, FinetuneBatch
 from app.lib.utils.QueryLogger import QueryLogger
 from app.lib.calc.loadables.vehicles import Vehicles, VEHICLES
+from app.settings import DEV_MACHINE
 
 
 class Trainer:
@@ -38,7 +39,8 @@ class Trainer:
 
         logger.debug(f'Loss function: {loss}')
 
-        # TODO Save model weights
+        if not DEV_MACHINE:
+            self.model.save_model()
 
     def add_sample(self, calculation_id: str, desired_dependent_price: float) -> None:
         """
