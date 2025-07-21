@@ -9,14 +9,13 @@ from flask import Response
 from app.lib.utils import compositor
 from app.lib.utils.compositor import TelegramMessageComposer
 from app.lib.calc.loadables import vehicles
-from app.lib.apis import smsapi, telegramapi3
+from app.lib.apis import smsapi
 from app.lib.apis.telegramapi3 import tg_interface_manager, Telegramv3Interface
 from app.lib.utils.QueryLogger import QUERY_LOGGER
 from flask_cors import CORS
 from app.lib.utils.blacklist import BLACKLIST
 import app.lib.utils.request_processor as request_processor
 import app.lib.calc.calc_itself as calc_itself
-from app.lib.utils.DTOs import CalculationDTO
 from app.lib.utils import number_tools
 from app.lib.utils.number_tools import WrongNumberError
 from app.lib.calc.calc_itself import ZeroDistanceResultsError
@@ -130,7 +129,7 @@ def calculate():
 
     # Step 2: Perform the calculation
     calculation_dto = calc_itself.process_request(request_dto)
-    logger.debug('Calculation was succesfully performed. Got Calculation DTO')
+    logger.debug('Calculation was successfully performed. Got Calculation DTO')
 
     # Step 3: Log calculation
     with QUERY_LOGGER as qlogger:
@@ -138,7 +137,7 @@ def calculate():
         #                              response=json.dumps([tg_msg, 'nosms'], ensure_ascii=False),
         #                              phone_number=request_dto.phone_num)
         digest = qlogger.log_calculation(request_dto, calculation_dto)
-    logger.debug('Query Logger has succesfully logged calculation')
+    logger.debug('Query Logger has successfully logged calculation')
 
     # Step 4: Prepare TG message
     tg_composer = TelegramMessageComposer(
@@ -176,12 +175,12 @@ def submit_new():
     Handle POST requests to submit a callback request based on calculation data and phone number.
 
     This endpoint performs the following steps:
-    1. Parses and validates the incoming request, including phone number and calculation payload.
+    1. Parses and validates the incoming request, including phone number and calculation_id.
     2. Composes both an SMS message for the client and a Telegram message for notifying internal managers.
-    3. Logs the incoming request and generated messages.
-    4. Checks if the request is from a blacklisted phone number or IP address:
+    3. Checks if the request is from a blacklisted phone number or IP address:
        - If not blacklisted: sends both SMS and Telegram messages.
        - If blacklisted: only sends a modified Telegram message.
+    4. Logs telegram message sent
     5. Returns a success response indicating the callback has been scheduled.
 
     :return: A Flask response object indicating the result of the submission.
@@ -189,9 +188,19 @@ def submit_new():
     """
 
     # Step 1: Preprocess request
-    dto = CalculationDTO.from_dict(request.json['dto'])
+    calculation_id = request.json['calculation_id']
     num = number_tools.validate_phone_ukr(request.json['num'])
+    referrer = request.json['url']
     ip = request.remote_addr
+
+    if not isinstance(calculation_id, str):
+        return __gen_response(400, 'Wrong calculation_id')
+    if len(calculation_id) != 40:
+        return __gen_response(400, 'Wrong calculation_id')
+    with QUERY_LOGGER as qlogger:
+        calculation_dto = qlogger.get_calculation_dto(calculation_id)
+    if calculation_dto is None:
+        return __gen_response(400, 'Wrong calculation_id')
 
     # Step 2 Prepare TG and SMS message
     sms_msg = compositor.make_sms_text(calculation_dto)
@@ -204,13 +213,7 @@ def submit_new():
         phone_num=num
     )
 
-    # Step 3: Log request and calculation
-    with QUERY_LOGGER as qlogger:
-        qlogger.log_request_response(phone_number=num,
-                                     query=json.dumps(dataclasses.asdict(dto), ensure_ascii=False),
-                                     response=json.dumps([tg_msg, sms_msg], ensure_ascii=False))
-
-    # Step 4: Check for blacklist and make notifications
+    # Step 3: Check for blacklist and make notifications
     if not BLACKLIST.check(num, ip):
         # Not blacklisted -> Send TG message to managers and SMS to client
         chat_id, message_id = tg_interface_manager.get_interface().send_loud(str(tg_composer))
