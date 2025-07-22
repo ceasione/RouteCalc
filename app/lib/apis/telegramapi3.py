@@ -196,7 +196,7 @@ class Telegramv3Interface:
                      text: str,
                      parse_mode: Optional[str] = 'MARKDOWN',
                      reply_to_message_id: Optional[int] = None,
-                     ) -> Optional[Tuple[int, int]]:
+                     ) -> Tuple[int, int] | Tuple[None, None]:
         """
         Send a message to given chat using Markdown by default.
         Return a tuple with chat_id, message_id or None if the message was not sent.
@@ -205,7 +205,7 @@ class Telegramv3Interface:
         :param parse_mode: Send Markdown or HTML. See the constants in :class:`telegram.ParseMode`
         :param reply_to_message_id: int, If you want to make a reply to the message.
         for the available modes.
-        :return: tuple with chat_id, message_id or None
+        :return: tuple with chat_id, message_id or (None, None) if send failed
         """
         try:
             msg = self.bot.send_message(
@@ -219,14 +219,14 @@ class Telegramv3Interface:
                 return chat_id, msg.message_id
         except TelegramError as e:
             logger.error(f'Message was not sent to Telegram chat {str(e)}')
-        return None
+        return None, None
 
     def edit_message(self,
                      chat_id: int,
                      message_id: int,
                      text: str,
                      parse_mode='MARKDOWN'
-    ) -> Optional[Tuple[int, int]]:
+    ) -> Tuple[int, int] | Tuple[None, None]:
         try:
             msg = self.bot.edit_message_text(
                 text=text,
@@ -239,7 +239,7 @@ class Telegramv3Interface:
                 return chat_id, msg.message_id
         except TelegramError as e:
             logger.error(f'Message was not sent to Telegram chat. {str(e)}')
-        return None
+        return None, None
 
     def process_webhook(self, json):
         update = Update.de_json(json, self.bot)
@@ -249,7 +249,7 @@ class Telegramv3Interface:
         """
         Sends msg to silent chat and return message id
         :param msg: Message in markdown
-        :return: sent message id
+        :return: tuple with chat_id, message_id or (None, None) if send failed
         """
         return self.send_message(self.silent_chat, msg)
 
@@ -257,7 +257,7 @@ class Telegramv3Interface:
         """
         Sends msg to loud chat and return message id
         :param msg: Message in markdown
-        :return: sent message id
+        :return: tuple with chat_id, message_id or (None, None) if send failed
         """
         return self.send_message(self.loud_chat, msg)
 
@@ -269,7 +269,12 @@ class Telegramv3Interface:
 
     def send_developer(self, msg: str, cause: Optional[Exception] = None) \
             -> Optional[Tuple[int, int]]:
-
+        """
+        Send message to a developer chat with trace from cause
+        :param msg: message str
+        :param cause: Exception cause or None
+        :return: tuple with chat_id, message_id or None if send failed
+        """
         timestamp = datetime.now().isoformat()
         trace = 'No Exception was provided'
         if cause:

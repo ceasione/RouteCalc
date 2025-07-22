@@ -311,6 +311,10 @@ class QueryLogger:
         :return: None if inserting OK
         :raises: RuntimeError if inserting failed
         """
+
+        if chat_id is None or message_id is None or calculation_id is None:
+            return None
+
         try:
             with open(SQL_PATH / 'tg_message_insert_into.sql', encoding='utf-8') as f:
                 sql = f.read()
