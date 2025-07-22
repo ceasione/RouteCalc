@@ -29,6 +29,11 @@ jobs:
         TELEGRAM_SILENT_CHAT_ID: ${{ secrets.TELEGRAM_SILENT_CHAT_ID }}
         TELEGRAM_LOUD_CHAT_ID: ${{ secrets.TELEGRAM_LOUD_CHAT_ID }}
         TELEGRAM_DEVELOPER_CHAT_ID: ${{ secrets.TELEGRAM_DEVELOPER_CHAT_ID }}
+        TELEGRAMV3_WEBHOOK_ADDRESS: ${{ secrets.TELEGRAMV3_WEBHOOK_ADDRESS }}
+        TELEGRAMV3_BOT_APIKEY: ${{ secrets.TELEGRAMV3_BOT_APIKEY }}
+        TELEGRAMV3_DEVELOPER_CHAT_ID: ${{ secrets.TELEGRAMV3_DEVELOPER_CHAT_ID }}
+        TELEGRAMV3_SILENT_CHAT_ID: ${{ secrets.TELEGRAMV3_SILENT_CHAT_ID }}
+        TELEGRAMV3_LOUD_CHAT_ID: ${{ secrets.TELEGRAMV3_LOUD_CHAT_ID }}
       run: |
         docker run -d --rm --name rctest \
         -v temp_volume:/RouteCalc/storage \
@@ -42,6 +47,11 @@ jobs:
         --env TELEGRAM_SILENT_CHAT_ID="$TELEGRAM_SILENT_CHAT_ID" \
         --env TELEGRAM_LOUD_CHAT_ID="$TELEGRAM_LOUD_CHAT_ID" \
         --env TELEGRAM_DEVELOPER_CHAT_ID="$TELEGRAM_DEVELOPER_CHAT_ID" \
+        --env TELEGRAMV3_WEBHOOK_ADDRESS="$TELEGRAMV3_WEBHOOK_ADDRESS" \
+        --env TELEGRAMV3_BOT_APIKEY="$TELEGRAMV3_BOT_APIKEY" \
+        --env TELEGRAMV3_DEVELOPER_CHAT_ID="$TELEGRAMV3_DEVELOPER_CHAT_ID" \
+        --env TELEGRAMV3_SILENT_CHAT_ID="$TELEGRAMV3_SILENT_CHAT_ID" \
+        --env TELEGRAMV3_LOUD_CHAT_ID="$TELEGRAMV3_LOUD_CHAT_ID" \
         ceasione/routecalc:$DATE_TIME python3 -m app.main
         
         docker exec rctest pytest
