@@ -295,24 +295,26 @@ def create_app():
 
 
 if __name__ == '__main__':
-    # Set up ngrok
-    from pyngrok import ngrok
-    tunnel = ngrok.connect('http://localhost:5000')
-    if tunnel.public_url is None:
-        raise RuntimeError('Ngrok tunnel public URL is None')
-    tunnel_hook_url = tunnel.public_url + settings.TELEGRAMV3_WEBHOOK_ADDRESS
 
-    # Set up tg webhook
-    tg_interface_manager.set_interface(
-        Telegramv3Interface(
-            botfatherkey=settings.TELEGRAMV3_BOT_APIKEY,
-            webhook_url=tunnel_hook_url,
-            chat_subscription=int(settings.TELEGRAMV3_DEVELOPER_CHAT_ID),
-            silent_chat=int(settings.TELEGRAMV3_DEVELOPER_CHAT_ID),
-            loud_chat=int(settings.TELEGRAMV3_DEVELOPER_CHAT_ID),
-            dev_chat=int(settings.TELEGRAMV3_DEVELOPER_CHAT_ID)
+    if settings.DEV_MACHINE:
+        # Set up ngrok
+        from pyngrok import ngrok
+        tunnel = ngrok.connect('http://localhost:5000')
+        if tunnel.public_url is None:
+            raise RuntimeError('Ngrok tunnel public URL is None')
+        tunnel_hook_url = tunnel.public_url + settings.TELEGRAMV3_WEBHOOK_ADDRESS
+
+        # Set up tg webhook
+        tg_interface_manager.set_interface(
+            Telegramv3Interface(
+                botfatherkey=settings.TELEGRAMV3_BOT_APIKEY,
+                webhook_url=tunnel_hook_url,
+                chat_subscription=int(settings.TELEGRAMV3_DEVELOPER_CHAT_ID),
+                silent_chat=int(settings.TELEGRAMV3_DEVELOPER_CHAT_ID),
+                loud_chat=int(settings.TELEGRAMV3_DEVELOPER_CHAT_ID),
+                dev_chat=int(settings.TELEGRAMV3_DEVELOPER_CHAT_ID)
+            )
         )
-    )
 
     # Run Flask
     app.run(debug=True, use_reloader=False)
