@@ -16,11 +16,14 @@
 # ceasione/routecalc:latest
 
 # Testing
-# sudo docker run -d -v /home/oliver/RTDATA:/RouteCalc/storage -v /tmp:/tmp/rcsocket --name rctest routecalc tail -f /dev/null
+# sudo docker run -d -v /home/oliver/RTDATA:/RouteCalc/storage -v /tmp:/tmp/rcsocket --name rctest ceasione/routecalc:latest tail -f /dev/null
 # docker exec -d rctest python3 -m app.main
 # docker exec rctest pytest -m unit
+
 # docker exec rctest pytest -m integration
 # docker exec rctest pytest -m network
+# docker exec rctest pytest
+# docker exec -it rctest /bin/bash
 # docker stop rctest
 # docker rm rctest
 
