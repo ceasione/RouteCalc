@@ -38,7 +38,7 @@ jobs:
         docker run -d --rm --name rctest \
         -v temp_volume:/RouteCalc/storage \
         -v /tmp:/tmp/rcsocket \
-        --env DEV_MACHINE=true \
+        --env DEV_MACHINE=false \
         --env LOGLEVEL=DEBUG \
         --env GOOGLE_APIKEY_DEV="$GOOGLE_APIKEY_DEV" \
         --env SMS_APIKEY="$SMS_APIKEY" \
