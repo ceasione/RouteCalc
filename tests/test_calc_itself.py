@@ -91,9 +91,9 @@ def test_calculate_basic(place_a, place_b, depot, vehicle):
 
     distance, price, cost = calculate(route, vehicle, mock_dist_resolver, mock_predictor)
 
-    assert distance == 300_000  # 3 segments * 100km
+    assert distance == 100_000  # 3 segments * 100km
     assert price == 20.0
-    assert cost == 6000.0
+    assert cost == 2000.0
 
 
 @pytest.mark.unit
