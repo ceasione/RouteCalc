@@ -257,10 +257,7 @@ def calculate(route: Tuple[LatLngAble, LatLngAble, LatLngAble, LatLngAble],
     :return: (float, float, float) -> distance in meters, price in UAH per km, cost
     """
     starting_depot, ending_depot = cast(Depot, route[0]), cast(Depot, route[3])
-    distance = \
-        dist_resolver([route[0]], [route[1]])[0].distance + \
-        dist_resolver([route[1]], [route[2]])[0].distance + \
-        dist_resolver([route[2]], [route[3]])[0].distance
+    distance = dist_resolver([route[1]], [route[2]])[0].distance
     price = predictor(starting_depot, ending_depot, vehicle, distance)
     cost = distance / 1000 * price  # Convert dist from m to km first as price is per kilometer
     return distance, price, cost
