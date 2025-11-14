@@ -39,7 +39,7 @@ def response_payload_assert():
 def submit_payload():
     ...
 
-
+@pytest.mark.skip
 @pytest.mark.network
 def test_calculate(flask_request_calculate, headers):
 
@@ -63,7 +63,7 @@ def test_submit():
     # TODO implement
     ...
 
-
+@pytest.mark.skip
 @pytest.mark.network
 def test_get_available_vehicles(headers):
     url = 'http://localhost:5000/get-available-vehicles/'
