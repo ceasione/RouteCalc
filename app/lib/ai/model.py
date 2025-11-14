@@ -1,5 +1,5 @@
 from typing import List
-import numpy
+import numpy as np
 from keras.api.utils import PyDataset
 from keras import layers, models, Input
 from keras.api.optimizers import Adam
@@ -25,7 +25,7 @@ class FinetuneBatch(PyDataset):
         return 1
 
     def __getitem__(self, idx):
-        return numpy.array(self.x), numpy.array(self.y)
+        return np.array(self.x), np.array(self.y)
 
     @dataclass
     class Sample:
@@ -132,7 +132,7 @@ class PricePredictor:
         param vehicle: Chosen Vehicle id
         :return: Approx price of 1 kilometer of the route
         """
-        x = numpy.array([self.vectorize_input(dpt_from_id, dpt_to_id, vehicle_id)])
+        x = np.array([self.vectorize_input(dpt_from_id, dpt_to_id, vehicle_id)])
         y = self.model.predict(x)
         return float(y[0][0])
 
