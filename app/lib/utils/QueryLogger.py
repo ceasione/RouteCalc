@@ -59,6 +59,12 @@ class QueryLogger:
         self.cursor.executescript(script)
         self.conn.commit()
 
+    def _ensure_si_sample_exists(self):
+        with open(SQL_PATH/'si_sample_create_table.sql', encoding='utf8') as f:
+            script = f.read()
+        self.cursor.executescript(script)
+        self.conn.commit()
+
     def __enter__(self):
         self.conn = sqlite3.connect(self.DB_LOCATION)
         self.conn.execute("PRAGMA foreign_keys = ON;")
@@ -68,6 +74,7 @@ class QueryLogger:
         self._ensure_calculation_exists()
         self._ensure_tg_message_exists()
         self._ensure_sample_exists()
+        self._ensure_si_sample_exists()
         return self
 
     def __exit__(self, exc_type, exc_value, tb):
@@ -374,32 +381,41 @@ class QueryLogger:
             tgapi3.tg_interface_manager.get_interface().send_developer('sqlite3.DatabaseError at QueryLogger', e)
             raise RuntimeError('Cannot read from the database') from e
 
-    def sample_upsert(self, calculation_id: str, desired_value: float) -> None:
+    def sample_upsert(self,
+        starting_depot_id: int,
+        ending_depot_id: int,
+        transport_id: int,
+        desired_value: float
+    ) -> None:
         """
         Inserts a sample to the database. Returns None if inserting OK.
         As calculation_id has UNIQUE constraint, method will update existing sample
         if it already exists.
-        :param calculation_id: str, 40 char sha1 hex digest, foreign key
+        :param starting_depot_id: int, ID of starting depot
+        :param ending_depot_id: int, ID of ending depot
+        :param transport_id: int, ID of vehicle
         :param desired_value: float, the model expected output value
         :return: returns None if inserting OK
         """
-        with open(SQL_PATH/'sample_upsert.sql', encoding='utf-8') as f:
+        with open(SQL_PATH/'si_sample_upsert.sql', encoding='utf-8') as f:
             script = f.read()
         self.cursor.execute(script, {
-            'calculation_id': calculation_id,
-            'desired_value': desired_value,
+            'starting_depot_id': starting_depot_id,
+            'ending_depot_id': ending_depot_id,
+            'transport_id': transport_id,
+            'desired_value': desired_value
         })
         self.conn.commit()
 
     def select_samples(self) -> Iterator[Tuple[int, int, int, float]]:
-        with open(SQL_PATH / 'sample_select_finetune_batch.sql', encoding='utf-8') as f:
+        with open(SQL_PATH / 'si_sample_select_finetune_batch.sql', encoding='utf-8') as f:
             sql = f.read()
         self.cursor.execute(sql)
 
         for row in self.cursor.fetchall():
-            yield int(row['calculation_starting_depot_id']), \
-                  int(row['calculation_ending_depot_id']), \
-                  int(row['calculation_transport_id']), \
+            yield int(row['starting_depot_id']), \
+                  int(row['ending_depot_id']), \
+                  int(row['transport_id']), \
                   float(row['desired_value'])
 
 

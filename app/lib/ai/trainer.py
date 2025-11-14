@@ -71,4 +71,9 @@ class Trainer:
             current_price_per_km = dto.real_price
             desired_price_per_km = current_price_per_km * ratio
 
-            db.sample_upsert(calculation_id, desired_price_per_km)
+            db.sample_upsert(
+                dto.starting_depot_id,
+                dto.ending_depot_id,
+                dto.transport_id,
+                desired_price_per_km
+            )
